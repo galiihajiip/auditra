@@ -196,3 +196,27 @@ def main() -> None:
             subset = df[df["metode"] == metode]["pagu"]
             fig.add_trace(
                 go.Box(y=np.log1p(subset), name=str(metode), showlegend=False),
+                row=2, col=2,
+            )
+
+    fig.update_layout(
+        title="Auditra EDA — Sample Visualizations",
+        height=700,
+        showlegend=False,
+        template="plotly_white",
+    )
+    fig.write_html(str(report_html))
+
+    elapsed = (datetime.now(timezone.utc) - t0).total_seconds()
+    print(f"\nBaris     : {n_rows:,}")
+    print(f"Duplikat  : {dup_id:,}")
+    print(f"Null cols : {len(null_report)}")
+    print(f"Pagu ≤ 0  : {stats['pagu']['zero_or_negative']:,}")
+    print(f"\n✓ {report_md}")
+    print(f"✓ {report_json}")
+    print(f"✓ {report_html}")
+    print(f"\nSelesai dalam {elapsed:.1f}s")
+
+
+if __name__ == "__main__":
+    main()
