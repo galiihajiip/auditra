@@ -6,3 +6,6 @@ networkx
 scikit-learn
 scipy
 pyyaml
+
+# Testing
+pytest
