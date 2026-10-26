@@ -27,3 +27,10 @@ scoring:
 
 eda:
   sample_size: 50000
+  random_seed: 42
+
+validation:
+  min_rows: 1000
+  rpi_min: 0
+  rpi_max: 100
+  valid_risk_labels: [KRITIS, TINGGI, SEDANG, RENDAH]
