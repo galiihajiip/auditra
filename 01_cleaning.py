@@ -81,3 +81,6 @@ print(df['jenisPengadaan'].value_counts().to_string())
 print(f"\nNull counts:")
 print(df.isnull().sum()[df.isnull().sum() > 0].to_string())
 
+# ── Save ──────────────────────────────────────────────────────────────────────
+df.to_csv(OUTPUT_PATH, index=False)
+print(f"\n✓ Saved → {OUTPUT_PATH}")
