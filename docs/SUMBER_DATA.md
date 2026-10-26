@@ -28,3 +28,19 @@ Kolom enrichment pihak ketiga (bukan data resmi SIRUP): `potensiPemborosan`, `ta
 | `kabkota.geojson` | [eppofahmi/geojson-indonesia](https://github.com/eppofahmi/geojson-indonesia) | Open |
 | `geo/kabkota_clean.geojson` | Derived (514 features) | — |
 
+## Cara Reproduksi
+
+1. Unduh/export data SIRUP sesuai akses LKPP
+2. Simpan sebagai `data/year-2026_merged.csv`
+3. Jalankan `python run_pipeline.py`
+
+## Integritas
+
+```powershell
+python 05_validate.py
+# atau
+curl http://127.0.0.1:8000/api/meta
+```
+
+Expected: `"total_rows": 3002992`, `"integrity": "full"`
+
