@@ -64,3 +64,23 @@ def main() -> None:
     df_full = pd.read_csv(input_path, low_memory=False)
     n_rows, n_cols = df_full.shape
 
+    # ── Profil dataset ────────────────────────────────────────────────
+    dtypes = {c: str(t) for c, t in df_full.dtypes.items()}
+    null_counts = df_full.isnull().sum()
+    null_pct = (null_counts / n_rows * 100).round(2)
+    null_report = {
+        c: {"count": int(null_counts[c]), "pct": float(null_pct[c])}
+        for c in null_counts.index if null_counts[c] > 0
+    }
+
+    dup_id = int(df_full["id"].duplicated().sum()) if "id" in df_full.columns else -1
+    pagu_stats = df_full["pagu"].describe().to_dict() if "pagu" in df_full.columns else {}
+    pagu_outliers = iqr_outliers(df_full["pagu"].dropna()) if "pagu" in df_full.columns else {}
+
+    cat_cols = ["metode", "jenisPengadaan", "lembaga", "sumberDana"]
+    distributions = {}
+    for col in cat_cols:
+        if col in df_full.columns:
+            vc = df_full[col].value_counts().head(15)
+            distributions[col] = {str(k): int(v) for k, v in vc.items()}
+
