@@ -29,3 +29,19 @@ SIRUP_COLS = [
 ]
 
 
+def iqr_outliers(series: pd.Series) -> dict:
+    q1, q3 = series.quantile(0.25), series.quantile(0.75)
+    iqr = q3 - q1
+    lower, upper = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+    mask = (series < lower) | (series > upper)
+    return {
+        "q1": float(q1),
+        "q3": float(q3),
+        "iqr": float(iqr),
+        "lower_fence": float(lower),
+        "upper_fence": float(upper),
+        "n_outliers": int(mask.sum()),
+        "pct_outliers": round(mask.mean() * 100, 2),
+    }
+
+
