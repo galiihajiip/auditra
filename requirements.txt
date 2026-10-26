@@ -1,0 +1,4 @@
+# Pipeline analisis data
+pandas
+numpy
+plotly
