@@ -140,3 +140,33 @@ def main() -> None:
         "",
         "## 4. Kardinalitas",
     ]
+    for col, n in stats["unique_counts"].items():
+        lines.append(f"- `{col}`: {n:,} unik")
+
+    lines += ["", "## 5. Distribusi Kategorikal (Top)", ""]
+    for col, dist in distributions.items():
+        lines.append(f"### {col}")
+        for k, v in list(dist.items())[:8]:
+            lines.append(f"- {k}: {v:,}")
+        lines.append("")
+
+    lines += [
+        "## 6. Rekomendasi Preprocessing",
+        "- Hapus kolom enrichment Nemesis (bukan data SIRUP murni)",
+        "- Drop duplikat `id`",
+        "- Filter `pagu > 0`",
+        "- Normalisasi whitespace & kategori `sumberDana`",
+        "- Patch baris `lembaga` = nama provinsi polos",
+        "",
+        "---",
+        "_Jalankan `01_cleaning.py` untuk preprocessing._",
+    ]
+
+    out_dir = reports_dir()
+    report_md = out_dir / "eda_report.md"
+    report_json = out_dir / "eda_stats.json"
+    report_html = out_dir / "eda_charts.html"
+
+    report_md.write_text("\n".join(lines), encoding="utf-8")
+    report_json.write_text(json.dumps(stats, indent=2, ensure_ascii=False), encoding="utf-8")
+
