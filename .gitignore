@@ -4,3 +4,8 @@ year-2026_merged.csv
 output/data_scored.csv
 output/data_network.csv
 output/data_network.parquet
+output/auditra.duckdb
+output/reports/
+!output/chunks/
+!output/chunks/*.parquet
+web/node_modules
