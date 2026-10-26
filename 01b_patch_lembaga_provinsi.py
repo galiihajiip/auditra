@@ -24,3 +24,15 @@ LIST_PROVINSI = {
     'banten','bali','nusa tenggara barat','nusa tenggara timur','kalimantan barat',
     'kalimantan tengah','kalimantan selatan','kalimantan timur','kalimantan utara',
     'sulawesi utara','sulawesi tengah','sulawesi selatan','sulawesi tenggara','gorontalo',
+    'sulawesi barat','maluku','maluku utara','papua','papua barat','papua tengah',
+    'papua pegunungan','papua selatan','papua barat daya',
+}
+
+print("Loading data...")
+df = pd.read_csv(INPUT_PATH, low_memory=False)
+print(f"  Shape sebelum: {df.shape}")
+
+mask = df['lembaga'].astype(str).str.strip().str.lower().isin(LIST_PROVINSI)
+n_affected = mask.sum()
+
+print(f"\nBaris dengan lembaga = nama provinsi murni: {n_affected}")
