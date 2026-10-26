@@ -45,3 +45,14 @@ print(f"\nKolom Nemesis yang dihapus: {nemesis_cols}")
 
 df = df_raw[SIRUP_COLS].copy()
 
+# ── Basic cleaning ────────────────────────────────────────────────────────────
+# Hapus duplikat berdasarkan id
+before = len(df)
+df = df.drop_duplicates(subset='id')
+print(f"\nDuplikat dihapus: {before - len(df)} baris")
+
+# Pagu tidak boleh 0 atau negatif
+before = len(df)
+df = df[df['pagu'] > 0]
+print(f"Pagu <= 0 dihapus: {before - len(df)} baris")
+
