@@ -72,3 +72,12 @@ before = len(df)
 df = df.dropna()
 print(f"Baris kosong dihapus: {before - len(df)} baris")
 
+# ── Summary ───────────────────────────────────────────────────────────────────
+print(f"\nClean shape : {df.shape}")
+print(f"\nDistribusi metode:")
+print(df['metode'].value_counts().to_string())
+print(f"\nDistribusi jenisPengadaan:")
+print(df['jenisPengadaan'].value_counts().to_string())
+print(f"\nNull counts:")
+print(df.isnull().sum()[df.isnull().sum() > 0].to_string())
+
