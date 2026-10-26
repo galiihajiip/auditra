@@ -13,3 +13,18 @@
 | **Baris setelah cleaning** | 3.002.992 |
 | **Kolom dipakai** | 16 field SIRUP murni (+ 1 derived) |
 
+## Kolom yang Digunakan
+
+`id`, `paket`, `jenisPengadaan`, `metode`, `lembaga`, `satker`, `lokasi`, `pagu`, `pemilihanDate`, `sumberDana`, `isUMKM`, `volumePekerjaan`, `uraianPekerjaan`, `spesifikasiPekerjaan`, `ownerType`, `dalamNegeri`
+
+## Kolom yang Dihapus (Preprocessing)
+
+Kolom enrichment pihak ketiga (bukan data resmi SIRUP): `potensiPemborosan`, `tags.isInappropriate`, dll.
+
+## Data Pendukung
+
+| File | Sumber | Lisensi |
+|------|--------|---------|
+| `kabkota.geojson` | [eppofahmi/geojson-indonesia](https://github.com/eppofahmi/geojson-indonesia) | Open |
+| `geo/kabkota_clean.geojson` | Derived (514 features) | — |
+
