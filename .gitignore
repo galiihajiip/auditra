@@ -9,3 +9,8 @@ output/reports/
 !output/chunks/
 !output/chunks/*.parquet
 web/node_modules
+web/dist
+web/tsconfig.tsbuildinfo
+__pycache__
+*.pyc
+.env
