@@ -39,3 +39,9 @@ print("Loading data...")
 df_raw = pd.read_csv(INPUT_PATH)
 print(f"  Raw shape  : {df_raw.shape}")
 
+# ── Drop kolom Nemesis ────────────────────────────────────────────────────────
+nemesis_cols = [c for c in df_raw.columns if c not in SIRUP_COLS]
+print(f"\nKolom Nemesis yang dihapus: {nemesis_cols}")
+
+df = df_raw[SIRUP_COLS].copy()
+
