@@ -56,3 +56,19 @@ before = len(df)
 df = df[df['pagu'] > 0]
 print(f"Pagu <= 0 dihapus: {before - len(df)} baris")
 
+# Strip whitespace kolom teks
+str_cols = ['paket', 'jenisPengadaan', 'metode', 'lembaga',
+            'satker', 'lokasi', 'sumberDana', 'ownerType']
+for col in str_cols:
+    df[col] = df[col].astype(str).str.strip()
+
+# Normalize sumberDana: semua varian APBN → 'APBN'
+df['sumberDana_cat'] = df['sumberDana'].apply(
+    lambda x: 'APBN' if str(x).startswith('APBN') else x
+)
+
+# Drop baris kosong
+before = len(df)
+df = df.dropna()
+print(f"Baris kosong dihapus: {before - len(df)} baris")
+
