@@ -18,3 +18,12 @@ scoring:
     s5_umkm: 0.10
     s6_dana_metode: 0.10
     s7_reputasi: 0.10
+  frag_pagu_threshold: 200000000
+  frag_similarity_threshold: 0.6
+  risk_thresholds:
+    KRITIS: 70
+    TINGGI: 50
+    SEDANG: 30
+
+eda:
+  sample_size: 50000
