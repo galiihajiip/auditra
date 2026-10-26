@@ -44,3 +44,12 @@ curl http://127.0.0.1:8000/api/meta
 
 Expected: `"total_rows": 3002992`, `"integrity": "full"`
 
+## Etika Penggunaan Data
+
+- Data publik untuk transparansi pengadaan
+- RPI **bukan** kesimpulan hukum — alat prioritas audit
+- Tidak menampilkan data pribadi individu (hanya entitas institusi)
+
+## Sitasi untuk Esai (contoh)
+
+> Lembaga Kebijakan Pengadaan Barang/Jasa Pemerintah. (2026). *Sistem Informasi Rencana Umum Pengadaan (SIRUP)*. Diakses dari https://sirup.lkpp.go.id/
