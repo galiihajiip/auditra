@@ -17,3 +17,11 @@ Atau step-by-step — lihat `docs/DATA_SCIENCE.md`.
 
 | Tahap | Output |
 |-------|--------|
+| EDA | `output/reports/eda_report.md` |
+| Cleaning | `data/data_clean.csv` |
+| Scoring | `output/data_scored.csv` |
+| Network | `output/data_network.csv` |
+| Geo | `geo/geo_lookup.csv` |
+| Validation | `output/reports/validation_report.txt` |
+
+File besar di `.gitignore` — simpan lokal atau cloud storage.
