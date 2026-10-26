@@ -107,3 +107,36 @@ def main() -> None:
         },
     }
 
+    # ── Markdown report ───────────────────────────────────────────────
+    lines = [
+        "# Auditra — EDA Report",
+        "",
+        f"**Generated:** {t0.strftime('%Y-%m-%d %H:%M UTC')}",
+        f"**Source:** `{input_path}`",
+        "",
+        "## 1. Dimensi Dataset",
+        f"- Baris: **{n_rows:,}**",
+        f"- Kolom: **{n_cols}**",
+        f"- Duplikat `id`: **{dup_id:,}**",
+        "",
+        "## 2. Missing Values",
+    ]
+    if null_report:
+        lines.append("| Kolom | Null | % |")
+        lines.append("|-------|------|---|")
+        for col, info in sorted(null_report.items(), key=lambda x: -x[1]["count"]):
+            lines.append(f"| {col} | {info['count']:,} | {info['pct']}% |")
+    else:
+        lines.append("_Tidak ada null value._")
+
+    lines += [
+        "",
+        "## 3. Statistik Pagu",
+        f"- Mean: Rp {pagu_stats.get('mean', 0):,.0f}",
+        f"- Median: Rp {pagu_stats.get('50%', 0):,.0f}",
+        f"- Max: Rp {pagu_stats.get('max', 0):,.0f}",
+        f"- Pagu ≤ 0: {stats['pagu']['zero_or_negative']:,} baris",
+        f"- Outlier (IQR): {pagu_outliers.get('n_outliers', 0):,} ({pagu_outliers.get('pct_outliers', 0)}%)",
+        "",
+        "## 4. Kardinalitas",
+    ]
