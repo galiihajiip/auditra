@@ -170,3 +170,29 @@ def main() -> None:
     report_md.write_text("\n".join(lines), encoding="utf-8")
     report_json.write_text(json.dumps(stats, indent=2, ensure_ascii=False), encoding="utf-8")
 
+    # ── Plotly charts ─────────────────────────────────────────────────
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=("Distribusi Pagu (log)", "Metode Pengadaan", "Jenis Pengadaan", "Pagu vs Metode (box)"),
+        specs=[[{"type": "histogram"}, {"type": "bar"}], [{"type": "bar"}, {"type": "box"}]],
+    )
+
+    if "pagu" in df.columns:
+        fig.add_trace(
+            go.Histogram(x=np.log1p(df["pagu"]), nbinsx=50, name="log(pagu)"),
+            row=1, col=1,
+        )
+
+    if "metode" in df.columns:
+        vc = df["metode"].value_counts().head(10)
+        fig.add_trace(go.Bar(x=vc.index, y=vc.values, name="metode"), row=1, col=2)
+
+    if "jenisPengadaan" in df.columns:
+        vc = df["jenisPengadaan"].value_counts().head(10)
+        fig.add_trace(go.Bar(x=vc.index, y=vc.values, name="jenis"), row=2, col=1)
+
+    if "pagu" in df.columns and "metode" in df.columns:
+        for metode in df["metode"].value_counts().head(5).index:
+            subset = df[df["metode"] == metode]["pagu"]
+            fig.add_trace(
+                go.Box(y=np.log1p(subset), name=str(metode), showlegend=False),
