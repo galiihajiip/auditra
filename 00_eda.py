@@ -84,3 +84,26 @@ def main() -> None:
             vc = df_full[col].value_counts().head(15)
             distributions[col] = {str(k): int(v) for k, v in vc.items()}
 
+    # ── Sample untuk chart ────────────────────────────────────────────
+    df = df_full.sample(n=min(sample_n, n_rows), random_state=seed)
+
+    stats = {
+        "generated_at": t0.isoformat(),
+        "input_file": str(input_path),
+        "shape": {"rows": n_rows, "columns": n_cols},
+        "dtypes": dtypes,
+        "null_report": null_report,
+        "duplicate_id": dup_id,
+        "pagu": {
+            "describe": {k: float(v) if isinstance(v, (np.floating, float)) else v for k, v in pagu_stats.items()},
+            "outliers_iqr": pagu_outliers,
+            "zero_or_negative": int((df_full["pagu"] <= 0).sum()) if "pagu" in df_full.columns else None,
+        },
+        "distributions_top15": distributions,
+        "unique_counts": {
+            col: int(df_full[col].nunique())
+            for col in ["lembaga", "satker", "lokasi", "metode"]
+            if col in df_full.columns
+        },
+    }
+
