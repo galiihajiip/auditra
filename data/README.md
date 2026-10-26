@@ -8,3 +8,12 @@ Taruh file mentah SIRUP di sini:
 
 ```powershell
 pip install -r requirements.txt
+python run_pipeline.py
+```
+
+Atau step-by-step — lihat `docs/DATA_SCIENCE.md`.
+
+## Output
+
+| Tahap | Output |
+|-------|--------|
