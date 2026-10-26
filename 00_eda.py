@@ -45,3 +45,22 @@ def iqr_outliers(series: pd.Series) -> dict:
     }
 
 
+def main() -> None:
+    cfg = load_config()
+    input_path = Path(cfg["paths"]["raw"])
+    seed = cfg["eda"]["random_seed"]
+    sample_n = cfg["eda"]["sample_size"]
+
+    if not input_path.exists():
+        raise FileNotFoundError(f"Data mentah tidak ditemukan: {input_path}")
+
+    print("=" * 60)
+    print("AUDITRA — EXPLORATORY DATA ANALYSIS")
+    print("=" * 60)
+    print(f"Input : {input_path}")
+    print(f"Sample: {sample_n:,} baris (seed={seed}) untuk visualisasi")
+
+    t0 = datetime.now(timezone.utc)
+    df_full = pd.read_csv(input_path, low_memory=False)
+    n_rows, n_cols = df_full.shape
+
