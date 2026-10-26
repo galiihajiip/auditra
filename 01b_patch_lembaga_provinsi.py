@@ -36,3 +36,12 @@ mask = df['lembaga'].astype(str).str.strip().str.lower().isin(LIST_PROVINSI)
 n_affected = mask.sum()
 
 print(f"\nBaris dengan lembaga = nama provinsi murni: {n_affected}")
+if n_affected > 0:
+    print("Contoh lembaga yang ditemukan (akan dihapus):")
+    print(df.loc[mask, 'lembaga'].value_counts().to_string())
+
+df_clean = df[~mask].copy()
+print(f"\n  Shape sesudah: {df_clean.shape}")
+
+df_clean.to_csv(OUTPUT_PATH, index=False)
+print(f"\n✓ Saved → {OUTPUT_PATH}")
