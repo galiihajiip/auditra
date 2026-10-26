@@ -15,3 +15,13 @@ def load_config() -> dict:
         return yaml.safe_load(f)
 
 
+def resolve(path_key: str) -> Path:
+    cfg = load_config()
+    return ROOT / cfg["paths"][path_key]
+
+
+def reports_dir() -> Path:
+    cfg = load_config()
+    d = ROOT / cfg["paths"]["reports_dir"]
+    d.mkdir(parents=True, exist_ok=True)
+    return d
