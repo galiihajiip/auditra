@@ -21,3 +21,11 @@ from plotly.subplots import make_subplots
 
 from pipeline.config import load_config, reports_dir
 
+SIRUP_COLS = [
+    "id", "paket", "jenisPengadaan", "metode", "lembaga", "satker",
+    "lokasi", "pagu", "pemilihanDate", "sumberDana", "isUMKM",
+    "volumePekerjaan", "uraianPekerjaan", "spesifikasiPekerjaan",
+    "ownerType", "dalamNegeri",
+]
+
+
