@@ -164,3 +164,20 @@ def score_umkm(row):
 
 df['s5_umkm'] = df.apply(score_umkm, axis=1)
 
+# ── S6: Kombinasi Sumber Dana APBN + Metode Berisiko ─────────────────────────
+print("[S6] Scoring kombinasi sumber dana + metode...")
+
+def score_dana_metode(row):
+    is_apbn = str(row.get('sumberDana_cat', '')).startswith('APBN') or \
+              str(row.get('sumberDana', '')).startswith('APBN')
+    is_berisiko = row['metode'] in METODE_BERISIKO
+    if is_apbn and is_berisiko:
+        return 1.0
+    elif is_apbn and row['metode'] == 'Pengadaan Langsung':
+        return 0.4
+    elif is_berisiko:
+        return 0.6
+    return 0.0
+
+df['s6_dana_metode'] = df.apply(score_dana_metode, axis=1)
+
