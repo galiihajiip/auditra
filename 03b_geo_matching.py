@@ -154,3 +154,25 @@ def match_one(provinsi, nama, df_geo):
             return {'kabkot_id': row['kabkot_id'], 'kabkot_name': row['name'],
                     'prov_name': row['prov_name'], 'match_type': 'fuzzy'}
 
+    # ── Tahap 2: FALLBACK cross-provinsi ──
+    # Data SIRUP kadang salah input provinsi (mis. "DKI Jakarta, Bulungan (Kab.)"
+    # padahal Bulungan ada di Kalimantan Utara). Cari nama kab/kota itu di SELURUH
+    # Indonesia; kalau ketemu unik (cuma 1 kandidat), pakai itu dan tandai sebagai
+    # 'cross_province' supaya tetap bisa diaudit/dicek manual kalau perlu.
+    exact_all = df_geo[df_geo['name_norm'] == nama_norm]
+    if len(exact_all) == 1:
+        row = exact_all.iloc[0]
+        return {'kabkot_id': row['kabkot_id'], 'kabkot_name': row['name'],
+                'prov_name': row['prov_name'], 'match_type': 'cross_province_exact'}
+
+    all_names = df_geo['name_norm'].unique().tolist()
+    close_all = get_close_matches(nama_norm, all_names, n=1, cutoff=0.85)  # cutoff lebih ketat krn lintas-provinsi
+    if close_all:
+        rows = df_geo[df_geo['name_norm'] == close_all[0]]
+        if len(rows) == 1:
+            row = rows.iloc[0]
+            return {'kabkot_id': row['kabkot_id'], 'kabkot_name': row['name'],
+                    'prov_name': row['prov_name'], 'match_type': 'cross_province_fuzzy'}
+
+    return None
+
