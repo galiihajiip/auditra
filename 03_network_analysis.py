@@ -141,3 +141,19 @@ for node in G.nodes():
 max_wd = max(weighted_degree.values()) if weighted_degree else 1
 pagerank = {n: v / max_wd for n, v in weighted_degree.items()}  # pakai nama pagerank agar kompatibel
 
+# Risk-weighted influence — untuk lembaga: weighted degree * avg_rpi node
+print("  Risk-weighted influence score...")
+risk_influence = {}
+for node in G.nodes():
+    avg_rpi = G.nodes[node].get('avg_rpi', 0)
+    wd = weighted_degree.get(node, 0)
+    risk_influence[node] = (wd / max_wd) * (avg_rpi / 100)
+
+# Betweenness centrality hanya untuk lembaga & satker nodes (mahal secara komputasi)
+print("  Betweenness centrality (subgraph lembaga-satker)...")
+lembaga_satker_nodes = [n for n in G.nodes if G.nodes[n]['type'] in ('lembaga', 'satker')]
+subG = G.subgraph(lembaga_satker_nodes)
+betweenness = nx.betweenness_centrality(subG, weight='weight', normalized=True)
+# Isi 0 untuk node yang tidak ada di subgraph
+betweenness_full = {n: betweenness.get(n, 0) for n in G.nodes}
+
