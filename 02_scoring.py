@@ -128,3 +128,23 @@ if len(kandidat) > 1:
     n_frag = sum(1 for v in frag_scores.values() if v >= FRAG_SIMILARITY_THRESHOLD)
     print(f"  Terdeteksi potensi fragmentasi: {n_frag:,} paket")
 
+# ── S4: Konsentrasi Metode Berisiko per Satker ────────────────────────────────
+print("[S4] Scoring konsentrasi metode berisiko per satker...")
+
+METODE_BERISIKO = {'Penunjukan Langsung', 'Dikecualikan'}
+
+df['is_berisiko'] = df['metode'].isin(METODE_BERISIKO).astype(int)
+
+satker_stats = df.groupby('satker').agg(
+    total_paket=('id', 'count'),
+    paket_berisiko=('is_berisiko', 'sum')
+).reset_index()
+satker_stats['rasio_berisiko'] = satker_stats['paket_berisiko'] / satker_stats['total_paket']
+
+# Normalize rasio ke 0-1 berdasarkan persentil
+p95 = satker_stats['rasio_berisiko'].quantile(0.95)
+satker_stats['s4_konsentrasi'] = (satker_stats['rasio_berisiko'] / p95).clip(0, 1)
+
+df = df.merge(satker_stats[['satker', 's4_konsentrasi']], on='satker', how='left')
+df['s4_konsentrasi'] = df['s4_konsentrasi'].fillna(0)
+
