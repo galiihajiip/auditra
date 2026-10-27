@@ -22,3 +22,22 @@ from scipy import sparse
 import warnings
 warnings.filterwarnings('ignore')
 
+# ── Config ────────────────────────────────────────────────────────────────────
+INPUT_PATH  = 'data/data_clean.csv'   # ganti path sesuai lokasimu
+OUTPUT_PATH = 'output/data_scored.csv'
+
+# Bobot RPI (total = 1.0)
+WEIGHTS = {
+    's1_metode':        0.20,
+    's2_pagu_anomali':  0.20,
+    's3_fragmentasi':   0.15,
+    's4_konsentrasi':   0.15,
+    's5_umkm':          0.10,
+    's6_dana_metode':   0.10,
+    's7_reputasi':      0.10,
+}
+
+# Threshold fragmentasi: satker + uraian mirip dalam window pagu
+FRAG_PAGU_THRESHOLD = 200_000_000   # 200 juta (batas Pengadaan Langsung)
+FRAG_SIMILARITY_THRESHOLD = 0.6     # cosine similarity minimum
+
