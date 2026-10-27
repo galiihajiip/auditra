@@ -92,3 +92,16 @@ def parse_single_lokasi(loc_str):
     nama = re.sub(r'\(Kab\)$', '', nama).strip()  # handle "Sijunjung(Kab)" tanpa spasi/titik
     return provinsi, nama
 
+def split_multi_lokasi(lokasi):
+    """Paket bisa punya banyak lokasi dipisah '|'. Return list of (provinsi, nama)."""
+    raw_parts = str(lokasi).split('|')
+    parsed = []
+    for part in raw_parts:
+        part = part.strip()
+        if not part:
+            continue
+        provinsi, nama = parse_single_lokasi(part)
+        if provinsi:
+            parsed.append((provinsi, nama))
+    return parsed
+
