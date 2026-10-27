@@ -74,3 +74,21 @@ for feat in geo['features']:
     })
 df_geo = pd.DataFrame(geo_lookup)
 
+# ── Load data SIRUP ───────────────────────────────────────────────────────────
+print("\nLoading data SIRUP...")
+df = pd.read_csv(DATA_PATH, low_memory=False, usecols=['lokasi'])
+unique_lokasi = df['lokasi'].dropna().unique()
+print(f"  Unique lokasi: {len(unique_lokasi)}")
+
+# ── Parsing & Matching ────────────────────────────────────────────────────────
+def parse_single_lokasi(loc_str):
+    """Parse SATU lokasi 'Provinsi, Nama (Kab./Kota)' -> (provinsi, nama_kabkota)"""
+    parts = str(loc_str).split(',', 1)
+    if len(parts) != 2:
+        return None, None
+    provinsi = parts[0].strip()
+    rest = parts[1].strip()
+    nama = re.sub(r'\s*\((Kab\.?|Kota)\)\s*$', '', rest).strip()
+    nama = re.sub(r'\(Kab\)$', '', nama).strip()  # handle "Sijunjung(Kab)" tanpa spasi/titik
+    return provinsi, nama
+
