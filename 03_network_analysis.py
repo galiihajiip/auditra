@@ -308,3 +308,15 @@ CLUSTER LEMBAGA BERISIKO
 """
 
 print(summary)
+
+# ── Save ──────────────────────────────────────────────────────────────────────
+df.to_csv(OUTPUT_DATA, index=False)
+df_nodes.to_csv(OUTPUT_NODES, index=False)
+df_edges.to_csv(OUTPUT_EDGES, index=False)
+with open(OUTPUT_SUMMARY, 'w') as f:
+    f.write(summary)
+
+print(f"✓ data_network.csv  → {OUTPUT_DATA}")
+print(f"✓ kg_nodes.csv      → {OUTPUT_NODES}")
+print(f"✓ kg_edges.csv      → {OUTPUT_EDGES}")
+print(f"✓ kg_summary.txt    → {OUTPUT_SUMMARY}")
