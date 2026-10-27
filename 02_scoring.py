@@ -199,3 +199,21 @@ lembaga_rep['s7_reputasi'] = lembaga_rep['raw_reputasi'] / max_rep
 df = df.merge(lembaga_rep[['lembaga', 's7_reputasi']], on='lembaga', how='left')
 df['s7_reputasi'] = df['s7_reputasi'].fillna(0)
 
+# ── RPI: Risk Priority Index ──────────────────────────────────────────────────
+print("\nMenghitung RPI...")
+
+df['RPI'] = sum(
+    df[col] * weight
+    for col, weight in WEIGHTS.items()
+)
+df['RPI'] = (df['RPI'] * 100).round(2)  # skala 0-100
+
+# Label kategori risiko
+def label_rpi(score):
+    if score >= 70: return 'KRITIS'
+    if score >= 50: return 'TINGGI'
+    if score >= 30: return 'SEDANG'
+    return 'RENDAH'
+
+df['risk_label'] = df['RPI'].apply(label_rpi)
+
