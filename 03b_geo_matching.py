@@ -53,3 +53,24 @@ def normalize_provinsi(s):
         s_norm = PROVINSI_PEMEKARAN[s_norm]
     return s_norm
 
+# ── Load GeoJSON ──────────────────────────────────────────────────────────────
+print("Loading geojson...")
+with open(GEOJSON_PATH) as f:
+    geo = json.load(f)
+
+print(f"  Total features: {len(geo['features'])}")
+
+# Build lookup table dari geojson: normalized_name -> kabkot_id
+geo_lookup = []
+for feat in geo['features']:
+    props = feat['properties']
+    geo_lookup.append({
+        'kabkot_id':   f"{props['province_id']}.{props['kabkot_id']}",
+        'prov_name':   props['prov_name'],
+        'prov_norm':   normalize(props['prov_name']),
+        'name':        props['name'],
+        'name_norm':   normalize(props['name']),
+        'alt_name':    props.get('alt_name', ''),
+    })
+df_geo = pd.DataFrame(geo_lookup)
+
