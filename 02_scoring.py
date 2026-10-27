@@ -61,3 +61,20 @@ METODE_SCORE = {
 
 df['s1_metode'] = df['metode'].map(METODE_SCORE).fillna(0.50)
 
+# ── S2: Pagu Anomali vs Median Kategori Sejenis ───────────────────────────────
+print("[S2] Scoring pagu anomali...")
+
+# Hitung median pagu per kombinasi jenisPengadaan + metode
+df['pagu_log'] = np.log1p(df['pagu'])
+
+group_stats = df.groupby(['jenisPengadaan', 'metode'])['pagu_log'].agg(
+    median='median', std='std'
+).reset_index()
+group_stats.columns = ['jenisPengadaan', 'metode', 'pagu_log_median', 'pagu_log_std']
+
+df = df.merge(group_stats, on=['jenisPengadaan', 'metode'], how='left')
+
+# Z-score dalam grup, clip ke 0-1
+df['pagu_z'] = (df['pagu_log'] - df['pagu_log_median']) / (df['pagu_log_std'] + 1e-9)
+df['s2_pagu_anomali'] = df['pagu_z'].clip(0, 3) / 3  # normalize ke 0-1
+
