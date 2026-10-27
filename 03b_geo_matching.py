@@ -127,3 +127,30 @@ def is_non_geo(provinsi, nama):
     n = normalize(nama)
     return p in NON_GEO_KEYWORDS or n in NON_GEO_KEYWORDS or p == '' or n == ''
 
+def match_one(provinsi, nama, df_geo):
+    """Match satu pasangan (provinsi, nama) ke geojson. Return dict atau None."""
+    prov_norm = normalize_provinsi(provinsi)
+    nama_norm = apply_manual_alias(normalize(nama))
+
+    candidates = df_geo[df_geo['prov_norm'] == prov_norm]
+    if len(candidates) == 0:
+        all_provs = df_geo['prov_norm'].unique().tolist()
+        close = get_close_matches(prov_norm, all_provs, n=1, cutoff=0.7)
+        if close:
+            candidates = df_geo[df_geo['prov_norm'] == close[0]]
+
+    # ── Tahap 1: match dalam provinsi yang tertulis ──
+    if len(candidates) > 0:
+        exact = candidates[candidates['name_norm'] == nama_norm]
+        if len(exact) > 0:
+            row = exact.iloc[0]
+            return {'kabkot_id': row['kabkot_id'], 'kabkot_name': row['name'],
+                    'prov_name': row['prov_name'], 'match_type': 'exact'}
+
+        cand_names = candidates['name_norm'].tolist()
+        close = get_close_matches(nama_norm, cand_names, n=1, cutoff=0.75)
+        if close:
+            row = candidates[candidates['name_norm'] == close[0]].iloc[0]
+            return {'kabkot_id': row['kabkot_id'], 'kabkot_name': row['name'],
+                    'prov_name': row['prov_name'], 'match_type': 'fuzzy'}
+
