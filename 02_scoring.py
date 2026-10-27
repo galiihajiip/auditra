@@ -41,3 +41,23 @@ WEIGHTS = {
 FRAG_PAGU_THRESHOLD = 200_000_000   # 200 juta (batas Pengadaan Langsung)
 FRAG_SIMILARITY_THRESHOLD = 0.6     # cosine similarity minimum
 
+# ── Load ──────────────────────────────────────────────────────────────────────
+print("Loading cleaned data...")
+df = pd.read_csv(INPUT_PATH, low_memory=False)
+print(f"  Shape: {df.shape}")
+
+# ── S1: Metode Pemilihan ──────────────────────────────────────────────────────
+print("\n[S1] Scoring metode pemilihan...")
+
+METODE_SCORE = {
+    'Penunjukan Langsung': 1.00,
+    'Dikecualikan':        0.85,
+    'Pengadaan Langsung':  0.40,
+    'Tender Cepat':        0.30,
+    'E-Purchasing':        0.20,
+    'Seleksi':             0.10,
+    'Tender':              0.05,
+}
+
+df['s1_metode'] = df['metode'].map(METODE_SCORE).fillna(0.50)
+
