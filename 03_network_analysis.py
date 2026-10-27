@@ -270,3 +270,41 @@ if 'kg_risk_influence' in df.columns:
             return 'RENDAH'
         df['risk_label'] = df['RPI'].apply(label_rpi)
 
+# ── Summary untuk Esai ────────────────────────────────────────────────────────
+top_lembaga_pr = df_nodes[df_nodes['node_type']=='lembaga']\
+    .sort_values('risk_influence', ascending=False).head(10)
+
+top_lembaga_rpi = df_nodes[df_nodes['node_type']=='lembaga']\
+    .sort_values('avg_rpi', ascending=False).head(10)
+
+summary = f"""
+============================================================
+AUDITRA - KNOWLEDGE GRAPH SUMMARY
+============================================================
+
+STATISTIK GRAPH
+  Total nodes        : {G.number_of_nodes():,}
+  Total edges        : {G.number_of_edges():,}
+  Density            : {nx.density(G):.6f}
+
+DISTRIBUSI NODE
+{df_nodes['node_type'].value_counts().to_string()}
+
+DISTRIBUSI RISK LABEL (final, post-KG)
+{df['risk_label'].value_counts().to_string()}
+
+TOP 10 LEMBAGA - RISK INFLUENCE TERTINGGI (weighted degree * avg_rpi)
+{top_lembaga_pr[['label','risk_influence','avg_rpi','n_paket']].to_string(index=False)}
+
+TOP 10 LEMBAGA - RATA-RATA RPI TERTINGGI
+{top_lembaga_rpi[['label','avg_rpi','n_paket','risk_influence']].to_string(index=False)}
+
+CLUSTER LEMBAGA BERISIKO
+  Jumlah cluster     : {len(set(community_map.values()))}
+  Lembaga per cluster:
+{pd.Series(community_map).value_counts().to_string()}
+
+============================================================
+"""
+
+print(summary)
