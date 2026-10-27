@@ -262,3 +262,16 @@ with open(OUTPUT_GEOJSON, 'w') as f:
     json.dump(clean_geo, f)
 print(f"✓ Saved geojson → {OUTPUT_GEOJSON}")
 
+# ── Save unmatched report ─────────────────────────────────────────────────────
+with open(OUTPUT_REPORT, 'a', encoding='utf-8') as f:
+    f.write(f"UNMATCHED LOCATIONS REPORT\n")
+    f.write(f"Total: {len(unmatched)}\n\n")
+    for lokasi, reason in unmatched:
+        f.write(f"{lokasi}  →  {reason}\n")
+print(f"✓ Saved unmatched report → {OUTPUT_REPORT}")
+
+if unmatched:
+    print(f"\n⚠ {len(unmatched)} lokasi gagal di-match. Cek {OUTPUT_REPORT}")
+    print("  Contoh:")
+    for lokasi, reason in unmatched[:10]:
+        print(f"    {lokasi} → {reason}")
