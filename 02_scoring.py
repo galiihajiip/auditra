@@ -148,3 +148,19 @@ satker_stats['s4_konsentrasi'] = (satker_stats['rasio_berisiko'] / p95).clip(0, 
 df = df.merge(satker_stats[['satker', 's4_konsentrasi']], on='satker', how='left')
 df['s4_konsentrasi'] = df['s4_konsentrasi'].fillna(0)
 
+# ── S5: Ketidaksesuaian UMKM vs Nilai Paket ──────────────────────────────────
+print("[S5] Scoring anomali UMKM...")
+
+# Threshold wajar UMKM berdasarkan Perpres: barang/jasa ≤ 15M untuk PL ke UMKM
+# Tapi banyak yang jauh di atas itu — kita pakai persentil 90 dalam grup isUMKM=True
+umkm_df = df[df['isUMKM'] == True]
+p90_umkm = umkm_df['pagu'].quantile(0.90)
+
+def score_umkm(row):
+    if row['isUMKM'] == True and row['pagu'] > p90_umkm:
+        # Semakin jauh di atas p90, skor makin tinggi
+        return min((row['pagu'] / p90_umkm - 1) / 9, 1.0)
+    return 0.0
+
+df['s5_umkm'] = df.apply(score_umkm, axis=1)
+
