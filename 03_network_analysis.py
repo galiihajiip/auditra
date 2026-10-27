@@ -197,3 +197,24 @@ else:
 
 print(f"  Cluster terdeteksi: {len(set(community_map.values()))}")
 
+# ── Buat Node DataFrame ───────────────────────────────────────────────────────
+print("\nMenyusun output...")
+
+nodes_data = []
+for node, attrs in G.nodes(data=True):
+    nodes_data.append({
+        'node_id':      node,
+        'node_type':    attrs.get('type'),
+        'label':        attrs.get('label', node),
+        'avg_rpi':      attrs.get('avg_rpi', 0),
+        'n_paket':      attrs.get('n_paket', 0),
+        'degree_cent':    round(degree_cent.get(node, 0), 4),
+        'in_degree':      round(in_degree_cent.get(node, 0), 4),
+        'pagerank':       round(pagerank.get(node, 0), 6),        # weighted degree normalized
+        'risk_influence': round(risk_influence.get(node, 0), 6),  # weighted degree * avg_rpi
+        'betweenness':    round(betweenness_full.get(node, 0), 4),
+        'cluster_id':     community_map.get(node, -1),
+    })
+
+df_nodes = pd.DataFrame(nodes_data)
+
