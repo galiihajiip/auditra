@@ -157,3 +157,30 @@ betweenness = nx.betweenness_centrality(subG, weight='weight', normalized=True)
 # Isi 0 untuk node yang tidak ada di subgraph
 betweenness_full = {n: betweenness.get(n, 0) for n in G.nodes}
 
+# ── Deteksi Komunitas / Cluster ───────────────────────────────────────────────
+print("\nDeteksi cluster lembaga berisiko...")
+
+# Buat undirected graph hanya untuk lembaga nodes
+lembaga_nodes = [n for n in G.nodes if G.nodes[n]['type'] == 'lembaga']
+G_lembaga = G.subgraph(lembaga_nodes).to_undirected()
+
+# Tambah edge antar lembaga yang punya satker overlap (connected via satker)
+G_lembaga_full = nx.Graph()
+G_lembaga_full.add_nodes_from(lembaga_nodes)
+
+# Lembaga terhubung jika share metode berisiko yang sama di satker
+METODE_BERISIKO = {'Penunjukan Langsung', 'Dikecualikan'}
+lembaga_berisiko_methods = defaultdict(set)
+for _, row in df[df['metode'].isin(METODE_BERISIKO)].iterrows():
+    lembaga_berisiko_methods[f"L::{row['lembaga']}"].add(row['metode'])
+
+# Buat edge berdasarkan shared risk profile
+lembaga_list = list(lembaga_berisiko_methods.keys())
+for i in range(len(lembaga_list)):
+    for j in range(i+1, len(lembaga_list)):
+        shared = lembaga_berisiko_methods[lembaga_list[i]] & \
+                 lembaga_berisiko_methods[lembaga_list[j]]
+        if shared:
+            G_lembaga_full.add_edge(lembaga_list[i], lembaga_list[j],
+                                    weight=len(shared))
+
