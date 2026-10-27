@@ -184,3 +184,16 @@ for i in range(len(lembaga_list)):
             G_lembaga_full.add_edge(lembaga_list[i], lembaga_list[j],
                                     weight=len(shared))
 
+# Greedy modularity communities
+if G_lembaga_full.number_of_edges() > 0:
+    from networkx.algorithms.community import greedy_modularity_communities
+    communities = list(greedy_modularity_communities(G_lembaga_full, weight='weight'))
+    community_map = {}
+    for i, comm in enumerate(communities):
+        for node in comm:
+            community_map[node] = i
+else:
+    community_map = {}
+
+print(f"  Cluster terdeteksi: {len(set(community_map.values()))}")
+
