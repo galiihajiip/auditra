@@ -119,3 +119,25 @@ for _, row in lp_weight.iterrows():
 print(f"  Nodes: {G.number_of_nodes():,}")
 print(f"  Edges: {G.number_of_edges():,}")
 
+# ── Hitung Centrality Metrics ─────────────────────────────────────────────────
+print("\nMenghitung centrality metrics...")
+
+# Degree centrality (normalized)
+degree_cent = nx.degree_centrality(G)
+
+# In-degree centrality (seberapa banyak yang "pointing ke" node ini)
+in_degree_cent = nx.in_degree_centrality(G)
+
+# Weighted Degree Centrality — lebih meaningful dari PageRank untuk sparse graph
+# = total bobot edge (jumlah paket) yang masuk/keluar dari node
+print("  Weighted degree centrality...")
+weighted_degree = {}
+for node in G.nodes():
+    out_weight = sum(d.get('weight', 1) for _, _, d in G.out_edges(node, data=True))
+    in_weight  = sum(d.get('weight', 1) for _, _, d in G.in_edges(node, data=True))
+    weighted_degree[node] = out_weight + in_weight
+
+# Normalize ke 0-1
+max_wd = max(weighted_degree.values()) if weighted_degree else 1
+pagerank = {n: v / max_wd for n, v in weighted_degree.items()}  # pakai nama pagerank agar kompatibel
+
