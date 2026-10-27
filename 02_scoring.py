@@ -237,3 +237,11 @@ for col in signal_cols + ['s7_reputasi']:
     contrib = df[col].mean() * weight * 100
     print(f"  {col:25s} mean={df[col].mean():.3f}  contrib={contrib:.2f} pts")
 
+# ── Save ──────────────────────────────────────────────────────────────────────
+# Kolom cleanup sebelum save
+drop_cols = ['pagu_log', 'pagu_log_median', 'pagu_log_std', 'pagu_z', 'is_berisiko']
+df = df.drop(columns=[c for c in drop_cols if c in df.columns])
+
+df.to_csv(OUTPUT_PATH, index=False)
+print(f"\n✓ Saved → {OUTPUT_PATH}")
+print(f"  Kolom output: {list(df.columns)}")
