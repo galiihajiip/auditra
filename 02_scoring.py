@@ -78,3 +78,18 @@ df = df.merge(group_stats, on=['jenisPengadaan', 'metode'], how='left')
 df['pagu_z'] = (df['pagu_log'] - df['pagu_log_median']) / (df['pagu_log_std'] + 1e-9)
 df['s2_pagu_anomali'] = df['pagu_z'].clip(0, 3) / 3  # normalize ke 0-1
 
+# ── S3: Fragmentasi Paket (Split Contract) ────────────────────────────────────
+print("[S3] Scoring fragmentasi paket (TF-IDF)... ini bisa makan waktu untuk data besar")
+
+# Filter kandidat fragmentasi: Pengadaan Langsung + pagu < threshold
+kandidat = df[
+    (df['metode'] == 'Pengadaan Langsung') &
+    (df['pagu'] <= FRAG_PAGU_THRESHOLD) &
+    (df['uraianPekerjaan'].notna())
+].copy()
+
+print(f"  Kandidat fragmentasi: {len(kandidat):,} paket")
+
+df['s3_fragmentasi'] = 0.0
+
+if len(kandidat) > 1:
