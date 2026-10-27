@@ -105,3 +105,25 @@ def split_multi_lokasi(lokasi):
             parsed.append((provinsi, nama))
     return parsed
 
+# Alias manual untuk nama lama/gabungan yang sudah berubah di geojson modern
+MANUAL_ALIAS = {
+    'SANGIHE TALAUD': 'KEPULAUAN SANGIHE',  
+    'MERANTI': 'KEPULAUAN MERANTI',
+    'SELAYAR': 'KEPULAUAN SELAYAR',
+    'TALIABU': 'PULAU TALIABU',
+    'PALI': 'PENUKAL ABAB LEMATANG ILIR',
+    'PASANGKAYU': 'MAMUJU UTARA',  # GeoJSON seringkali masih menggunakan nama lama ini
+}
+
+def apply_manual_alias(nama_norm):
+    return MANUAL_ALIAS.get(nama_norm, nama_norm)
+
+# Lokasi yang memang TIDAK punya representasi geografis di Indonesia
+# (luar negeri, kategori administratif umum) - skip tanpa dianggap error
+NON_GEO_KEYWORDS = {'LAINNYA', 'LUAR INDONESIA', 'LUAR NEGERI'}
+
+def is_non_geo(provinsi, nama):
+    p = normalize(provinsi)
+    n = normalize(nama)
+    return p in NON_GEO_KEYWORDS or n in NON_GEO_KEYWORDS or p == '' or n == ''
+
