@@ -100,3 +100,22 @@ for _, row in sm_weight.iterrows():
     G.add_edge(f"SK::{row['satker']}", f"M::{row['metode']}",
                relation='USES_METHOD', weight=row['n'], avg_rpi=round(row['avg_rpi'],2))
 
+# satker → jenis
+sj_weight = df.groupby(['satker','jenisPengadaan']).agg(
+    n=('id','count'), avg_rpi=('RPI','mean')
+).reset_index()
+for _, row in sj_weight.iterrows():
+    G.add_edge(f"SK::{row['satker']}", f"J::{row['jenisPengadaan']}",
+               relation='PROCURES', weight=row['n'], avg_rpi=round(row['avg_rpi'],2))
+
+# lembaga → provinsi
+lp_weight = df.groupby(['lembaga','provinsi']).agg(
+    n=('id','count')
+).reset_index()
+for _, row in lp_weight.iterrows():
+    G.add_edge(f"L::{row['lembaga']}", f"P::{row['provinsi']}",
+               relation='OPERATES_IN', weight=row['n'])
+
+print(f"  Nodes: {G.number_of_nodes():,}")
+print(f"  Edges: {G.number_of_edges():,}")
+
