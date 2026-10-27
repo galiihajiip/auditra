@@ -226,3 +226,20 @@ for lokasi in unique_lokasi:
 
 df_lookup = pd.DataFrame(results)
 
+# ── Summary ───────────────────────────────────────────────────────────────────
+n_lokasi_matched = df_lookup['lokasi_sirup'].nunique() if len(df_lookup) > 0 else 0
+n_skipped_unique = len(set(skipped_non_geo))
+print(f"\nTotal lokasi unik (string SIRUP) : {len(unique_lokasi)}")
+print(f"Berhasil di-match (≥1 kabkota)   : {n_lokasi_matched} ({n_lokasi_matched/len(unique_lokasi)*100:.1f}%)")
+print(f"  - exact match rows           : {(df_lookup['match_type']=='exact').sum() if len(df_lookup)>0 else 0}")
+print(f"  - fuzzy match rows           : {(df_lookup['match_type']=='fuzzy').sum() if len(df_lookup)>0 else 0}")
+print(f"  - cross-province exact rows  : {(df_lookup['match_type']=='cross_province_exact').sum() if len(df_lookup)>0 else 0}  (provinsi SIRUP keliru, dikoreksi otomatis)")
+print(f"  - cross-province fuzzy rows  : {(df_lookup['match_type']=='cross_province_fuzzy').sum() if len(df_lookup)>0 else 0}")
+print(f"Total baris lookup (termasuk multi-lokasi) : {len(df_lookup)}")
+print(f"Sub-lokasi non-geografis (Luar Indonesia/Lainnya), di-skip : {n_skipped_unique}")
+print(f"Lokasi gagal total/parsial di-match (REAL FAILURE) : {len(unmatched)}")
+
+# ── Save lookup ───────────────────────────────────────────────────────────────
+df_lookup.to_csv(OUTPUT_LOOKUP, index=False)
+print(f"\n✓ Saved lookup → {OUTPUT_LOOKUP}")
+
