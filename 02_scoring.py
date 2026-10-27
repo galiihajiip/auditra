@@ -181,3 +181,21 @@ def score_dana_metode(row):
 
 df['s6_dana_metode'] = df.apply(score_dana_metode, axis=1)
 
+# ── S7: Reputasi Risiko Lembaga (Knowledge Graph Node Weight) ─────────────────
+print("[S7] Menghitung reputasi risiko lembaga (KG node weight)...")
+
+# Hitung composite risk per lembaga dari S1-S6
+signal_cols = ['s1_metode', 's2_pagu_anomali', 's3_fragmentasi',
+               's4_konsentrasi', 's5_umkm', 's6_dana_metode']
+
+# Rata-rata skor S1-S6 per lembaga = "reputasi risiko" node di Knowledge Graph
+lembaga_rep = df.groupby('lembaga')[signal_cols].mean().mean(axis=1).reset_index()
+lembaga_rep.columns = ['lembaga', 'raw_reputasi']
+
+# Normalize ke 0-1
+max_rep = lembaga_rep['raw_reputasi'].max()
+lembaga_rep['s7_reputasi'] = lembaga_rep['raw_reputasi'] / max_rep
+
+df = df.merge(lembaga_rep[['lembaga', 's7_reputasi']], on='lembaga', how='left')
+df['s7_reputasi'] = df['s7_reputasi'].fillna(0)
+
