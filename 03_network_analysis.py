@@ -254,3 +254,19 @@ if 'kg_risk_influence' in df.columns:
         WEIGHTS = {
             's1_metode':       0.20,
             's2_pagu_anomali': 0.20,
+            's3_fragmentasi':  0.15,
+            's4_konsentrasi':  0.15,
+            's5_umkm':         0.10,
+            's6_dana_metode':  0.10,
+            's7_reputasi':     0.10,
+        }
+        df['RPI'] = sum(df[col] * w for col, w in WEIGHTS.items())
+        df['RPI'] = (df['RPI'] * 100).round(2)
+
+        def label_rpi(score):
+            if score >= 70: return 'KRITIS'
+            if score >= 50: return 'TINGGI'
+            if score >= 30: return 'SEDANG'
+            return 'RENDAH'
+        df['risk_label'] = df['RPI'].apply(label_rpi)
+
