@@ -23,3 +23,33 @@ OUTPUT_LOOKUP   = 'geo/geo_lookup.csv'
 OUTPUT_GEOJSON  = 'geo/kabkota_clean.geojson'
 OUTPUT_REPORT   = 'geo/unmatched_report.txt'
 
+# ── Normalisasi teks ──────────────────────────────────────────────────────────
+def normalize(s):
+    if pd.isna(s):
+        return ''
+    s = str(s).upper()
+    s = unicodedata.normalize('NFKD', s)
+    s = re.sub(r'[^A-Z0-9\s]', ' ', s)
+    s = re.sub(r'\bKAB\b|\bKABUPATEN\b', '', s)
+    s = re.sub(r'\bKOTA\b', '', s)
+    s = re.sub(r'\bADM\b|\bADMINISTRASI\b', '', s)
+    s = re.sub(r'\s+', ' ', s).strip()
+    return s
+
+# Mapping provinsi pemekaran baru -> provinsi induk (geojson belum punya yang baru)
+PROVINSI_PEMEKARAN = {
+    'PAPUA TENGAH': 'PAPUA',
+    'PAPUA PEGUNUNGAN': 'PAPUA',
+    'PAPUA SELATAN': 'PAPUA',
+    'PAPUA BARAT DAYA': 'PAPUA BARAT',
+}
+
+def normalize_provinsi(s):
+    s = str(s).strip()
+    # Fix DI Yogyakarta SEBELUM normalize umum (karena normalize() hapus titik)
+    s = re.sub(r'^DI\s+Yogyakarta$', 'Daerah Istimewa Yogyakarta', s, flags=re.IGNORECASE)
+    s_norm = normalize(s)
+    if s_norm in PROVINSI_PEMEKARAN:
+        s_norm = PROVINSI_PEMEKARAN[s_norm]
+    return s_norm
+
