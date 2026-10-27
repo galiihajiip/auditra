@@ -81,3 +81,22 @@ for jenis in df['jenisPengadaan'].unique():
 for prov in df['provinsi'].unique():
     add_node(G, f"P::{prov}", 'provinsi', label=prov)
 
+# Tambah semua edge dengan weight = jumlah paket + avg RPI
+print("  Menambah edges...")
+
+# lembaga → satker
+ls_weight = df.groupby(['lembaga','satker']).agg(
+    n=('id','count'), avg_rpi=('RPI','mean')
+).reset_index()
+for _, row in ls_weight.iterrows():
+    G.add_edge(f"L::{row['lembaga']}", f"SK::{row['satker']}",
+               relation='HAS_SATKER', weight=row['n'], avg_rpi=round(row['avg_rpi'],2))
+
+# satker → metode
+sm_weight = df.groupby(['satker','metode']).agg(
+    n=('id','count'), avg_rpi=('RPI','mean')
+).reset_index()
+for _, row in sm_weight.iterrows():
+    G.add_edge(f"SK::{row['satker']}", f"M::{row['metode']}",
+               relation='USES_METHOD', weight=row['n'], avg_rpi=round(row['avg_rpi'],2))
+
