@@ -93,3 +93,38 @@ print(f"  Kandidat fragmentasi: {len(kandidat):,} paket")
 df['s3_fragmentasi'] = 0.0
 
 if len(kandidat) > 1:
+    # TF-IDF pada uraianPekerjaan
+    tfidf = TfidfVectorizer(
+        max_features=5000,
+        ngram_range=(1, 2),
+        min_df=2
+    )
+    tfidf_matrix = tfidf.fit_transform(kandidat['uraianPekerjaan'].fillna(''))
+
+    # Proses per satker untuk efisiensi memori
+    frag_scores = {}
+    satker_groups = kandidat.groupby('satker')
+
+    for satker, grp in satker_groups:
+        if len(grp) < 2:
+            continue
+
+        idx = grp.index.tolist()
+        mat = tfidf_matrix[kandidat.index.get_indexer(idx)]
+
+        # Cosine similarity antar paket dalam satker yang sama
+        sim_matrix = cosine_similarity(mat)
+        np.fill_diagonal(sim_matrix, 0)
+
+        # Skor fragmentasi = max similarity dengan paket lain di satker yang sama
+        for i, orig_idx in enumerate(idx):
+            max_sim = sim_matrix[i].max()
+            if max_sim >= FRAG_SIMILARITY_THRESHOLD:
+                frag_scores[orig_idx] = max_sim
+
+    for idx, score in frag_scores.items():
+        df.loc[idx, 's3_fragmentasi'] = score
+
+    n_frag = sum(1 for v in frag_scores.values() if v >= FRAG_SIMILARITY_THRESHOLD)
+    print(f"  Terdeteksi potensi fragmentasi: {n_frag:,} paket")
+
