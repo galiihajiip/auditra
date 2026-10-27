@@ -218,3 +218,16 @@ for node, attrs in G.nodes(data=True):
 
 df_nodes = pd.DataFrame(nodes_data)
 
+# ── Buat Edge DataFrame ───────────────────────────────────────────────────────
+edges_data = []
+for src, dst, attrs in G.edges(data=True):
+    edges_data.append({
+        'source':   src,
+        'target':   dst,
+        'relation': attrs.get('relation'),
+        'weight':   attrs.get('weight', 1),
+        'avg_rpi':  attrs.get('avg_rpi', 0),
+    })
+
+df_edges = pd.DataFrame(edges_data)
+
