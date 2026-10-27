@@ -243,3 +243,22 @@ print(f"Lokasi gagal total/parsial di-match (REAL FAILURE) : {len(unmatched)}")
 df_lookup.to_csv(OUTPUT_LOOKUP, index=False)
 print(f"\n✓ Saved lookup → {OUTPUT_LOOKUP}")
 
+# ── Save cleaned geojson (properties disederhanakan) ──────────────────────────
+clean_features = []
+for feat in geo['features']:
+    props = feat['properties']
+    clean_features.append({
+        'type': 'Feature',
+        'properties': {
+            'kabkot_id': f"{props['province_id']}.{props['kabkot_id']}",
+            'name': props['name'],
+            'prov_name': props['prov_name'],
+        },
+        'geometry': feat['geometry'],
+    })
+
+clean_geo = {'type': 'FeatureCollection', 'features': clean_features}
+with open(OUTPUT_GEOJSON, 'w') as f:
+    json.dump(clean_geo, f)
+print(f"✓ Saved geojson → {OUTPUT_GEOJSON}")
+
