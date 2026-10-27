@@ -231,3 +231,26 @@ for src, dst, attrs in G.edges(data=True):
 
 df_edges = pd.DataFrame(edges_data)
 
+# ── Merge network metrics ke data utama ──────────────────────────────────────
+lembaga_metrics = df_nodes[df_nodes['node_type']=='lembaga'][
+    ['label','pagerank','risk_influence','betweenness','degree_cent','cluster_id']
+].rename(columns={
+    'label':          'lembaga',
+    'pagerank':       'kg_pagerank',       # weighted degree normalized
+    'risk_influence': 'kg_risk_influence', # weighted degree * avg_rpi (S7 baru)
+    'betweenness':    'kg_betweenness',
+    'degree_cent':    'kg_degree',
+    'cluster_id':     'kg_cluster',
+})
+
+df = df.merge(lembaga_metrics, on='lembaga', how='left')
+
+# Update S7 dengan risk_influence (weighted degree * avg_rpi — lebih meaningful)
+if 'kg_risk_influence' in df.columns:
+    max_ri = df['kg_risk_influence'].max()
+    if max_ri > 0:
+        df['s7_reputasi'] = df['kg_risk_influence'] / max_ri
+        # Recalculate RPI dengan S7 yang baru
+        WEIGHTS = {
+            's1_metode':       0.20,
+            's2_pagu_anomali': 0.20,
