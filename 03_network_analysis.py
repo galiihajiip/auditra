@@ -53,3 +53,31 @@ G = nx.DiGraph()
 def add_node(G, node_id, node_type, **attrs):
     G.add_node(node_id, type=node_type, **attrs)
 
+# Tambah semua node
+lembaga_rpi   = df.groupby('lembaga')['RPI'].mean().to_dict()
+lembaga_count = df.groupby('lembaga')['id'].count().to_dict()
+
+satker_rpi    = df.groupby('satker')['RPI'].mean().to_dict()
+satker_count  = df.groupby('satker')['id'].count().to_dict()
+
+for lembaga in df['lembaga'].unique():
+    add_node(G, f"L::{lembaga}", 'lembaga',
+             label=lembaga,
+             avg_rpi=round(lembaga_rpi.get(lembaga, 0), 2),
+             n_paket=lembaga_count.get(lembaga, 0))
+
+for satker in df['satker'].unique():
+    add_node(G, f"SK::{satker}", 'satker',
+             label=satker,
+             avg_rpi=round(satker_rpi.get(satker, 0), 2),
+             n_paket=satker_count.get(satker, 0))
+
+for metode in df['metode'].unique():
+    add_node(G, f"M::{metode}", 'metode', label=metode)
+
+for jenis in df['jenisPengadaan'].unique():
+    add_node(G, f"J::{jenis}", 'jenis', label=jenis)
+
+for prov in df['provinsi'].unique():
+    add_node(G, f"P::{prov}", 'provinsi', label=prov)
+
