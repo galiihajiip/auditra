@@ -176,3 +176,53 @@ def match_one(provinsi, nama, df_geo):
 
     return None
 
+print("\nMatching lokasi ke geojson (termasuk paket multi-lokasi)...")
+results = []
+unmatched = []
+skipped_non_geo = []
+
+for lokasi in unique_lokasi:
+    sub_locations = split_multi_lokasi(lokasi)
+
+    if not sub_locations:
+        unmatched.append((lokasi, 'PARSE_FAILED'))
+        continue
+
+    matched_kabkot = []
+    failed_subs = []
+    has_real_failure = False
+
+    for provinsi, nama in sub_locations:
+        if is_non_geo(provinsi, nama):
+            skipped_non_geo.append(f"{provinsi} | {nama}")
+            continue
+
+        m = match_one(provinsi, nama, df_geo)
+        if m:
+            matched_kabkot.append(m)
+        else:
+            failed_subs.append(f"{provinsi} | {nama}")
+            has_real_failure = True
+
+    if matched_kabkot:
+        # Simpan SEMUA kabkot yang match untuk lokasi ini (multi-lokasi paket)
+        for m in matched_kabkot:
+            results.append({
+                'lokasi_sirup': lokasi,
+                'n_lokasi_in_paket': len(sub_locations),
+                'kabkot_id': m['kabkot_id'],
+                'kabkot_name': m['kabkot_name'],
+                'prov_name': m['prov_name'],
+                'match_type': m['match_type'],
+            })
+        if has_real_failure:
+            unmatched.append((lokasi, f"PARTIAL_MATCH, gagal: {'; '.join(failed_subs)}"))
+    elif has_real_failure:
+        unmatched.append((lokasi, f"NO_MATCH: {'; '.join(failed_subs)}"))
+    else:
+        # Semua sub-lokasi adalah non-geo (mis. seluruhnya "Lainnya, Luar Indonesia")
+        # — bukan kegagalan, cuma tidak punya representasi peta.
+        pass
+
+df_lookup = pd.DataFrame(results)
+
