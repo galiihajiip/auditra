@@ -217,3 +217,23 @@ def label_rpi(score):
 
 df['risk_label'] = df['RPI'].apply(label_rpi)
 
+# ── Summary ───────────────────────────────────────────────────────────────────
+print("\n" + "="*50)
+print("AUDITRA - RISK PRIORITY INDEX SUMMARY")
+print("="*50)
+print(f"\nTotal paket dianalisis : {len(df):,}")
+print(f"\nDistribusi Risk Label:")
+print(df['risk_label'].value_counts().to_string())
+print(f"\nTop 20 paket KRITIS:")
+top20 = df[df['risk_label'].isin(['KRITIS','TINGGI'])]\
+    .sort_values('RPI', ascending=False)\
+    [['paket','lembaga','metode','pagu','RPI','risk_label']]\
+    .head(20)
+print(top20.to_string())
+
+print(f"\nKontribusi rata-rata per sinyal:")
+for col in signal_cols + ['s7_reputasi']:
+    weight = WEIGHTS.get(col, 0)
+    contrib = df[col].mean() * weight * 100
+    print(f"  {col:25s} mean={df[col].mean():.3f}  contrib={contrib:.2f} pts")
+
