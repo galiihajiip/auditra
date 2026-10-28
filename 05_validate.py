@@ -1,0 +1,22 @@
+"""
+Auditra - Step 5: Data Validation
+Validasi kualitas data di setiap tahap pipeline.
+
+Output:
+  output/reports/validation_report.txt
+"""
+
+from __future__ import annotations
+
+from pipeline.config import reports_dir
+from pipeline.validate import run_all_validations
+
+
+def main() -> None:
+    print("=" * 60)
+    print("AUDITRA — DATA VALIDATION")
+    print("=" * 60)
+
+    results = run_all_validations()
+    lines = []
+    all_pass = True
