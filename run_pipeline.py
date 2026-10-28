@@ -30,3 +30,22 @@ STEPS = [
     ("06", "06_sensitivity_analysis.py", "Sensitivity Analysis"),
 ]
 
+
+def run_step(script: str, label: str) -> float:
+    path = ROOT / script
+    if not path.exists():
+        raise FileNotFoundError(f"Script tidak ditemukan: {path}")
+
+    print(f"\n{'='*60}")
+    print(f"▶ {label} ({script})")
+    print(f"{'='*60}")
+    t0 = time.perf_counter()
+    result = subprocess.run([sys.executable, str(path)], cwd=str(ROOT))
+    elapsed = time.perf_counter() - t0
+
+    if result.returncode != 0:
+        raise SystemExit(f"Gagal di {script} (exit {result.returncode})")
+
+    print(f"✓ Selesai dalam {elapsed:.1f}s")
+    return elapsed
+
