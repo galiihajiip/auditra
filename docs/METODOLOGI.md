@@ -132,3 +132,27 @@ S7 dan RPI di-recalculate setelah metrik KG.
 
 ---
 
+## 7. Geo-Spatial Matching (Step 3b)
+
+1. Parse `lokasi` → (provinsi, kab/kota)
+2. Normalisasi Unicode + fuzzy match ke GeoJSON 514 kab/kota
+3. Output `geo/geo_lookup.csv` untuk join cepat di API
+
+**Limitasi:** 46 string lokasi multi-wilayah gagal sebagian (`geo/unmatched_report.txt`).
+
+---
+
+## 8. Validasi (Step 5)
+
+Automated QA: row count integrity, RPI ∈ [0,100], duplikat id, kolom wajib.
+
+---
+
+## 9. Serving & Visualisasi
+
+- DuckDB materialized cache — query agregat 3M baris ~0,2 detik
+- Dashboard React: peta choropleth, KG, ranking, tabel paginated
+- **Integritas:** `GET /api/meta` verifikasi N baris
+
+---
+
