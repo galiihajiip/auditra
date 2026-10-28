@@ -70,3 +70,22 @@ def main() -> None:
                     "spearman": round(base_rpi.corr(new_rpi, method="spearman"), 4),
                 })
 
+    # ── 2. Equal weights scenario ───────────────────────────────────
+    equal_w = {col: 1 / len(SIGNAL_COLS) for col in SIGNAL_COLS}
+    equal_rpi = compute_rpi(df, equal_w)
+    equal_rank = equal_rpi.sort_values(ascending=False)
+
+    # ── 3. Drop-one-signal analysis ─────────────────────────────────
+    dropone = []
+    for drop_col in SIGNAL_COLS:
+        w = {k: (0.0 if k == drop_col else v) for k, v in base_weights.items()}
+        total = sum(w.values())
+        w = {k: v / total for k, v in w.items()}
+        new_rpi = compute_rpi(df, w)
+        new_rank = new_rpi.sort_values(ascending=False)
+        dropone.append({
+            "dropped": drop_col,
+            "spearman_vs_base": round(base_rpi.corr(new_rpi, method="spearman"), 4),
+            "top100_overlap": round(rank_overlap(base_rank, new_rank, 100), 4),
+        })
+
