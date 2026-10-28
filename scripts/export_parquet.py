@@ -20,3 +20,24 @@ def main() -> None:
     before = con.execute(
         f"SELECT COUNT(*) FROM read_csv_auto('{CSV.as_posix()}', header=true)"
     ).fetchone()[0]
+
+    con.execute(
+        f"""
+        COPY (SELECT * FROM read_csv_auto('{CSV.as_posix()}', header=true))
+        TO '{PARQUET.as_posix()}' (FORMAT PARQUET)
+        """
+    )
+
+    after = con.execute(
+        f"SELECT COUNT(*) FROM read_parquet('{PARQUET.as_posix()}')"
+    ).fetchone()[0]
+
+    print(f"Rows before: {before:,}")
+    print(f"Rows after : {after:,}")
+    if before != after:
+        raise SystemExit("INTEGRITY ERROR: row count mismatch!")
+    print(f"✓ Saved → {PARQUET}")
+
+
+if __name__ == "__main__":
+    main()
