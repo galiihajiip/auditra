@@ -89,3 +89,25 @@ def main() -> None:
             "top100_overlap": round(rank_overlap(base_rank, new_rank, 100), 4),
         })
 
+    # ── 4. Label stability under equal weights ──────────────────────
+    def label(score):
+        if score >= 70: return "KRITIS"
+        if score >= 50: return "TINGGI"
+        if score >= 30: return "SEDANG"
+        return "RENDAH"
+
+    base_labels = base_rpi.apply(label)
+    equal_labels = equal_rpi.apply(label)
+    label_agree = (base_labels == equal_labels).mean()
+
+    stats = {
+        "base_weights": base_weights,
+        "perturbation_pm10pct": perturb_results,
+        "equal_weights": {
+            "top100_overlap": round(rank_overlap(base_rank, equal_rank, 100), 4),
+            "spearman": round(base_rpi.corr(equal_rpi, method="spearman"), 4),
+            "label_agreement_pct": round(label_agree * 100, 2),
+        },
+        "drop_one_signal": dropone,
+    }
+
