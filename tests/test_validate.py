@@ -60,3 +60,14 @@ def test_validate_clean_fails_on_duplicate(tmp_path: Path) -> None:
     assert not result.passed
 
 
+def test_validate_scored_passes(tmp_scored_csv: Path) -> None:
+    result = validate_scored(tmp_scored_csv)
+    assert result.passed
+
+
+def test_validation_result_summary() -> None:
+    r = ValidationResult(stage="test", path="/tmp/x.csv")
+    r.ok("check 1")
+    r.fail("error 1")
+    assert not r.passed
+    assert "FAIL" in r.summary()
