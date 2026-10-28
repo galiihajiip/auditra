@@ -99,3 +99,36 @@ Tahap final (post network analysis):
 
 ---
 
+## 5. Risk Priority Index (RPI)
+
+\[
+\text{RPI} = 100 \times \sum_{i=1}^{7} w_i \cdot s_i
+\]
+
+| Label | Threshold |
+|-------|-----------|
+| KRITIS | RPI ≥ 70 |
+| TINGGI | RPI ≥ 50 |
+| SEDANG | RPI ≥ 30 |
+| RENDAH | RPI < 30 |
+
+Bobot \(w_i\) di `config/pipeline.yaml`.
+
+---
+
+## 6. Knowledge Graph (Step 3)
+
+**Node:** lembaga, satker, metode, jenis pengadaan, provinsi  
+**Edge:** HAS_SATKER, USES_METHOD, PROCURES, OPERATES_IN (weight = jumlah paket)
+
+**Metrik:**
+- Degree centrality, in-degree centrality
+- Weighted degree (normalisasi → `kg_pagerank`)
+- Betweenness (subgraph lembaga–satker)
+- Risk influence = weighted degree × avg RPI
+- **Community detection:** greedy modularity (36 cluster lembaga)
+
+S7 dan RPI di-recalculate setelah metrik KG.
+
+---
+
