@@ -23,3 +23,14 @@ SIGNAL_COLS = [
 ]
 
 
+def compute_rpi(df: pd.DataFrame, weights: dict[str, float]) -> pd.Series:
+    total = sum(df[col] * weights[col] for col in SIGNAL_COLS)
+    return (total * 100).round(2)
+
+
+def rank_overlap(base_rank: pd.Series, new_rank: pd.Series, top_n: int) -> float:
+    base_top = set(base_rank.head(top_n).index)
+    new_top = set(new_rank.head(top_n).index)
+    return len(base_top & new_top) / top_n
+
+
