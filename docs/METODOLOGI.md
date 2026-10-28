@@ -36,3 +36,40 @@ Lihat [SUMBER_DATA.md](SUMBER_DATA.md).
 
 ---
 
+## 4. Feature Engineering — 7 Sinyal Risiko (Step 2)
+
+### S1 — Metode Pemilihan (bobot 20%)
+
+Mapping rule-based berdasarkan hierarki risiko tata kelola (PP 12/2019):
+
+| Metode | Skor |
+|--------|------|
+| Penunjukan Langsung | 1.00 |
+| Dikecualikan | 0.85 |
+| Pengadaan Langsung | 0.40 |
+| Tender Cepat | 0.30 |
+| E-Purchasing | 0.20 |
+| Seleksi | 0.10 |
+| Tender | 0.05 |
+
+### S2 — Anomali Pagu (bobot 20%)
+
+Grup: `(jenisPengadaan, metode)`
+
+\[
+z = \frac{\log(1 + \text{pagu}) - \mu_{\text{grup}}}{\sigma_{\text{grup}} + \epsilon}, \quad s_2 = \frac{\clip(z, 0, 3)}{3}
+\]
+
+### S3 — Fragmentasi / Split Contract (bobot 15%)
+
+**Kandidat:** Pengadaan Langsung, pagu ≤ Rp 200 juta, uraian tidak null
+
+1. TF-IDF (`max_features=5000`, n-gram 1–2) pada `uraianPekerjaan`
+2. Cosine similarity antar paket **dalam satker yang sama**
+3. Jika max similarity ≥ 0,6 → skor = similarity
+
+**Dasar regulasi:** batas PL Rp 200 juta (Perpres 16/2018) — pemecahan paket untuk menghindari tender.
+
+### S4 — Konsentrasi Metode Berisiko per Satker (bobot 15%)
+
+\[
