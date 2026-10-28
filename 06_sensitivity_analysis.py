@@ -34,3 +34,18 @@ def rank_overlap(base_rank: pd.Series, new_rank: pd.Series, top_n: int) -> float
     return len(base_top & new_top) / top_n
 
 
+def main() -> None:
+    cfg = load_config()
+    path = cfg["paths"]["network"]
+    base_weights = cfg["scoring"]["weights"]
+
+    print("=" * 60)
+    print("AUDITRA — SENSITIVITY ANALYSIS")
+    print("=" * 60)
+
+    df = pd.read_csv(path, usecols=["id", "paket", "lembaga", "RPI"] + SIGNAL_COLS, low_memory=False)
+    print(f"Loaded {len(df):,} rows")
+
+    base_rpi = compute_rpi(df, base_weights)
+    base_rank = base_rpi.sort_values(ascending=False)
+
