@@ -130,3 +130,24 @@ def validate_scored(path: Path | None = None) -> ValidationResult:
     if "RPI" in df.columns:
         rpi = df["RPI"]
         if rpi.min() < vcfg["rpi_min"] or rpi.max() > vcfg["rpi_max"]:
+            res.fail(f"RPI di luar [{vcfg['rpi_min']}, {vcfg['rpi_max']}]: min={rpi.min()}, max={rpi.max()}")
+        else:
+            res.ok(f"RPI dalam rentang 0–100 (mean={rpi.mean():.2f})")
+
+    if "risk_label" in df.columns:
+        valid = set(vcfg["valid_risk_labels"])
+        invalid = set(df["risk_label"].unique()) - valid
+        if invalid:
+            res.fail(f"risk_label tidak valid: {invalid}")
+        else:
+            dist = df["risk_label"].value_counts().to_dict()
+            res.ok(f"Distribusi risk_label: {dist}")
+
+    for col in signal_cols:
+        if col in df.columns:
+            if df[col].min() < -0.01 or df[col].max() > 1.01:
+                res.fail(f"{col} di luar [0,1]: min={df[col].min()}, max={df[col].max()}")
+
+    return res
+
+
