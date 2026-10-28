@@ -33,3 +33,10 @@ def main() -> None:
     out.write_text("\n".join(lines), encoding="utf-8")
     print(f"✓ Report → {out}")
 
+    if not all_pass:
+        raise SystemExit(1)
+    print("\n✓ Semua validasi PASS")
+
+
+if __name__ == "__main__":
+    main()
