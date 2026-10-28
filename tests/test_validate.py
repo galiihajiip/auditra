@@ -51,3 +51,12 @@ def test_validate_clean_passes(tmp_clean_csv: Path, monkeypatch: pytest.MonkeyPa
     assert result.passed
     assert "Tidak ada duplikat id" in "\n".join(result.checks)
 
+
+def test_validate_clean_fails_on_duplicate(tmp_path: Path) -> None:
+    df = pd.DataFrame({"id": [1, 1], "pagu": [100, 200]})
+    path = tmp_path / "bad.csv"
+    df.to_csv(path, index=False)
+    result = validate_clean(path)
+    assert not result.passed
+
+
