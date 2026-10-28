@@ -217,3 +217,13 @@ def validate_geo(lookup_path: Path | None = None) -> ValidationResult:
     return res
 
 
+def run_all_validations() -> list[ValidationResult]:
+    cfg = load_config()
+    results = [
+        validate_raw(Path(cfg["paths"]["raw"])),
+        validate_clean(),
+        validate_scored(),
+        validate_network(),
+        validate_geo(),
+    ]
+    return results
