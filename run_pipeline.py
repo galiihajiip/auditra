@@ -49,3 +49,24 @@ def run_step(script: str, label: str) -> float:
     print(f"✓ Selesai dalam {elapsed:.1f}s")
     return elapsed
 
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Auditra pipeline orchestrator")
+    parser.add_argument("--from", dest="from_step", default="00", help="Mulai dari step (00, 01, 02, …)")
+    parser.add_argument("--skip-eda", action="store_true", help="Lewati 00_eda.py")
+    parser.add_argument("--validate-only", action="store_true", help="Hanya jalankan 05_validate.py")
+    args = parser.parse_args()
+
+    if args.validate_only:
+        run_step("05_validate.py", "Data Validation")
+        return
+
+    start_idx = next((i for i, (code, _, _) in enumerate(STEPS) if code == args.from_step), 0)
+    if args.skip_eda and start_idx == 0:
+        start_idx = 1
+
+    print("AUDITRA PIPELINE")
+    print(f"Steps: {', '.join(s[0] for s in STEPS[start_idx:])}")
+
+    total = 0.0
+    for code, script, label in STEPS[start_idx:]:
