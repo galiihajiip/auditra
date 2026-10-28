@@ -181,3 +181,39 @@ def validate_network(path: Path | None = None) -> ValidationResult:
     return res
 
 
+def validate_geo(lookup_path: Path | None = None) -> ValidationResult:
+    cfg = load_config()
+    path = lookup_path or Path(cfg["paths"]["geo_lookup"])
+    res = ValidationResult(stage="geo", path=str(path))
+
+    if not path.exists():
+        res.fail(f"File tidak ditemukan: {path}")
+        return res
+
+    df = _read_csv(path)
+    res.ok(f"Lookup entries: {len(df):,}")
+
+    for col in ["lokasi_sirup", "kabkot_id", "kabkot_name", "prov_name"]:
+        if col not in df.columns:
+            res.fail(f"Kolom hilang: {col}")
+        else:
+            res.ok(f"Kolom {col} ada")
+
+    unmatched_path = Path(cfg["paths"]["geo_lookup"]).parent / "unmatched_report.txt"
+    if unmatched_path.exists():
+        n_unmatched = unmatched_path.read_text(encoding="utf-8").count("→")
+        res.ok(f"Lokasi edge case (unmatched report): {n_unmatched} entri — lihat geo/unmatched_report.txt")
+    else:
+        res.ok("Tidak ada unmatched report")
+
+    if "match_type" in df.columns:
+        fuzzy = (df["match_type"] == "fuzzy").sum()
+        cross = (df["match_type"] == "cross_province_exact").sum()
+        exact = (df["match_type"] == "exact").sum()
+        res.ok(f"Match quality: exact={exact:,}, fuzzy={fuzzy:,}, cross_province={cross:,}")
+        if cross > 0:
+            res.ok(f"Cross-province match: {cross} (lokasi multi-wilayah — limitasi dokumentasi)")
+
+    return res
+
+
