@@ -156,3 +156,21 @@ Automated QA: row count integrity, RPI ∈ [0,100], duplikat id, kolom wajib.
 
 ---
 
+## Referensi Regulasi & Metode
+
+1. PP No. 12 Tahun 2019 — Pengadaan Barang/Jasa Pemerintah  
+2. Perpres No. 16 Tahun 2018 — Pengadaan Barang/Jasa (batas PL)  
+3. SIRUP — LKPP (https://sirup.lkpp.go.id/)  
+4. Salton & McGill (1983) — TF-IDF  
+5. Brandes (2001) — Betweenness centrality  
+6. Clauset, Newman & Moore (2004) — Greedy modularity  
+
+---
+
+## Limitasi (Wajib Dijelaskan ke Juri)
+
+1. **Bukan prediksi fraud** — prioritization heuristic  
+2. **Bobot RPI** — expert judgment, bukan estimasi ML  
+3. **S3 O(n²) per satker** — hanya kandidat PL ≤ 200 juta  
+4. **Geo pemekaran** — Papua/Taliabu dll. belum di GeoJSON lama  
+5. **Data SIRUP** — self-declared, belum verifikasi lapangan
