@@ -107,3 +107,26 @@ def validate_clean(path: Path | None = None) -> ValidationResult:
     return res
 
 
+def validate_scored(path: Path | None = None) -> ValidationResult:
+    cfg = load_config()
+    path = path or Path(cfg["paths"]["scored"])
+    vcfg = cfg["validation"]
+    res = ValidationResult(stage="scored", path=str(path))
+
+    if not path.exists():
+        res.fail(f"File tidak ditemukan: {path}")
+        return res
+
+    df = _read_csv(path)
+    res.ok(f"Shape: {df.shape[0]:,} baris")
+
+    signal_cols = [c for c in df.columns if c.startswith("s") and "_" in c[:4]]
+    for col in ["s1_metode", "s2_pagu_anomali", "RPI", "risk_label"]:
+        if col not in df.columns:
+            res.fail(f"Kolom hilang: {col}")
+        else:
+            res.ok(f"Kolom {col} ada")
+
+    if "RPI" in df.columns:
+        rpi = df["RPI"]
+        if rpi.min() < vcfg["rpi_min"] or rpi.max() > vcfg["rpi_max"]:
