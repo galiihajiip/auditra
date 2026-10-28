@@ -23,3 +23,21 @@ def tmp_clean_csv(tmp_path: Path) -> Path:
     return path
 
 
+@pytest.fixture
+def tmp_scored_csv(tmp_path: Path) -> Path:
+    df = pd.DataFrame({
+        "id": [1, 2],
+        "RPI": [45.5, 72.0],
+        "risk_label": ["SEDANG", "KRITIS"],
+        "s1_metode": [0.05, 1.0],
+        "s2_pagu_anomali": [0.3, 0.8],
+        "s3_fragmentasi": [0.0, 0.5],
+        "s4_konsentrasi": [0.1, 0.9],
+        "s5_umkm": [0.0, 0.0],
+        "s6_dana_metode": [0.0, 1.0],
+        "s7_reputasi": [0.2, 0.7],
+    })
+    path = tmp_path / "scored.csv"
+    df.to_csv(path, index=False)
+    return path
+
