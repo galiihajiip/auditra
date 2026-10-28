@@ -20,3 +20,16 @@ def main() -> None:
     results = run_all_validations()
     lines = []
     all_pass = True
+
+    for r in results:
+        print(r.summary())
+        print()
+        lines.append(r.summary())
+        lines.append("")
+        if not r.passed:
+            all_pass = False
+
+    out = reports_dir() / "validation_report.txt"
+    out.write_text("\n".join(lines), encoding="utf-8")
+    print(f"✓ Report → {out}")
+
