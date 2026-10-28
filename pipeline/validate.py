@@ -151,3 +151,33 @@ def validate_scored(path: Path | None = None) -> ValidationResult:
     return res
 
 
+def validate_network(path: Path | None = None) -> ValidationResult:
+    cfg = load_config()
+    path = path or Path(cfg["paths"]["network"])
+    res = ValidationResult(stage="network", path=str(path))
+
+    if not path.exists():
+        res.fail(f"File tidak ditemukan: {path}")
+        return res
+
+    df = _read_csv(path)
+    res.ok(f"Shape: {df.shape[0]:,} baris × {df.shape[1]} kolom")
+
+    kg_cols = ["kg_pagerank", "kg_risk_influence", "kg_betweenness"]
+    present = [c for c in kg_cols if c in df.columns]
+    if len(present) < 2:
+        res.fail(f"Kolom KG metrics kurang: {kg_cols}")
+    else:
+        res.ok(f"KG metrics: {present}")
+
+    scored_path = Path(cfg["paths"]["scored"])
+    if scored_path.exists():
+        n_scored = len(_read_csv(scored_path, nrows=None))
+        if len(df) != n_scored:
+            res.fail(f"Row count mismatch vs scored: {len(df)} vs {n_scored}")
+        else:
+            res.ok(f"Row count match scored: {len(df):,}")
+
+    return res
+
+
