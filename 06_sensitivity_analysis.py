@@ -49,3 +49,24 @@ def main() -> None:
     base_rpi = compute_rpi(df, base_weights)
     base_rank = base_rpi.sort_values(ascending=False)
 
+    # ── 1. Perturbasi ±10% per sinyal (renormalize) ─────────────────
+    perturb_results = []
+    delta = 0.10
+
+    for signal in SIGNAL_COLS:
+        for direction in (+1, -1):
+            w = dict(base_weights)
+            w[signal] = w[signal] * (1 + direction * delta)
+            total = sum(w.values())
+            w = {k: v / total for k, v in w.items()}
+            new_rpi = compute_rpi(df, w)
+            new_rank = new_rpi.sort_values(ascending=False)
+            for top_n in [50, 100, 500]:
+                overlap = rank_overlap(base_rank, new_rank, top_n)
+                perturb_results.append({
+                    "perturbation": f"{signal} {'+' if direction > 0 else '-'}{int(delta*100)}%",
+                    "top_n": top_n,
+                    "overlap": round(overlap, 4),
+                    "spearman": round(base_rpi.corr(new_rpi, method="spearman"), 4),
+                })
+
