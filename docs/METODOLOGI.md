@@ -73,3 +73,29 @@ z = \frac{\log(1 + \text{pagu}) - \mu_{\text{grup}}}{\sigma_{\text{grup}} + \eps
 ### S4 — Konsentrasi Metode Berisiko per Satker (bobot 15%)
 
 \[
+r = \frac{\#\text{Penunjukan/Dikecualikan}}{\#\text{total paket satker}}, \quad s_4 = \clip(r / P_{95}(r), 0, 1)
+\]
+
+### S5 — Anomali UMKM (bobot 10%)
+
+Jika `isUMKM=True` dan pagu > P90 pagu UMKM:
+
+\[
+s_5 = \min\left(\frac{\text{pagu}/P_{90} - 1}{9}, 1\right)
+\]
+
+### S6 — Kombinasi Dana + Metode (bobot 10%)
+
+Matriks rule: APBN × metode berisiko → skor 0–1
+
+### S7 — Reputasi Lembaga via KG (bobot 10%)
+
+Tahap awal: rata-rata S1–S6 per lembaga.  
+Tahap final (post network analysis):
+
+\[
+\text{risk\_influence} = \frac{w_{\text{degree}}}{w_{\max}} \times \frac{\overline{\text{RPI}}_{\text{lembaga}}}{100}
+\]
+
+---
+
