@@ -41,3 +41,13 @@ def tmp_scored_csv(tmp_path: Path) -> Path:
     df.to_csv(path, index=False)
     return path
 
+
+def test_validate_clean_passes(tmp_clean_csv: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def _cfg() -> dict:
+        return {"validation": {"min_rows": 1}, "paths": {"clean": str(tmp_clean_csv)}}
+
+    monkeypatch.setattr("pipeline.validate.load_config", _cfg)
+    result = validate_clean(tmp_clean_csv)
+    assert result.passed
+    assert "Tidak ada duplikat id" in "\n".join(result.checks)
+
