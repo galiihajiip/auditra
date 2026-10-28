@@ -111,3 +111,45 @@ def main() -> None:
         "drop_one_signal": dropone,
     }
 
+    # ── Report ──────────────────────────────────────────────────────
+    avg_overlap_100 = np.mean([r["overlap"] for r in perturb_results if r["top_n"] == 100])
+    min_overlap_100 = min(r["overlap"] for r in perturb_results if r["top_n"] == 100)
+
+    lines = [
+        "# Auditra — Sensitivity Analysis Report",
+        "",
+        "## Tujuan",
+        "Menguji **robustness** ranking RPI terhadap perubahan bobot — respons juri: *mengapa bobot ini?*",
+        "",
+        "## Setup",
+        f"- Dataset: `{path}` ({len(df):,} baris)",
+        f"- Bobot baseline: {base_weights}",
+        f"- Perturbasi: ±10% per sinyal, renormalisasi Σw=1",
+        "",
+        "## Hasil Perturbasi ±10%",
+        f"- **Overlap top-100 rata-rata:** {avg_overlap_100:.1%}",
+        f"- **Overlap top-100 minimum:** {min_overlap_100:.1%}",
+        "",
+        "| Perturbasi | Top-50 | Top-100 | Top-500 | Spearman |",
+        "|------------|--------|---------|---------|----------|",
+    ]
+
+    seen = set()
+    for r in perturb_results:
+        key = r["perturbation"]
+        if key in seen:
+            continue
+        seen.add(key)
+        rows = {x["top_n"]: x for x in perturb_results if x["perturbation"] == key}
+        lines.append(
+            f"| {key} | {rows[50]['overlap']:.1%} | {rows[100]['overlap']:.1%} "
+            f"| {rows[500]['overlap']:.1%} | {rows[100]['spearman']:.3f} |"
+        )
+
+    lines += [
+        "",
+        "## Skenario Equal Weights (1/7 each)",
+        f"- Spearman vs baseline: **{stats['equal_weights']['spearman']:.3f}**",
+        f"- Top-100 overlap: **{stats['equal_weights']['top100_overlap']:.1%}**",
+        f"- Label agreement: **{stats['equal_weights']['label_agreement_pct']:.1f}%**",
+        "",
