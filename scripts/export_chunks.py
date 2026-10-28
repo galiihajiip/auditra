@@ -22,3 +22,15 @@ def export_chunks(chunks_count: int = 10):
         shutil.rmtree(OUTPUT_DIR)
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+    print(f"Reading {INPUT_FILE}...")
+    df = pd.read_parquet(INPUT_FILE)
+    total_rows = len(df)
+    chunk_size = math.ceil(total_rows / chunks_count)
+
+    print(f"Splitting into {chunks_count} chunks of ~{chunk_size} rows each...")
+    for i in range(chunks_count):
+        start = i * chunk_size
+        end = min((i + 1) * chunk_size, total_rows)
+        chunk = df.iloc[start:end]
+        out_file = OUTPUT_DIR / f"part_{i}.parquet"
+        
