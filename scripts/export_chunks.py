@@ -34,3 +34,13 @@ def export_chunks(chunks_count: int = 10):
         chunk = df.iloc[start:end]
         out_file = OUTPUT_DIR / f"part_{i}.parquet"
         
+        # Save chunk
+        chunk.to_parquet(out_file, index=False, compression="zstd")
+        size_mb = os.path.getsize(out_file) / 1e6
+        print(f"Saved {out_file.name} (rows {start} to {end}) - {size_mb:.2f} MB")
+
+    print("\nData chunking complete! The output/chunks directory is tracked in git.")
+    print("Railway deployment will auto-assemble these chunks using DuckDB.")
+
+if __name__ == "__main__":
+    export_chunks()
