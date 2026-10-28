@@ -70,3 +70,16 @@ def main() -> None:
 
     total = 0.0
     for code, script, label in STEPS[start_idx:]:
+        total += run_step(script, label)
+
+    print(f"\n{'='*60}")
+    print(f"✓ Pipeline selesai — total {total:.1f}s ({total/60:.1f} menit)")
+    print(f"{'='*60}")
+    print("\nLangkah deploy web:")
+    print("  pip install -r requirements-web.txt")
+    print("  uvicorn api.main:app --reload --port 8000")
+    print("  cd web && npm run dev")
+
+
+if __name__ == "__main__":
+    main()
