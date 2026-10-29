@@ -68,3 +68,18 @@ def build_where(
             params.extend(patterns)
         else:
             clauses.append(provinsi_match_sql(prov_col))
+            params.append(resolved)
+
+    if lembaga and lembaga != "ALL":
+        clauses.append(f"{pfx}lembaga = ?")
+        params.append(lembaga)
+
+    if metode and metode != "ALL":
+        clauses.append(f"{pfx}metode = ?")
+        params.append(metode)
+
+    if risk_min and risk_min > 0:
+        clauses.append(f"{pfx}RPI >= ?")
+        params.append(float(risk_min))
+
+    return " AND ".join(clauses) if clauses else "1=1", params
