@@ -326,3 +326,49 @@ class DataStore:
         if not _use_parquet_views():
             self._geo_coverage_cache = self._compute_geo_coverage()
 
+    def _compute_geo_coverage(self) -> dict:
+        with self._lock:
+            total = int(self.conn.execute("SELECT COUNT(*) FROM packages").fetchone()[0])
+            if not GEO_LOOKUP_CSV.exists() or total == 0:
+                return {
+                    "total_packages": total,
+                    "mapped_packages": 0,
+                    "unmapped_packages": total,
+                    "multi_lokasi_packages": 0,
+                }
+
+            if not self._table_exists(self.conn, "packages_geo"):
+                return {
+                    "total_packages": total,
+                    "mapped_packages": 0,
+                    "unmapped_packages": total,
+                    "multi_lokasi_packages": 0,
+                }
+
+            mapped = int(
+                self.conn.execute(
+                    "SELECT COUNT(DISTINCT id) FROM packages_geo"
+                ).fetchone()[0]
+            )
+            multi = int(
+                self.conn.execute(
+                    """
+                    SELECT COUNT(DISTINCT p.id)
+                    FROM packages p
+                    INNER JOIN (
+                        SELECT lokasi_sirup
+                        FROM geo_lookup
+                        GROUP BY lokasi_sirup
+                        HAVING COUNT(DISTINCT kabkot_id) > 1
+                    ) m ON p.lokasi = m.lokasi_sirup
+                    """
+                ).fetchone()[0]
+            )
+
+        return {
+            "total_packages": total,
+            "mapped_packages": mapped,
+            "unmapped_packages": max(0, total - mapped),
+            "multi_lokasi_packages": multi,
+        }
+
