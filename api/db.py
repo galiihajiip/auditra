@@ -80,3 +80,25 @@ class DataStore:
         print(f"[Auditra] Database ready in {elapsed:.1f}s ({self._meta_cache['total_rows']:,} rows)")
 
     @classmethod
+    def _ensure_built(cls) -> None:
+        global _init_state, _init_error
+        if cls._instance is not None:
+            return
+        with cls._init_lock:
+            if cls._instance is not None:
+                return
+            if _init_state == "error":
+                raise RuntimeError(_init_error or "Database gagal diinisialisasi.")
+            _init_state = "loading"
+        try:
+            instance = cls()
+        except Exception as exc:
+            with cls._init_lock:
+                _init_state = "error"
+                _init_error = str(exc)
+            raise
+        with cls._init_lock:
+            cls._instance = instance
+            _init_state = "ready"
+
+    @classmethod
