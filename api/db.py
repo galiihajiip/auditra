@@ -232,3 +232,27 @@ class DataStore:
         print(f"[Auditra] Parquet saved in {time.perf_counter() - t0:.1f}s")
         return DATA_NETWORK_PARQUET
 
+    def _resolve_parquet_source(self) -> str:
+        chunks = list(DATA_CHUNKS_DIR.glob("*.parquet")) if DATA_CHUNKS_DIR.exists() else []
+        if chunks:
+            self.source_path = str(DATA_CHUNKS_GLOB.as_posix())
+            self.source_kind = "parquet_chunks"
+            return self.source_path
+        if not DATA_NETWORK_CSV.exists() and not DATA_NETWORK_PARQUET.exists():
+            raise FileNotFoundError(
+                "Dataset utama belum ada. Jalankan pipeline:\n"
+                "  python 01_cleaning.py … python 03b_geo_matching.py"
+            )
+        parquet = self._ensure_parquet()
+        self.source_path = str(parquet.as_posix())
+        self.source_kind = "parquet"
+        return self.source_path
+
+    def _setup_parquet_views(self, conn: duckdb.DuckDBPyConnection) -> None:
+        source = self._resolve_parquet_source()
+        print(f"[Auditra] Parquet view mode (low RAM) over {source}")
+        conn.execute(
+            f"CREATE VIEW packages AS SELECT * FROM read_parquet('{source}')"
+        )
+        self._create_packages_geo(conn, as_view=True)
+
