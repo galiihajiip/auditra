@@ -162,3 +162,34 @@ def choropleth(
     return df.to_dict(orient="records")
 
 
+@router.get("/rankings/lembaga")
+def rank_lembaga(
+    provinsi: str = Query("ALL"),
+    metode: str = Query("ALL"),
+    risk_min: float = Query(0),
+    limit: int = Query(25, ge=1, le=100),
+):
+    store = _require_store()
+    where, params = build_where(
+        provinsi=provinsi, metode=metode, risk_min=risk_min
+    )
+    df = store.fetch_df(
+        f"""
+        SELECT
+            lembaga,
+            AVG(RPI) AS avg_rpi,
+            SUM(CASE WHEN risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+            SUM(CASE WHEN risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi,
+            COUNT(*) AS n_paket
+        FROM packages
+        WHERE {where}
+        GROUP BY lembaga
+        ORDER BY avg_rpi DESC
+        LIMIT ?
+        """,
+        params + [limit],
+    )
+    df["avg_rpi"] = df["avg_rpi"].round(2)
+    return df.to_dict(orient="records")
+
+
