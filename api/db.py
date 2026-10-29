@@ -204,3 +204,31 @@ class DataStore:
                 """
             )
 
+    def _ensure_packages_geo(self, conn: duckdb.DuckDBPyConnection) -> None:
+        if self._table_exists(conn, "packages_geo"):
+            return
+        if not self._table_exists(conn, "packages"):
+            raise RuntimeError("DuckDB cache is missing the packages table")
+        print("[Auditra] Repairing cache: creating packages_geo table…")
+        self._create_packages_geo(conn)
+
+    def _ensure_parquet(self) -> Path:
+        if DATA_NETWORK_PARQUET.exists():
+            return DATA_NETWORK_PARQUET
+        if not DATA_NETWORK_CSV.exists():
+            raise FileNotFoundError(f"Missing {DATA_NETWORK_CSV}")
+
+        print("[Auditra] Converting CSV → Parquet (one-time, ~2-5 min)…")
+        t0 = time.perf_counter()
+        con = duckdb.connect()
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM read_csv_auto('{DATA_NETWORK_CSV.as_posix()}', header=true)
+            ) TO '{DATA_NETWORK_PARQUET.as_posix()}' (FORMAT PARQUET, COMPRESSION ZSTD)
+            """
+        )
+        con.close()
+        print(f"[Auditra] Parquet saved in {time.perf_counter() - t0:.1f}s")
+        return DATA_NETWORK_PARQUET
+
