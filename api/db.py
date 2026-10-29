@@ -753,3 +753,44 @@ class DataStore:
                 ORDER BY RPI DESC, id ASC
                 LIMIT ? OFFSET ?
                 """,
+                params + [page_size, offset],
+            ).fetchdf()
+
+        records = df.to_dict(orient="records")
+        for rec in records:
+            if rec.get("pagu") is not None:
+                rec["pagu_miliar"] = round(float(rec["pagu"]) / 1e9, 3)
+
+        total_pages = max(1, (total + page_size - 1) // page_size)
+        result = {
+            "data": records,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+        }
+        self._packages_cache.set(key, result)
+        return result
+
+    # Legacy helpers for individual endpoints
+    def fetch_df(self, sql: str, params: list | None = None) -> pd.DataFrame:
+        with self._lock:
+            if params:
+                return self.conn.execute(sql, params).fetchdf()
+            return self.conn.execute(sql).fetchdf()
+
+    def fetch_one(self, sql: str, params: list | None = None):
+        with self._lock:
+            if params:
+                return self.conn.execute(sql, params).fetchone()
+            return self.conn.execute(sql).fetchone()
+
+    def load_kg_nodes(self) -> pd.DataFrame:
+        if self._kg_nodes is None:
+            raise FileNotFoundError(f"Missing {KG_NODES_CSV}")
+        return self._kg_nodes
+
+    def load_kg_edges(self) -> pd.DataFrame:
+        if self._kg_edges is None:
+            raise FileNotFoundError(f"Missing {KG_EDGES_CSV}")
+        return self._kg_edges
