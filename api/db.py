@@ -421,3 +421,44 @@ class DataStore:
     ) -> str:
         return f"{provinsi}|{lembaga}|{metode}|{risk_min}|{extra}"
 
+    def fetch_dashboard_bundle(
+        self,
+        provinsi: str = "ALL",
+        lembaga: str = "ALL",
+        metode: str = "ALL",
+        risk_min: float = 0,
+    ) -> dict:
+        key = self._filter_cache_key(provinsi, lembaga, metode, risk_min, "dashboard")
+        cached = self._dashboard_cache.get(key)
+        if cached is not None:
+            return cached
+
+        where, params = build_where(
+            provinsi=provinsi,
+            lembaga=lembaga,
+            metode=metode,
+            risk_min=risk_min,
+            packages_via_geo=GEO_LOOKUP_CSV.exists(),
+        )
+
+        with self._lock:
+            # Single scan: overview + signals
+            stats = self.conn.execute(
+                f"""
+                SELECT
+                    COUNT(*) AS total_paket,
+                    COALESCE(SUM(pagu) / 1e9, 0) AS total_pagu_miliar,
+                    COALESCE(SUM(CASE WHEN risk_label = 'KRITIS' THEN 1 ELSE 0 END), 0) AS paket_kritis,
+                    COALESCE(AVG(RPI), 0) AS avg_rpi,
+                    COALESCE(SUM(CASE WHEN s3_fragmentasi >= 0.6 THEN 1 ELSE 0 END), 0) AS split_contract,
+                    AVG(s1_metode) AS s1,
+                    AVG(s2_pagu_anomali) AS s2,
+                    AVG(s3_fragmentasi) AS s3,
+                    AVG(s4_konsentrasi) AS s4,
+                    AVG(s5_umkm) AS s5,
+                    AVG(s6_dana_metode) AS s6,
+                    AVG(s7_reputasi) AS s7
+                FROM packages
+                WHERE {where}
+                """,
+                params,
