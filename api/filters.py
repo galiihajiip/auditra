@@ -15,3 +15,14 @@ PROVINSI_ALIASES: dict[str, str] = {
 }
 
 
+def resolve_provinsi(name: str) -> str:
+    """Samakan variasi penulisan provinsi ke nama di geo_lookup."""
+    key = name.strip().lower()
+    return PROVINSI_ALIASES.get(key, name.strip())
+
+
+def provinsi_match_sql(column: str) -> str:
+    """Perbandingan provinsi case-insensitive (geo_lookup = UPPERCASE)."""
+    return f"UPPER(TRIM({column})) = UPPER(TRIM(?))"
+
+
