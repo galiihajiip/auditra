@@ -372,3 +372,37 @@ class DataStore:
             "multi_lokasi_packages": multi,
         }
 
+    def geo_coverage(self) -> dict:
+        if self._geo_coverage_cache is None:
+            self._geo_coverage_cache = self._compute_geo_coverage()
+        return dict(self._geo_coverage_cache)
+
+    def meta(self) -> dict:
+        return dict(self._meta_cache or {})
+
+    def filter_options(self) -> dict:
+        if self._filter_options_cache is not None:
+            return self._filter_options_cache
+
+        with self._lock:
+            lembaga = self.conn.execute(
+                "SELECT DISTINCT lembaga FROM packages "
+                "WHERE lembaga IS NOT NULL ORDER BY lembaga"
+            ).fetchdf()["lembaga"].tolist()
+            metode = self.conn.execute(
+                "SELECT DISTINCT metode FROM packages "
+                "WHERE metode IS NOT NULL ORDER BY metode"
+            ).fetchdf()["metode"].tolist()
+            provinsi: list[str] = []
+            if GEO_LOOKUP_CSV.exists():
+                provinsi = self.conn.execute(
+                    "SELECT DISTINCT prov_name FROM geo_lookup ORDER BY prov_name"
+                ).fetchdf()["prov_name"].tolist()
+
+        self._filter_options_cache = {
+            "lembaga": lembaga,
+            "metode": metode,
+            "provinsi": provinsi,
+        }
+        return self._filter_options_cache
+
