@@ -118,3 +118,17 @@ class DataStore:
         return _init_state == "ready" and cls._instance is not None
 
     @classmethod
+    def begin_background_init(cls) -> None:
+        """Start DataStore warm-up on a worker thread (non-blocking startup)."""
+        if cls.is_ready() or _init_state in ("loading", "ready"):
+            return
+
+        def _run() -> None:
+            try:
+                cls._ensure_built()
+                print("[Auditra] Background database init complete.")
+            except Exception as exc:
+                print(f"[Auditra] Background init failed: {exc}")
+
+        threading.Thread(target=_run, name="auditra-db-init", daemon=True).start()
+
