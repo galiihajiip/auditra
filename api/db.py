@@ -686,3 +686,30 @@ class DataStore:
                 row["avg_rpi"] = float(stats_row["avg_rpi"] or 0)
                 row["n_paket"] = int(stats_row["n_paket"] or 0)
             row["risk_influence"] = (
+                float(row.get("avg_rpi") or 0) * int(row.get("n_paket") or 0) / 100.0
+            )
+            return row
+
+        nodes_df = nodes_df.apply(apply_live_stats, axis=1)
+
+        if lembaga and lembaga != "ALL":
+            focus_id = f"L::{lembaga}"
+            if focus_id not in set(nodes_df["node_id"]):
+                return {"nodes": [], "edges": []}
+            connected = edges_df[edges_df["source"] == focus_id]["target"].tolist()
+            keep = {focus_id, *connected}
+            nodes_df = nodes_df[nodes_df["node_id"].isin(keep)]
+        else:
+            nodes_df = nodes_df.sort_values(
+                ["risk_influence", "avg_rpi"], ascending=False
+            ).head(70)
+
+        node_ids = set(nodes_df["node_id"])
+        edges_sub = edges_df[
+            edges_df["source"].isin(node_ids) & edges_df["target"].isin(node_ids)
+        ]
+        return {
+            "nodes": nodes_df.to_dict(orient="records"),
+            "edges": edges_sub.to_dict(orient="records"),
+        }
+
