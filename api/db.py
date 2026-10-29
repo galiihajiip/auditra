@@ -572,3 +572,32 @@ class DataStore:
         self._dashboard_cache.set(key, bundle)
         return bundle
 
+    def _fetch_choropleth_modes(self, where: str, params: list) -> dict[str, list]:
+        """Agregat kab/kota per mode pemilik — seluruh Indonesia (tanpa filter provinsi)."""
+        modes: dict[str, list] = {}
+        with self._lock:
+            for mode in MAP_MODES:
+                df = self.conn.execute(
+                    f"""
+                    SELECT
+                        printf('%.2f', TRY_CAST(pg.kabkot_id AS DOUBLE)) AS kabkot_id,
+                        pg.kabkot_name,
+                        pg.prov_name,
+                        COUNT(*) AS n_paket,
+                        ROUND(AVG(pg.RPI), 2) AS avg_rpi,
+                        ROUND(SUM(pg.pagu) / 1e9, 2) AS total_pagu_miliar,
+                        ROUND(SUM(CASE WHEN pg.RPI >= 50 THEN pg.pagu ELSE 0 END) / 1e9, 2)
+                            AS pagu_risiko_miliar,
+                        SUM(CASE WHEN pg.risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+                        SUM(CASE WHEN pg.risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi
+                    FROM packages_geo pg
+                    INNER JOIN packages p ON pg.id = p.id
+                    WHERE {where} AND ({OWNER_CATEGORY_EXPR}) = ?
+                    GROUP BY pg.kabkot_id, pg.kabkot_name, pg.prov_name
+                    ORDER BY pagu_risiko_miliar DESC
+                    """,
+                    params + [mode],
+                ).fetchdf()
+                modes[mode] = df.to_dict(orient="records")
+        return modes
+
