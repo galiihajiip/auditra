@@ -132,3 +132,25 @@ class DataStore:
 
         threading.Thread(target=_run, name="auditra-db-init", daemon=True).start()
 
+    def _configure_session(self) -> None:
+        threads = min(8, max(2, __import__("os").cpu_count() or 4))
+        self.conn.execute(f"SET threads TO {threads}")
+        self.conn.execute("SET enable_object_cache TO true")
+
+    def _source_mtime(self) -> float:
+        chunks = list(DATA_CHUNKS_DIR.glob("*.parquet")) if DATA_CHUNKS_DIR.exists() else []
+        if chunks:
+            return max(f.stat().st_mtime for f in chunks)
+        if DATA_NETWORK_PARQUET.exists():
+            return DATA_NETWORK_PARQUET.stat().st_mtime
+        if DATA_NETWORK_CSV.exists():
+            return DATA_NETWORK_CSV.stat().st_mtime
+        return 0
+
+    def _table_exists(self, conn: duckdb.DuckDBPyConnection, name: str) -> bool:
+        row = conn.execute(
+            "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = ?",
+            [name],
+        ).fetchone()
+        return int(row[0]) > 0
+
