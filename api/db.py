@@ -46,3 +46,37 @@ def _use_parquet_views() -> bool:
     return bool(os.getenv("RAILWAY_ENVIRONMENT"))
 
 
+class DataStore:
+    """Singleton DuckDB over a materialized local cache (auditra.duckdb)."""
+
+    _instance: "DataStore | None" = None
+    _init_lock = threading.Lock()
+
+    def __init__(self) -> None:
+        self._lock = threading.RLock()
+        self._dashboard_cache = TTLCache(maxsize=DASHBOARD_CACHE_SIZE, ttl_seconds=600)
+        self._packages_cache = TTLCache(maxsize=128, ttl_seconds=120)
+        self._filter_options_cache: dict | None = None
+        self._meta_cache: dict | None = None
+        self._geo_coverage_cache: dict | None = None
+        self._geojson_cache: dict | None = None
+        self._kg_nodes: pd.DataFrame | None = None
+        self._kg_edges: pd.DataFrame | None = None
+        self.source_path = ""
+        self.source_kind = ""
+
+        t0 = time.perf_counter()
+        self._ensure_database()
+        if _use_parquet_views():
+            self.conn = duckdb.connect(":memory:")
+            self._configure_session()
+            self._setup_parquet_views(self.conn)
+        else:
+            self.conn = duckdb.connect(str(DUCKDB_CACHE), read_only=False)
+            self._configure_session()
+            self._ensure_packages_geo(self.conn)
+        self._warm_static_caches()
+        elapsed = time.perf_counter() - t0
+        print(f"[Auditra] Database ready in {elapsed:.1f}s ({self._meta_cache['total_rows']:,} rows)")
+
+    @classmethod
