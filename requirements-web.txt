@@ -1,0 +1,6 @@
+# Web API
+fastapi
+uvicorn[standard]
+duckdb
+pandas
+python-multipart
