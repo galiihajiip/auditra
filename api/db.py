@@ -154,3 +154,17 @@ class DataStore:
         ).fetchone()
         return int(row[0]) > 0
 
+    def _cache_is_usable(self) -> bool:
+        """Cache exists, is newer than sources, and has the packages table."""
+        if not DUCKDB_CACHE.exists():
+            return False
+        try:
+            if DUCKDB_CACHE.stat().st_mtime < self._source_mtime():
+                return False
+            test_con = duckdb.connect(str(DUCKDB_CACHE), read_only=True)
+            ok = self._table_exists(test_con, "packages")
+            test_con.close()
+            return ok
+        except Exception:
+            return False
+
