@@ -22,3 +22,9 @@ class OverviewStats(BaseModel):
     split_contract: int
 
 
+class PaginatedPackages(BaseModel):
+    data: list[dict]
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
