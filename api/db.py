@@ -406,3 +406,18 @@ class DataStore:
         }
         return self._filter_options_cache
 
+    def geojson(self) -> dict:
+        if self._geojson_cache is None:
+            raise FileNotFoundError(f"Missing {GEOJSON_PATH}")
+        return self._geojson_cache
+
+    def _filter_cache_key(
+        self,
+        provinsi: str,
+        lembaga: str,
+        metode: str,
+        risk_min: float,
+        extra: str = "",
+    ) -> str:
+        return f"{provinsi}|{lembaga}|{metode}|{risk_min}|{extra}"
+
