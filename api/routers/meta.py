@@ -16,3 +16,11 @@ def health():
         "database_ready": ready,
     }
 
+
+@router.get("/meta", response_model=MetaResponse)
+def meta():
+    try:
+        store = require_store()
+        return store.meta()
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
