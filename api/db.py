@@ -713,3 +713,43 @@ class DataStore:
             "edges": edges_sub.to_dict(orient="records"),
         }
 
+    def fetch_packages_page(
+        self,
+        provinsi: str,
+        lembaga: str,
+        metode: str,
+        risk_min: float,
+        page: int,
+        page_size: int,
+    ) -> dict:
+        effective_risk = max(risk_min, 30)
+        key = self._filter_cache_key(provinsi, lembaga, metode, effective_risk, f"p{page}s{page_size}")
+        cached = self._packages_cache.get(key)
+        if cached is not None:
+            return cached
+
+        where, params = build_where(
+            provinsi=provinsi,
+            lembaga=lembaga,
+            metode=metode,
+            risk_min=effective_risk,
+            packages_via_geo=GEO_LOOKUP_CSV.exists(),
+        )
+        offset = (page - 1) * page_size
+
+        with self._lock:
+            total = int(
+                self.conn.execute(
+                    f"SELECT COUNT(*) FROM packages WHERE {where}", params
+                ).fetchone()[0]
+            )
+            df = self.conn.execute(
+                f"""
+                SELECT id, RPI, risk_label, paket, lembaga, metode, pagu, lokasi,
+                       s1_metode, s2_pagu_anomali, s3_fragmentasi, s4_konsentrasi,
+                       s5_umkm, s6_dana_metode, s7_reputasi
+                FROM packages
+                WHERE {where}
+                ORDER BY RPI DESC, id ASC
+                LIMIT ? OFFSET ?
+                """,
