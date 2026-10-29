@@ -523,3 +523,52 @@ class DataStore:
                 choropleth_df = pd.DataFrame(choropleth_modes.get("kl", []))
 
                 prov_where, prov_params = build_where(
+                    provinsi=provinsi,
+                    lembaga=lembaga,
+                    metode=metode,
+                    risk_min=risk_min,
+                    packages_geo=True,
+                )
+                rank_prov_df = self.conn.execute(
+                    f"""
+                    SELECT prov_name, ROUND(AVG(RPI), 2) AS avg_rpi,
+                        SUM(CASE WHEN risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+                        SUM(CASE WHEN risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi,
+                        COUNT(*) AS n_paket
+                    FROM packages_geo
+                    WHERE {prov_where}
+                    GROUP BY prov_name ORDER BY avg_rpi DESC LIMIT 25
+                    """,
+                    prov_params,
+                ).fetchdf()
+
+        bundle = {
+            "overview": {
+                "total_paket": int(stats[0] or 0),
+                "total_pagu_miliar": round(float(stats[1] or 0), 2),
+                "paket_kritis": int(stats[2] or 0),
+                "avg_rpi": round(float(stats[3] or 0), 2),
+                "split_contract": int(stats[4] or 0),
+            },
+            "signals": {
+                "Metode": round(float(stats[5] or 0), 4),
+                "Pagu Anomali": round(float(stats[6] or 0), 4),
+                "Fragmentasi": round(float(stats[7] or 0), 4),
+                "Konsentrasi": round(float(stats[8] or 0), 4),
+                "UMKM": round(float(stats[9] or 0), 4),
+                "Dana+Metode": round(float(stats[10] or 0), 4),
+                "Reputasi KG": round(float(stats[11] or 0), 4),
+            },
+            "risk_distribution": risk_df.to_dict(orient="records"),
+            "metode": metode_df.to_dict(orient="records"),
+            "scatter": scatter_df.to_dict(orient="records"),
+            "rank_lembaga": rank_lem_df.to_dict(orient="records"),
+            "choropleth": choropleth_df.to_dict(orient="records"),
+            "choropleth_modes": choropleth_modes,
+            "rank_provinsi": rank_prov_df.to_dict(orient="records"),
+            "geo_coverage": self.geo_coverage(),
+            "kg": self._kg_subset_safe(provinsi, lembaga, metode, risk_min),
+        }
+        self._dashboard_cache.set(key, bundle)
+        return bundle
+
