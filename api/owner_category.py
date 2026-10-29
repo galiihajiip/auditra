@@ -17,3 +17,15 @@ CASE
       OR COALESCE(p.lembaga, '') ILIKE 'PEMPROV %'
       THEN 'pemprov'
     WHEN COALESCE(p.ownerType, '') ILIKE '%kabupaten%'
+      OR COALESCE(p.ownerType, '') ILIKE '%kota%'
+      OR COALESCE(p.ownerType, '') ILIKE '%pemkot%'
+      OR COALESCE(p.ownerType, '') ILIKE '%pemkab%'
+      OR COALESCE(p.ownerType, '') ILIKE '%daerah%'
+      OR COALESCE(p.lembaga, '') ILIKE 'PEMERINTAH KABUPATEN%'
+      OR COALESCE(p.lembaga, '') ILIKE 'PEMERINTAH KOTA%'
+      OR COALESCE(p.lembaga, '') ILIKE 'PEMERINTAH DAERAH%'
+      THEN 'pemkot'
+    ELSE 'others'
+END
+"""
+
