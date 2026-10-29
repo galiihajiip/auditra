@@ -493,3 +493,33 @@ class DataStore:
             ).fetchdf()
 
             rank_lem_df = self.conn.execute(
+                f"""
+                SELECT lembaga, ROUND(AVG(RPI), 2) AS avg_rpi,
+                    SUM(CASE WHEN risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+                    SUM(CASE WHEN risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi,
+                    SUM(CASE WHEN risk_label = 'KRITIS'
+                        AND (s2_pagu_anomali >= 0.8 OR s3_fragmentasi >= 0.6)
+                        THEN 1 ELSE 0 END) AS n_ekstrem,
+                    ROUND(COALESCE(SUM(pagu) / 1e9, 0), 2) AS total_pagu_miliar,
+                    COUNT(*) AS n_paket
+                FROM packages WHERE {where}
+                GROUP BY lembaga ORDER BY avg_rpi DESC LIMIT 100
+                """,
+                params,
+            ).fetchdf()
+
+            choropleth_df = pd.DataFrame()
+            choropleth_modes: dict[str, list] = {m: [] for m in MAP_MODES}
+            rank_prov_df = pd.DataFrame()
+            if GEO_LOOKUP_CSV.exists():
+                ch_where, ch_params = build_where(
+                    lembaga=lembaga,
+                    metode=metode,
+                    risk_min=risk_min,
+                    packages_geo=True,
+                    table_prefix="pg.",
+                )
+                choropleth_modes = self._fetch_choropleth_modes(ch_where, ch_params)
+                choropleth_df = pd.DataFrame(choropleth_modes.get("kl", []))
+
+                prov_where, prov_params = build_where(
