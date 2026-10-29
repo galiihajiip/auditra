@@ -88,3 +88,40 @@ def scatter(
     }
 
 
+@router.get("/charts/signals")
+def signal_radar(
+    provinsi: str = Query("ALL"),
+    lembaga: str = Query("ALL"),
+    metode: str = Query("ALL"),
+    risk_min: float = Query(0),
+):
+    store = _require_store()
+    where, params = build_where(
+        provinsi=provinsi, lembaga=lembaga, metode=metode, risk_min=risk_min
+    )
+    row = store.fetch_one(
+        f"""
+        SELECT
+            AVG(s1_metode) AS metode,
+            AVG(s2_pagu_anomali) AS pagu_anomali,
+            AVG(s3_fragmentasi) AS fragmentasi,
+            AVG(s4_konsentrasi) AS konsentrasi,
+            AVG(s5_umkm) AS umkm,
+            AVG(s6_dana_metode) AS dana_metode,
+            AVG(s7_reputasi) AS reputasi_kg
+        FROM packages
+        WHERE {where}
+        """,
+        params,
+    )
+    return {
+        "Metode": round(float(row[0] or 0), 4),
+        "Pagu Anomali": round(float(row[1] or 0), 4),
+        "Fragmentasi": round(float(row[2] or 0), 4),
+        "Konsentrasi": round(float(row[3] or 0), 4),
+        "UMKM": round(float(row[4] or 0), 4),
+        "Dana+Metode": round(float(row[5] or 0), 4),
+        "Reputasi KG": round(float(row[6] or 0), 4),
+    }
+
+
