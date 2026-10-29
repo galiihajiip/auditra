@@ -102,3 +102,19 @@ class DataStore:
             _init_state = "ready"
 
     @classmethod
+    def get(cls) -> "DataStore":
+        if _init_state == "loading":
+            raise DataStoreNotReady(
+                "Database sedang disiapkan. Tunggu 30–90 detik lalu muat ulang halaman."
+            )
+        if _init_state == "error":
+            raise RuntimeError(_init_error or "Database gagal diinisialisasi.")
+        if cls._instance is None:
+            cls._ensure_built()
+        return cls._instance
+
+    @classmethod
+    def is_ready(cls) -> bool:
+        return _init_state == "ready" and cls._instance is not None
+
+    @classmethod
