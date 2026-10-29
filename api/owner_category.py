@@ -29,3 +29,11 @@ CASE
 END
 """
 
+MAP_MODES = ("kl", "pemprov", "pemkot", "others")
+
+MODE_LABELS = {
+    "kl": "Kementerian/Lembaga",
+    "pemprov": "Pemprov",
+    "pemkot": "Pemkot/Kab",
+    "others": "Lainnya",
+}
