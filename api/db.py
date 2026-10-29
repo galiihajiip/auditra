@@ -168,3 +168,39 @@ class DataStore:
         except Exception:
             return False
 
+    def _create_packages_geo(
+        self, conn: duckdb.DuckDBPyConnection, *, as_view: bool = False
+    ) -> None:
+        rel = "VIEW" if as_view else "TABLE"
+        if GEO_LOOKUP_CSV.exists():
+            geo = GEO_LOOKUP_CSV.as_posix()
+            if not self._table_exists(conn, "geo_lookup"):
+                conn.execute(
+                    f"""
+                    CREATE TABLE geo_lookup AS
+                    SELECT * FROM read_csv_auto('{geo}', header=true)
+                    """
+                )
+            conn.execute(
+                f"""
+                CREATE OR REPLACE {rel} packages_geo AS
+                SELECT
+                    p.id, p.RPI, p.risk_label, p.pagu, p.lembaga, p.metode, p.lokasi,
+                    p.s1_metode, p.s2_pagu_anomali, p.s3_fragmentasi, p.s4_konsentrasi,
+                    p.s5_umkm, p.s6_dana_metode, p.s7_reputasi, p.paket,
+                    g.kabkot_id, g.kabkot_name, g.prov_name
+                FROM packages p
+                INNER JOIN geo_lookup g ON p.lokasi = g.lokasi_sirup
+                """
+            )
+        else:
+            conn.execute(
+                f"""
+                CREATE OR REPLACE {rel} packages_geo AS
+                SELECT *, CAST(NULL AS VARCHAR) AS kabkot_id,
+                       CAST(NULL AS VARCHAR) AS kabkot_name,
+                       CAST(NULL AS VARCHAR) AS prov_name
+                FROM packages WHERE 1=0
+                """
+            )
+
