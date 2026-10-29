@@ -13,3 +13,12 @@ class MetaResponse(BaseModel):
     kg_edges_available: bool
     geo_lookup_available: bool
 
+
+class OverviewStats(BaseModel):
+    total_paket: int
+    total_pagu_miliar: float
+    paket_kritis: int
+    avg_rpi: float
+    split_contract: int
+
+
