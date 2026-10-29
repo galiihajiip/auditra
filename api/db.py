@@ -601,3 +601,45 @@ class DataStore:
                 modes[mode] = df.to_dict(orient="records")
         return modes
 
+    def _kg_subset_safe(
+        self,
+        provinsi: str = "ALL",
+        lembaga: str = "ALL",
+        metode: str = "ALL",
+        risk_min: float = 0,
+    ) -> dict:
+        try:
+            return self._kg_subset(provinsi, lembaga, metode, risk_min)
+        except Exception as exc:
+            print(f"[Auditra] KG subset gagal (filter tetap aktif): {exc}")
+            return {"nodes": [], "edges": []}
+
+    def _kg_subset(
+        self,
+        provinsi: str = "ALL",
+        lembaga: str = "ALL",
+        metode: str = "ALL",
+        risk_min: float = 0,
+    ) -> dict:
+        if self._kg_nodes is None or self._kg_edges is None:
+            return {"nodes": [], "edges": []}
+
+        edges_df = self._kg_edges
+        where, params = build_where(
+            provinsi=provinsi,
+            lembaga=lembaga,
+            metode=metode,
+            risk_min=risk_min,
+            packages_via_geo=GEO_LOOKUP_CSV.exists(),
+        )
+
+        with self._lock:
+            lem_stats = self.conn.execute(
+                f"""
+                SELECT lembaga AS label,
+                       ROUND(AVG(RPI), 2) AS avg_rpi,
+                       COUNT(*) AS n_paket
+                FROM packages
+                WHERE {where} AND lembaga IS NOT NULL
+                GROUP BY lembaga
+                """,
