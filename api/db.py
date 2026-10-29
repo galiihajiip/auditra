@@ -643,3 +643,46 @@ class DataStore:
                 WHERE {where} AND lembaga IS NOT NULL
                 GROUP BY lembaga
                 """,
+                params,
+            ).fetchdf()
+            sk_stats = self.conn.execute(
+                f"""
+                SELECT satker AS label,
+                       ROUND(AVG(RPI), 2) AS avg_rpi,
+                       COUNT(*) AS n_paket
+                FROM packages
+                WHERE {where} AND satker IS NOT NULL
+                GROUP BY satker
+                """,
+                params,
+            ).fetchdf()
+
+        if lem_stats.empty and sk_stats.empty:
+            return {"nodes": [], "edges": []}
+
+        active_ids: set[str] = set()
+        active_ids.update(f"L::{row['label']}" for _, row in lem_stats.iterrows())
+        active_ids.update(f"SK::{row['label']}" for _, row in sk_stats.iterrows())
+
+        nodes_df = self._kg_nodes[
+            self._kg_nodes["node_type"].isin(["lembaga", "satker"])
+            & self._kg_nodes["node_id"].isin(active_ids)
+        ].copy()
+
+        if nodes_df.empty:
+            return {"nodes": [], "edges": []}
+
+        lem_map = lem_stats.set_index("label")
+        sk_map = sk_stats.set_index("label")
+
+        def apply_live_stats(row: pd.Series) -> pd.Series:
+            label = row["label"]
+            if row["node_type"] == "lembaga" and label in lem_map.index:
+                stats_row = lem_map.loc[label]
+                row["avg_rpi"] = float(stats_row["avg_rpi"] or 0)
+                row["n_paket"] = int(stats_row["n_paket"] or 0)
+            elif row["node_type"] == "satker" and label in sk_map.index:
+                stats_row = sk_map.loc[label]
+                row["avg_rpi"] = float(stats_row["avg_rpi"] or 0)
+                row["n_paket"] = int(stats_row["n_paket"] or 0)
+            row["risk_influence"] = (
