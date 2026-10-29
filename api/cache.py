@@ -27,3 +27,17 @@ class TTLCache:
             self._data.move_to_end(key)
             return value
 
+    def set(self, key: str, value: Any) -> None:
+        with self._lock:
+            self._data[key] = (time.monotonic(), value)
+            self._data.move_to_end(key)
+            while len(self._data) > self.maxsize:
+                self._data.popitem(last=False)
+
+    def get_or_set(self, key: str, factory: Callable[[], Any]) -> Any:
+        cached = self.get(key)
+        if cached is not None:
+            return cached
+        value = factory()
+        self.set(key, value)
+        return value
