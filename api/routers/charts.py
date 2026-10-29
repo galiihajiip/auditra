@@ -125,3 +125,40 @@ def signal_radar(
     }
 
 
+@router.get("/charts/choropleth")
+def choropleth(
+    lembaga: str = Query("ALL"),
+    metode: str = Query("ALL"),
+    risk_min: float = Query(0),
+):
+    store = _require_store()
+    if not store.meta()["geo_lookup_available"]:
+        raise HTTPException(status_code=503, detail="geo_lookup.csv not found")
+
+    where, params = build_where(
+        lembaga=lembaga, metode=metode, risk_min=risk_min, use_geo=True
+    )
+    df = store.fetch_df(
+        f"""
+        SELECT
+            printf('%.2f', TRY_CAST(g.kabkot_id AS DOUBLE)) AS kabkot_id,
+            g.kabkot_name,
+            g.prov_name,
+            COUNT(*) AS n_paket,
+            AVG(p.RPI) AS avg_rpi,
+            SUM(p.pagu) / 1e9 AS total_pagu_miliar,
+            SUM(CASE WHEN p.risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+            SUM(CASE WHEN p.risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi
+        FROM packages p
+        INNER JOIN geo_lookup g ON p.lokasi = g.lokasi_sirup
+        WHERE {where}
+        GROUP BY g.kabkot_id, g.kabkot_name, g.prov_name
+        ORDER BY avg_rpi DESC
+        """,
+        params,
+    )
+    df["avg_rpi"] = df["avg_rpi"].round(2)
+    df["total_pagu_miliar"] = df["total_pagu_miliar"].round(2)
+    return df.to_dict(orient="records")
+
+
