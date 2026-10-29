@@ -295,3 +295,34 @@ class DataStore:
         building.replace(DUCKDB_CACHE)
         print(f"[Auditra] DuckDB cache built in {time.perf_counter() - t0:.1f}s")
 
+    def _warm_static_caches(self) -> None:
+        with self._lock:
+            row = self.conn.execute("SELECT COUNT(*) FROM packages").fetchone()
+            cols = self.conn.execute("DESCRIBE packages").fetchdf()
+            self._meta_cache = {
+                "total_rows": int(row[0]),
+                "total_columns": len(cols),
+                "columns": cols["column_name"].tolist(),
+                "source_file": self.source_path or str(DUCKDB_CACHE),
+                "source_kind": "parquet_views" if _use_parquet_views() else "duckdb_cache",
+                "integrity": "full",
+                "note": (
+                    "Seluruh baris & kolom pipeline tersimpan di server (materialized DuckDB). "
+                    "API mengirim agregat/pagination ke browser."
+                ),
+                "kg_nodes_available": KG_NODES_CSV.exists(),
+                "kg_edges_available": KG_EDGES_CSV.exists(),
+                "geo_lookup_available": GEO_LOOKUP_CSV.exists(),
+            }
+
+        if KG_NODES_CSV.exists():
+            self._kg_nodes = pd.read_csv(KG_NODES_CSV)
+        if KG_EDGES_CSV.exists():
+            self._kg_edges = pd.read_csv(KG_EDGES_CSV)
+        if GEOJSON_PATH.exists():
+            with open(GEOJSON_PATH, encoding="utf-8") as f:
+                self._geojson_cache = json.load(f)
+
+        if not _use_parquet_views():
+            self._geo_coverage_cache = self._compute_geo_coverage()
+
