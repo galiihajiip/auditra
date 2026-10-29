@@ -193,3 +193,36 @@ def rank_lembaga(
     return df.to_dict(orient="records")
 
 
+@router.get("/rankings/provinsi")
+def rank_provinsi(
+    lembaga: str = Query("ALL"),
+    metode: str = Query("ALL"),
+    risk_min: float = Query(0),
+    limit: int = Query(25, ge=1, le=100),
+):
+    store = _require_store()
+    if not store.meta()["geo_lookup_available"]:
+        raise HTTPException(status_code=503, detail="geo_lookup.csv not found")
+
+    where, params = build_where(
+        lembaga=lembaga, metode=metode, risk_min=risk_min, use_geo=True
+    )
+    df = store.fetch_df(
+        f"""
+        SELECT
+            g.prov_name,
+            AVG(p.RPI) AS avg_rpi,
+            SUM(CASE WHEN p.risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+            SUM(CASE WHEN p.risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi,
+            COUNT(*) AS n_paket
+        FROM packages p
+        INNER JOIN geo_lookup g ON p.lokasi = g.lokasi_sirup
+        WHERE {where}
+        GROUP BY g.prov_name
+        ORDER BY avg_rpi DESC
+        LIMIT ?
+        """,
+        params + [limit],
+    )
+    df["avg_rpi"] = df["avg_rpi"].round(2)
+    return df.to_dict(orient="records")
