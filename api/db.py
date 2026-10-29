@@ -256,3 +256,42 @@ class DataStore:
         )
         self._create_packages_geo(conn, as_view=True)
 
+    def _ensure_database(self) -> None:
+        if _use_parquet_views():
+            self._resolve_parquet_source()
+            return
+
+        if self._cache_is_usable():
+            if DATA_CHUNKS_DIR.exists() and list(DATA_CHUNKS_DIR.glob("*.parquet")):
+                self.source_path = str(DATA_CHUNKS_GLOB)
+            else:
+                self.source_path = str(
+                    DATA_NETWORK_PARQUET if DATA_NETWORK_PARQUET.exists() else DATA_NETWORK_CSV
+                )
+            self.source_kind = "duckdb_cache"
+            return
+
+        source_file = self._resolve_parquet_source()
+
+        building = DUCKDB_CACHE.with_suffix(".duckdb.building")
+        for stale in (DUCKDB_CACHE, building):
+            if stale.exists():
+                stale.unlink()
+
+        print("[Auditra] Building DuckDB cache (one-time, ~1-3 min)…")
+        t0 = time.perf_counter()
+        con = duckdb.connect(str(building))
+        con.execute("SET threads TO 4")
+
+        con.execute(
+            f"""
+            CREATE TABLE packages AS
+            SELECT * FROM read_parquet('{source_file}')
+            """
+        )
+        self._create_packages_geo(con)
+
+        con.close()
+        building.replace(DUCKDB_CACHE)
+        print(f"[Auditra] DuckDB cache built in {time.perf_counter() - t0:.1f}s")
+
