@@ -50,3 +50,21 @@ def build_where(
     else:
         pfx = table_prefix
         prov_col = "lokasi"
+
+    if provinsi and provinsi != "ALL":
+        resolved = resolve_provinsi(provinsi)
+        if packages_via_geo and not packages_geo and not use_geo:
+            id_col = f"{pfx}id" if pfx else "id"
+            clauses.append(
+                f"{id_col} IN (SELECT id FROM packages_geo WHERE {provinsi_match_sql('prov_name')})"
+            )
+            params.append(resolved)
+        elif prov_col == "lokasi":
+            patterns = list({f"%{resolved}%", f"%{provinsi.strip()}%"})
+            if "yogyakarta" in resolved.lower():
+                patterns.append("%DI Yogyakarta%")
+            ors = " OR ".join(["lokasi ILIKE ?"] * len(patterns))
+            clauses.append(f"({ors})")
+            params.extend(patterns)
+        else:
+            clauses.append(provinsi_match_sql(prov_col))
