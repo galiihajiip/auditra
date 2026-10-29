@@ -34,3 +34,28 @@ def risk_distribution(
     return df.to_dict(orient="records")
 
 
+@router.get("/charts/metode")
+def metode_bar(
+    provinsi: str = Query("ALL"),
+    lembaga: str = Query("ALL"),
+    metode: str = Query("ALL"),
+    risk_min: float = Query(0),
+):
+    store = _require_store()
+    where, params = build_where(
+        provinsi=provinsi, lembaga=lembaga, metode=metode, risk_min=risk_min
+    )
+    df = store.fetch_df(
+        f"""
+        SELECT metode, COUNT(*) AS jumlah, AVG(RPI) AS avg_rpi
+        FROM packages
+        WHERE {where}
+        GROUP BY metode
+        ORDER BY avg_rpi DESC
+        """,
+        params,
+    )
+    df["avg_rpi"] = df["avg_rpi"].round(2)
+    return df.to_dict(orient="records")
+
+
