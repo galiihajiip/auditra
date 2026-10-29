@@ -16,3 +16,14 @@ class TTLCache:
         self._lock = threading.RLock()
 
     def get(self, key: str) -> Any | None:
+        with self._lock:
+            item = self._data.get(key)
+            if item is None:
+                return None
+            ts, value = item
+            if time.monotonic() - ts > self.ttl:
+                del self._data[key]
+                return None
+            self._data.move_to_end(key)
+            return value
+
