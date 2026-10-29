@@ -462,3 +462,34 @@ class DataStore:
                 WHERE {where}
                 """,
                 params,
+            ).fetchone()
+
+            risk_df = self.conn.execute(
+                f"""
+                SELECT risk_label, COUNT(*) AS count
+                FROM packages WHERE {where}
+                GROUP BY risk_label
+                """,
+                params,
+            ).fetchdf()
+
+            metode_df = self.conn.execute(
+                f"""
+                SELECT metode, COUNT(*) AS jumlah, ROUND(AVG(RPI), 2) AS avg_rpi
+                FROM packages WHERE {where}
+                GROUP BY metode ORDER BY avg_rpi DESC
+                """,
+                params,
+            ).fetchdf()
+
+            scatter_df = self.conn.execute(
+                f"""
+                SELECT RPI, risk_label, pagu / 1e9 AS pagu_miliar, paket, lembaga, metode
+                FROM packages
+                WHERE {where}
+                USING SAMPLE 3000 ROWS
+                """,
+                params,
+            ).fetchdf()
+
+            rank_lem_df = self.conn.execute(
