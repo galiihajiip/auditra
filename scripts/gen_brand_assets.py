@@ -78,3 +78,37 @@ def render_header_logo(source: Image.Image, out_height: int, margin_ratio: float
     return canvas.resize((nw, out_height), Image.Resampling.LANCZOS)
 
 
+def icon_bbox(img: Image.Image) -> tuple[int, int, int, int]:
+    """Tight rectangular bounds of the mark (A + magnifying glass), excluding wordmark."""
+    w, h = img.size
+    px = img.load()
+    icon_bottom = int(h * ICON_BOTTOM_RATIO)
+
+    xs: list[int] = []
+    ys: list[int] = []
+    for y in range(icon_bottom):
+        for x in range(w):
+            if is_content_pixel(*px[x, y]):
+                xs.append(x)
+                ys.append(y)
+
+    if not xs:
+        side = int(min(w, h) * 0.42)
+        ox = (w - side) // 2
+        oy = int(h * 0.17)
+        return ox, oy, ox + side, oy + side
+
+    left, right = min(xs), max(xs)
+    top, bottom = min(ys), max(ys)
+
+    pad_x = int((right - left) * 0.1)
+    pad_y = int((bottom - top) * 0.1)
+
+    return (
+        max(0, left - pad_x),
+        max(0, top - pad_y),
+        min(w, right + pad_x),
+        min(h, bottom + pad_y),
+    )
+
+
