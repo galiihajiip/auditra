@@ -17,3 +17,24 @@ export interface MetaResponse {
   note: string;
 }
 
+export interface OverviewStats {
+  total_paket: number;
+  total_pagu_miliar: number;
+  paket_kritis: number;
+  avg_rpi: number;
+  split_contract: number;
+}
+
+export interface GeoCoverage {
+  total_packages: number;
+  mapped_packages: number;
+  unmapped_packages: number;
+  multi_lokasi_packages: number;
+}
+
+export interface FilterOptions {
+  lembaga: string[];
+  metode: string[];
+  provinsi: string[];
+}
+
