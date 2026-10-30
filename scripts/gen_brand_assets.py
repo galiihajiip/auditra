@@ -143,3 +143,43 @@ def write_favicon_svg(icon_128: Image.Image) -> None:
     (PUBLIC / "favicon.svg").write_text(svg, encoding="utf-8")
 
 
+def main() -> None:
+    PUBLIC.mkdir(parents=True, exist_ok=True)
+    (PUBLIC / "icons").mkdir(exist_ok=True)
+
+    source = load_source()
+    source.save(PUBLIC / "logo.png", "PNG")
+
+    icon_256 = render_icon(source, 256, margin_ratio=0.1)
+    icon_256.save(PUBLIC / "logo-icon.png", "PNG")
+
+    render_header_logo(source, 112).save(PUBLIC / "logo-header.png", "PNG")
+    render_header_logo(source, 144).save(PUBLIC / "logo-header@2x.png", "PNG")
+
+    render_icon(source, 192, margin_ratio=0.1).save(PUBLIC / "icons" / "icon-192.png", "PNG")
+    render_icon(source, 512, margin_ratio=0.1).save(PUBLIC / "icons" / "icon-512.png", "PNG")
+
+    fav32 = render_icon(source, 32, margin_ratio=0.08)
+    fav32.save(PUBLIC / "favicon-32.png", "PNG")
+
+    fav16 = render_icon(source, 16, margin_ratio=0.06)
+    fav48 = render_icon(source, 48, margin_ratio=0.08)
+    fav16.save(
+        PUBLIC / "favicon.ico",
+        format="ICO",
+        sizes=[(16, 16), (32, 32), (48, 48)],
+        append_images=[fav32, fav48],
+    )
+
+    render_icon(source, 180, margin_ratio=0.1).save(PUBLIC / "apple-touch-icon.png", "PNG")
+    write_favicon_svg(render_icon(source, 128, margin_ratio=0.1))
+
+    box = icon_bbox(source)
+    stack = stack_bbox(source)
+    print("Assets written to", PUBLIC)
+    print("Icon bbox:", box, "size:", box[2] - box[0], box[3] - box[1])
+    print("Header bbox:", stack, "size:", stack[2] - stack[0], stack[3] - stack[1])
+
+
+if __name__ == "__main__":
+    main()
