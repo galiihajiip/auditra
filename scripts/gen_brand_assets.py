@@ -112,3 +112,20 @@ def icon_bbox(img: Image.Image) -> tuple[int, int, int, int]:
     )
 
 
+def render_icon(source: Image.Image, out_size: int, margin_ratio: float = 0.1) -> Image.Image:
+    crop = source.crop(icon_bbox(source))
+    cw, ch = crop.size
+    inner = max(cw, ch)
+    margin = max(4, int(inner * margin_ratio))
+    canvas_side = inner + margin * 2
+    canvas = Image.new("RGBA", (canvas_side, canvas_side), (255, 255, 255, 255))
+
+    scale = inner / max(cw, ch)
+    nw, nh = max(1, int(cw * scale)), max(1, int(ch * scale))
+    resized = crop.resize((nw, nh), Image.Resampling.LANCZOS)
+    ox = (canvas_side - nw) // 2
+    oy = (canvas_side - nh) // 2
+    canvas.paste(resized, (ox, oy))
+    return canvas.resize((out_size, out_size), Image.Resampling.LANCZOS)
+
+
