@@ -24,3 +24,25 @@ export default function FilterBar({ filters, onChange, options }: Props) {
       </div>
       <div>
         <p className="mb-1 text-[10px] uppercase tracking-wide text-muted">Lembaga</p>
+        <select
+          className="input-select"
+          value={filters.lembaga}
+          onChange={(e) => onChange({ lembaga: e.target.value })}
+        >
+          <option value="ALL">Semua Lembaga</option>
+          {options.lembaga.map((l) => (
+            <option key={l} value={l}>{l}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <p className="mb-1 text-[10px] uppercase tracking-wide text-muted">Metode</p>
+        <select
+          className="input-select"
+          value={filters.metode}
+          onChange={(e) => onChange({ metode: e.target.value })}
+        >
+          <option value="ALL">Semua Metode</option>
+          {options.metode.map((m) => (
+            <option key={m} value={m}>{m}</option>
+          ))}
