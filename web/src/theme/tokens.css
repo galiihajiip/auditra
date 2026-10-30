@@ -32,3 +32,35 @@ html.light,
   color-scheme: light;
 }
 
+/* Dark mode */
+html.dark {
+  --bg-page: #0b1120;
+  --bg-panel: #1e293b;
+  --bg-subtle: #162032;
+  --bg-input: #0f172a;
+  --bg-table-head: #0f172a;
+  --bg-table-row: #1e293b;
+  --bg-btn: #0f172a;
+  --bg-btn-hover: #334155;
+  --bg-badge: #0f172a;
+  --bg-kriti: rgba(127, 29, 29, 0.35);
+  --bg-tinggi: rgba(124, 45, 18, 0.3);
+  --bg-kg: #0c1222;
+  --border: #334155;
+  --border-subtle: #1e293b;
+  --text: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-on-accent: #ffffff;
+  --accent-blue: #3b82f6;
+  --accent-orange: #f97316;
+  --accent-live: #fb923c;
+  --accent-loading: #fb923c;
+  --shadow-panel: 0 1px 3px rgba(0, 0, 0, 0.35);
+  --chart-bg: #1e293b;
+  --chart-text: #94a3b8;
+  --chart-grid: #334155;
+  --kg-label: #f8fafc;
+  --kg-label-bg: rgba(15, 23, 42, 0.92);
+  --kg-label-stroke: #0f172a;
+  color-scheme: dark;
+}
