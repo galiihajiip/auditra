@@ -38,3 +38,25 @@ export interface FilterOptions {
   provinsi: string[];
 }
 
+export interface PaginatedPackages {
+  data: Record<string, unknown>[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+export interface DashboardBundle {
+  overview: OverviewStats;
+  signals: Record<string, number>;
+  risk_distribution: { risk_label: string; count: number }[];
+  metode: { metode: string; jumlah: number; avg_rpi: number }[];
+  scatter: { pagu_miliar: number; RPI: number; risk_label: string }[];
+  rank_lembaga: RankRow[];
+  choropleth: ChoroplethRow[];
+  choropleth_modes: Record<MapOwnerMode, ChoroplethRow[]>;
+  rank_provinsi: RankRow[];
+  geo_coverage: GeoCoverage;
+  kg: { nodes: Record<string, unknown>[]; edges: Record<string, unknown>[] };
+}
+
