@@ -23,3 +23,26 @@ export default function StatCards({ stats, geoCoverage }: Props) {
           Akumulasi pagu paket dalam filter aktif · prioritas audit via RPI
         </p>
       </div>
+
+      <div className="stat-card border-blue-500 lg:col-span-4">
+        <p className="text-[11px] uppercase tracking-wide text-muted">Paket Terpetakan</p>
+        <p className="mt-1 text-3xl font-extrabold text-primary">
+          {total > 0 ? (
+            <>
+              {mapped.toLocaleString("id-ID")}
+              <span className="text-lg font-semibold text-muted"> / {total.toLocaleString("id-ID")}</span>
+            </>
+          ) : (
+            "—"
+          )}
+        </p>
+        <p className="text-[11px] text-muted">
+          {unmapped.toLocaleString("id-ID")} unmapped · {multi.toLocaleString("id-ID")} multi-lokasi
+        </p>
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:col-span-4">
+        {[
+          {
+            title: "Paket Kritis",
+            value: stats ? stats.paket_kritis.toLocaleString("id-ID") : "—",
