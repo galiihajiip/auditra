@@ -41,3 +41,42 @@ export default function EntitySidebar({ data, selectedLembaga, onSelect }: Props
   const hiddenCount = Math.max(0, filtered.length - INITIAL_VISIBLE);
 
   return (
+    <div className="flex flex-col">
+      <div className="mb-2 flex gap-2">
+        <button
+          type="button"
+          className={`tab-btn ${sortBy === "rpi" ? "tab-btn-active" : ""}`}
+          onClick={() => setSortBy("rpi")}
+        >
+          By RPI
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${sortBy === "pagu" ? "tab-btn-active" : ""}`}
+          onClick={() => setSortBy("pagu")}
+        >
+          By Pagu
+        </button>
+        <span className="ml-auto self-center text-[10px] text-muted">
+          {filtered.length} lembaga
+        </span>
+      </div>
+
+      <div className="relative mb-2">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted">
+          🔍
+        </span>
+        <input
+          type="search"
+          className="input-select pl-8"
+          placeholder="Cari lembaga…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+
+      <div
+        className={`entity-list pr-1 ${expanded ? "entity-list-expanded" : ""}`}
+        style={expanded ? { maxHeight: EXPANDED_MAX_HEIGHT } : undefined}
+      >
+        {filtered.length === 0 && (
