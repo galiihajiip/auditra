@@ -60,3 +60,25 @@ export interface DashboardBundle {
   kg: { nodes: Record<string, unknown>[]; edges: Record<string, unknown>[] };
 }
 
+export interface ChoroplethRow {
+  kabkot_id: string;
+  kabkot_name: string;
+  prov_name: string;
+  n_paket: number;
+  avg_rpi: number;
+  total_pagu_miliar: number;
+  pagu_risiko_miliar?: number;
+  n_kritis: number;
+  n_tinggi: number;
+}
+
+export interface RankRow {
+  lembaga?: string;
+  prov_name?: string;
+  avg_rpi: number;
+  n_kritis: number;
+  n_tinggi: number;
+  n_ekstrem?: number;
+  total_pagu_miliar?: number;
+  n_paket: number;
+}
