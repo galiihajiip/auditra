@@ -46,3 +46,29 @@ export default function StatCards({ stats, geoCoverage }: Props) {
           {
             title: "Paket Kritis",
             value: stats ? stats.paket_kritis.toLocaleString("id-ID") : "—",
+            sub: "RPI ≥ 70",
+            accent: "border-orange-500",
+          },
+          {
+            title: "Rata-rata RPI",
+            value: stats ? stats.avg_rpi.toFixed(1) : "—",
+            sub: "skala 0–100",
+            accent: "border-yellow-500",
+          },
+          {
+            title: "Split Contract",
+            value: stats ? stats.split_contract.toLocaleString("id-ID") : "—",
+            sub: "fragmentasi ≥ 0.6",
+            accent: "border-orange-500",
+          },
+        ].map((c) => (
+          <div key={c.title} className={`stat-card ${c.accent}`}>
+            <p className="text-[10px] uppercase tracking-wide text-muted">{c.title}</p>
+            <p className="mt-1 text-xl font-extrabold text-primary">{c.value}</p>
+            <p className="text-[10px] text-muted">{c.sub}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
