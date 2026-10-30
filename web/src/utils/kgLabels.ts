@@ -15,3 +15,21 @@ const TYPE_ID: Record<string, string> = {
   provinsi: "Provinsi",
 };
 
+/** Ubah label ALL CAPS (umum di data SIRUP) ke title case. */
+export function normalizeDisplayCase(text: string): string {
+  const s = text.trim();
+  if (!s) return s;
+  const letters = s.replace(/[^A-Za-zÀ-ÿ]/g, "");
+  if (letters.length >= 4 && letters === letters.toUpperCase()) {
+    return s
+      .toLowerCase()
+      .split(/(\s+|\/|-)/)
+      .map((part) => {
+        if (/^\s+$|^\/$|^-$/.test(part)) return part;
+        return part.charAt(0).toUpperCase() + part.slice(1);
+      })
+      .join("");
+  }
+  return s;
+}
+
