@@ -18,3 +18,24 @@ const dashboardApi = axios.create({
   timeout: 300_000,
 });
 
+async function withWarmupRetry<T>(fn: () => Promise<T>, attempts = 40): Promise<T> {
+  let lastError: unknown;
+  for (let i = 0; i < attempts; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      lastError = e;
+      if (axios.isAxiosError(e) && e.response?.status === 503) {
+        await new Promise((r) => setTimeout(r, 3000));
+        continue;
+      }
+      if (axios.isAxiosError(e) && e.response?.status === 502 && i < attempts - 1) {
+        await new Promise((r) => setTimeout(r, 5000));
+        continue;
+      }
+      throw e;
+    }
+  }
+  throw lastError;
+}
+
