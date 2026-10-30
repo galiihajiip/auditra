@@ -80,3 +80,55 @@ export default function EntitySidebar({ data, selectedLembaga, onSelect }: Props
         style={expanded ? { maxHeight: EXPANDED_MAX_HEIGHT } : undefined}
       >
         {filtered.length === 0 && (
+          <p className="py-6 text-center text-xs text-muted">Tidak ada lembaga ditemukan</p>
+        )}
+        {visibleRows.map((row, idx) => {
+          const name = row.lembaga || "—";
+          const active = selectedLembaga === name;
+          return (
+            <button
+              key={name}
+              type="button"
+              className={`entity-card entity-card-compact w-full text-left ${active ? "entity-card-active" : ""}`}
+              onClick={() => onSelect(name)}
+            >
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-xs font-semibold text-primary">
+                    <span className="mr-1 font-bold text-muted">#{idx + 1}</span>
+                    {name}
+                  </p>
+                </div>
+                <span className="entity-badge shrink-0">K/L</span>
+              </div>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted">
+                <span>{row.n_paket.toLocaleString("id-ID")} pkt</span>
+                <span>RPI {row.avg_rpi.toFixed(1)}</span>
+                <span style={{ color: "var(--accent-orange)" }}>Kr {row.n_kritis}</span>
+                <span style={{ color: "var(--accent-live)" }}>Tg {row.n_tinggi}</span>
+                {(row.n_ekstrem ?? 0) > 0 && (
+                  <span style={{ color: "#ef4444" }}>Eks {row.n_ekstrem}</span>
+                )}
+                <span className="ml-auto font-bold" style={{ color: "#ef4444" }}>
+                  {formatPaguCompact(row.total_pagu_miliar ?? 0)}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          className="entity-show-more mt-2 w-full"
+          onClick={() => setExpanded((v) => !v)}
+        >
+          {expanded
+            ? "Tampilkan lebih sedikit"
+            : `Tampilkan ${hiddenCount} lembaga lainnya`}
+        </button>
+      )}
+    </div>
+  );
+}
