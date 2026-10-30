@@ -79,3 +79,40 @@ function applyThemeClass(mode: ThemeMode) {
   localStorage.setItem("auditra-theme", mode);
 }
 
+interface ThemeContextValue {
+  mode: ThemeMode;
+  colors: ThemeColors;
+  toggle: () => void;
+  isDark: boolean;
+}
+
+const ThemeContext = createContext<ThemeContextValue | null>(null);
+
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [mode, setMode] = useState<ThemeMode>(() => {
+    const saved = localStorage.getItem("auditra-theme");
+    return saved === "light" ? "light" : "dark";
+  });
+
+  useLayoutEffect(() => {
+    applyThemeClass(mode);
+  }, [mode]);
+
+  const value = useMemo(
+    () => ({
+      mode,
+      colors: mode === "dark" ? DARK : LIGHT,
+      toggle: () => setMode((m) => (m === "dark" ? "light" : "dark")),
+      isDark: mode === "dark",
+    }),
+    [mode]
+  );
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+export function useTheme() {
+  const ctx = useContext(ThemeContext);
+  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
+  return ctx;
+}
