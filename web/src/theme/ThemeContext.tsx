@@ -51,3 +51,31 @@ const DARK: ThemeColors = {
   selectBg: "#0f172a",
 };
 
+const LIGHT: ThemeColors = {
+  bgPage: "#eef2f7",
+  bgPanel: "#ffffff",
+  bgPanel2: "#f1f5f9",
+  border: "#cbd5e1",
+  textPrimary: "#0f172a",
+  textMuted: "#475569",
+  accentBlue: "#2563eb",
+  accentOrange: "#ea580c",
+  kgCanvas: "#dbeafe",
+  kgLabel: "#0f172a",
+  kgLabelBg: "rgba(255, 255, 255, 0.95)",
+  kgLabelStroke: "#ffffff",
+  kgEdge: "#94a3b8",
+  kgEdgeHover: "#ffffff",
+  chartText: "#334155",
+  chartGrid: "#e2e8f0",
+  chartBg: "#ffffff",
+  selectBg: "#ffffff",
+};
+
+function applyThemeClass(mode: ThemeMode) {
+  const root = document.documentElement;
+  root.classList.remove("light", "dark");
+  root.classList.add(mode);
+  localStorage.setItem("auditra-theme", mode);
+}
+
