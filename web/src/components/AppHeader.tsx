@@ -20,3 +20,22 @@ export default function AppHeader({ isDark, onToggleTheme }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           className="btn-secondary text-xs"
+        >
+          GitHub
+        </a>
+        <button
+          type="button"
+          onClick={onToggleTheme}
+          className="btn-secondary flex items-center gap-1.5 text-xs"
+          title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+        >
+          {isDark ? "☀ Light" : "🌙 Dark"}
+        </button>
+        <span className="badge-pill text-xs font-bold">TA 2026</span>
+        <span className="text-xs font-semibold" style={{ color: "var(--accent-live)" }}>
+          ● LIVE
+        </span>
+      </div>
+    </header>
+  );
+}
