@@ -33,3 +33,24 @@ export function normalizeDisplayCase(text: string): string {
   return s;
 }
 
+export function formatNodeLabel(raw: unknown, nodeType?: unknown): string {
+  const s = String(raw ?? "").trim();
+  const stripped = s.replace(/^(L|SK|M|J|P)::/, "");
+  void nodeType;
+  return normalizeDisplayCase(stripped);
+}
+
+export function nodeTypeLabel(nodeType: unknown): string {
+  return TYPE_ID[String(nodeType)] ?? "Entitas";
+}
+
+export function formatRelation(relation: unknown): string {
+  const key = String(relation ?? "");
+  if (RELATION_ID[key]) return RELATION_ID[key];
+  const raw = key.replace(/_/g, " ").toLowerCase();
+  return raw ? raw.charAt(0).toUpperCase() + raw.slice(1) : raw;
+}
+
+export function isHighRisk(avgRpi: unknown): boolean {
+  return Number(avgRpi) >= 30;
+}
