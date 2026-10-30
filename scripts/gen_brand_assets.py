@@ -27,3 +27,43 @@ WHITE_THRESH = 248
 ICON_BOTTOM_RATIO = 0.535
 
 
+def load_source() -> Image.Image:
+    for path in ASSET_CANDIDATES:
+        if path.exists():
+            return Image.open(path).convert("RGB")
+    raise FileNotFoundError("Logo source not found")
+
+
+def is_content_pixel(r: int, g: int, b: int) -> bool:
+    return not (r > WHITE_THRESH and g > WHITE_THRESH and b > WHITE_THRESH)
+
+
+def stack_bbox(img: Image.Image) -> tuple[int, int, int, int]:
+    """Bounds of icon + AUDITRA wordmark (full vertical logo stack)."""
+    w, h = img.size
+    px = img.load()
+    xs: list[int] = []
+    ys: list[int] = []
+    for y in range(h):
+        for x in range(w):
+            if is_content_pixel(*px[x, y]):
+                xs.append(x)
+                ys.append(y)
+
+    if not xs:
+        return 0, 0, w, h
+
+    left, right = min(xs), max(xs)
+    top, bottom = min(ys), max(ys)
+    pad_x = int((right - left) * 0.06)
+    pad_top = int((bottom - top) * 0.06)
+    pad_bottom = int((bottom - top) * 0.14)
+
+    return (
+        max(0, left - pad_x),
+        max(0, top - pad_top),
+        min(w, right + pad_x),
+        min(h, bottom + pad_bottom),
+    )
+
+
