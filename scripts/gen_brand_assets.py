@@ -129,3 +129,17 @@ def render_icon(source: Image.Image, out_size: int, margin_ratio: float = 0.1) -
     return canvas.resize((out_size, out_size), Image.Resampling.LANCZOS)
 
 
+def write_favicon_svg(icon_128: Image.Image) -> None:
+    buf = io.BytesIO()
+    icon_128.save(buf, format="PNG")
+    b64 = base64.b64encode(buf.getvalue()).decode()
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">'
+        '<rect width="128" height="128" rx="22" fill="#ffffff"/>'
+        f'<image href="data:image/png;base64,{b64}" x="10" y="10" width="108" height="108" '
+        'preserveAspectRatio="xMidYMid meet"/>'
+        "</svg>"
+    )
+    (PUBLIC / "favicon.svg").write_text(svg, encoding="utf-8")
+
+
