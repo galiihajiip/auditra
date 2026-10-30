@@ -46,3 +46,21 @@ export default function FilterBar({ filters, onChange, options }: Props) {
           {options.metode.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
+        </select>
+      </div>
+      <div>
+        <p className="mb-1 text-[10px] uppercase tracking-wide text-muted">Min. RPI</p>
+        <select
+          className="input-select"
+          value={filters.riskMin}
+          onChange={(e) => onChange({ riskMin: Number(e.target.value) })}
+        >
+          <option value={0}>Semua</option>
+          <option value={30}>≥30 Sedang+</option>
+          <option value={50}>≥50 Tinggi+</option>
+          <option value={70}>≥70 Kritis</option>
+        </select>
+      </div>
+    </div>
+  );
+}
