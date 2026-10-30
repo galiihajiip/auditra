@@ -67,3 +67,14 @@ def stack_bbox(img: Image.Image) -> tuple[int, int, int, int]:
     )
 
 
+def render_header_logo(source: Image.Image, out_height: int, margin_ratio: float = 0.08) -> Image.Image:
+    crop = source.crop(stack_bbox(source))
+    cw, ch = crop.size
+    margin = max(6, int(max(cw, ch) * margin_ratio))
+    canvas = Image.new("RGBA", (cw + margin * 2, ch + margin * 2), (255, 255, 255, 255))
+    canvas.paste(crop, (margin, margin))
+    scale = out_height / canvas.size[1]
+    nw = max(1, int(canvas.size[0] * scale))
+    return canvas.resize((nw, out_height), Image.Resampling.LANCZOS)
+
+
