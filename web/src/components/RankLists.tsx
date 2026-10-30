@@ -26,3 +26,22 @@ function Row({ name, row }: { name: string; row: RankRow }) {
   );
 }
 
+export function RankLembaga({ data }: { data: RankRow[] }) {
+  return (
+    <div>
+      {data.map((r) => (
+        <Row key={r.lembaga} name={r.lembaga || "—"} row={r} />
+      ))}
+    </div>
+  );
+}
+
+export function RankProvinsi({ data }: { data: RankRow[] }) {
+  return (
+    <div>
+      {data.map((r) => (
+        <Row key={r.prov_name} name={r.prov_name || "—"} row={r} />
+      ))}
+    </div>
+  );
+}
