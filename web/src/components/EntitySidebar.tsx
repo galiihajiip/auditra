@@ -22,3 +22,22 @@ export default function EntitySidebar({ data, selectedLembaga, onSelect }: Props
     setExpanded(false);
   }, [query, sortBy]);
 
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    let rows = q
+      ? data.filter((r) => (r.lembaga || "").toLowerCase().includes(q))
+      : [...data];
+
+    rows.sort((a, b) => {
+      if (sortBy === "pagu") {
+        return (b.total_pagu_miliar ?? 0) - (a.total_pagu_miliar ?? 0);
+      }
+      return b.avg_rpi - a.avg_rpi;
+    });
+    return rows;
+  }, [data, query, sortBy]);
+
+  const visibleRows = expanded ? filtered : filtered.slice(0, INITIAL_VISIBLE);
+  const hiddenCount = Math.max(0, filtered.length - INITIAL_VISIBLE);
+
+  return (
