@@ -59,3 +59,33 @@ export async function fetchFilterOptions(): Promise<FilterOptions> {
   return data;
 }
 
+/** All chart data in ONE request (fast, cached server-side). */
+export async function fetchDashboardBundle(f: Filters): Promise<DashboardBundle> {
+  const { data } = await withWarmupRetry(() =>
+    dashboardApi.get<DashboardBundle>("/dashboard/bundle", { params: params(f) })
+  );
+  return data;
+}
+
+export async function fetchPackages(
+  f: Filters,
+  page: number,
+  pageSize: number
+): Promise<PaginatedPackages> {
+  const { data } = await withWarmupRetry(() =>
+    api.get<PaginatedPackages>("/packages", {
+      params: {
+        ...params(f),
+        risk_min: Math.max(f.riskMin, 30),
+        page,
+        page_size: pageSize,
+      },
+    })
+  );
+  return data;
+}
+
+export async function fetchGeoJson() {
+  const { data } = await withWarmupRetry(() => api.get("/geo/kabkota"));
+  return data;
+}
