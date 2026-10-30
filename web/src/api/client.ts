@@ -39,3 +39,23 @@ async function withWarmupRetry<T>(fn: () => Promise<T>, attempts = 40): Promise<
   throw lastError;
 }
 
+function params(f: Filters, extra: Record<string, unknown> = {}) {
+  return {
+    provinsi: f.provinsi,
+    lembaga: f.lembaga,
+    metode: f.metode,
+    risk_min: f.riskMin,
+    ...extra,
+  };
+}
+
+export async function fetchMeta(): Promise<MetaResponse> {
+  const { data } = await withWarmupRetry(() => api.get<MetaResponse>("/meta"));
+  return data;
+}
+
+export async function fetchFilterOptions(): Promise<FilterOptions> {
+  const { data } = await withWarmupRetry(() => api.get<FilterOptions>("/filters/options"));
+  return data;
+}
+
