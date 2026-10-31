@@ -85,3 +85,27 @@ function buildKgSummary(nodes: Record<string, unknown>[], edges: Record<string, 
     .join(" ");
 }
 
+export default function KgNetwork({ nodes, edges }: Props) {
+  const ref = useRef<HTMLDivElement>(null);
+  const networkRef = useRef<Network | null>(null);
+  const nodesDsRef = useRef<DataSet<Record<string, unknown>> | null>(null);
+  const edgesDsRef = useRef<DataSet<Record<string, unknown>> | null>(null);
+  const nodeMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+  const edgeMetaRef = useRef<EdgeMeta[]>([]);
+  const nodeBaseRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+  const selectedIdRef = useRef<string | null>(null);
+  const { colors } = useTheme();
+  const [physicsOn, setPhysicsOn] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    selectedIdRef.current = selectedId;
+  }, [selectedId]);
+
+  const summary = useMemo(() => buildKgSummary(nodes, edges), [nodes, edges]);
+
+  const selectedNode = useMemo(
+    () => (selectedId ? nodes.find((n) => String(n.node_id) === selectedId) : null),
+    [selectedId, nodes]
+  );
+
