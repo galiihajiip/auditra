@@ -166,3 +166,41 @@ export default function PackagesTable({ result, page, loading, onPage }: Props) 
                     {row.pagu_miliar != null
                       ? Number(row.pagu_miliar).toFixed(2)
                       : row.pagu != null
+                        ? (Number(row.pagu) / 1e9).toFixed(2)
+                        : "—"}
+                  </td>
+                  <td className="max-w-[200px] truncate">{String(row.lokasi || "")}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {selected && <PackageDetail row={selected} onClose={() => setSelected(null)} />}
+      {result.data.length === 0 && (
+        <p className="mt-3 text-sm text-muted">Tidak ada paket RPI ≥ 30 untuk kombinasi filter ini.</p>
+      )}
+      <div className="mt-3 flex items-center justify-between">
+        <button
+          type="button"
+          disabled={page <= 1 || loading}
+          onClick={() => onPage(page - 1)}
+          className="btn-secondary text-sm"
+        >
+          ← Sebelumnya
+        </button>
+        <span className="text-sm text-muted">
+          Halaman {page} / {result.total_pages}
+        </span>
+        <button
+          type="button"
+          disabled={page >= result.total_pages || loading}
+          onClick={() => onPage(page + 1)}
+          className="btn-secondary text-sm"
+        >
+          Selanjutnya →
+        </button>
+      </div>
+    </div>
+  );
+}
