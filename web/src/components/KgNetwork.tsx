@@ -325,3 +325,36 @@ export default function KgNetwork({ nodes, edges }: Props) {
       network.setOptions({ physics: { enabled: false } });
       setPhysicsOn(false);
     });
+
+    network.on("hoverNode", (params) => {
+      const nodeId = params.node as string;
+      applyNodeFocus(nodeId, "hover");
+    });
+
+    network.on("blurNode", () => {
+      const sel = selectedIdRef.current;
+      if (sel) applyNodeFocus(sel, "select");
+      else resetGraphVisuals();
+    });
+
+    network.on("click", (params) => {
+      if (params.nodes.length > 0) {
+        const nodeId = params.nodes[0] as string;
+        setSelectedId(nodeId);
+        applyNodeFocus(nodeId, "select");
+      } else {
+        setSelectedId(null);
+        resetGraphVisuals();
+      }
+    });
+
+    networkRef.current = network;
+    return () => {
+      network.destroy();
+      networkRef.current = null;
+      nodesDsRef.current = null;
+      edgesDsRef.current = null;
+      nodeBaseRef.current.clear();
+    };
+  }, [nodes, edges, colors, applyNodeFocus, resetGraphVisuals]);
+
