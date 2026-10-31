@@ -146,3 +146,49 @@ export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRe
     return {
       data: [
         {
+          type: "choropleth" as const,
+          geojson: normalizedGeo,
+          locations,
+          z,
+          text,
+          featureidkey: "properties.kabkot_id",
+          colorscale,
+          zmin: 0,
+          zmax,
+          marker: { line: { width: 0.35, color: isDark ? "#475569" : "#94a3b8" } },
+          hovertemplate: "%{text}<extra></extra>",
+          colorbar: {
+            ...(isNarrow
+              ? { orientation: "h" as const, x: 0.5, xanchor: "center" as const, y: -0.02, yanchor: "top" as const, len: 0.9, thickness: 10 }
+              : {}),
+            tickfont: { color: colors.textPrimary },
+            title: {
+              text: isPagu ? "Pagu Berisiko (Miliar Rp)" : "Avg RPI",
+              font: { color: colors.textPrimary, size: 11 },
+            },
+          },
+        },
+      ],
+      layout: {
+        geo: {
+          ...INDONESIA_GEO,
+          bgcolor: colors.chartBg,
+          showframe: false,
+          showcoastlines: true,
+          coastlinecolor: isDark ? "#475569" : "#94a3b8",
+          showland: true,
+          landcolor: isDark ? "#0f172a" : "#f1f5f9",
+          showocean: true,
+          oceancolor: colors.chartBg,
+          lakecolor: colors.chartBg,
+          projection: { type: "mercator" as const },
+        },
+        paper_bgcolor: colors.chartBg,
+        plot_bgcolor: colors.chartBg,
+        margin: { t: 0, b: 0, l: 0, r: 0 },
+        height: isNarrow ? 300 : 480,
+        font: { color: colors.textPrimary, family: "Inter, system-ui" },
+      },
+    };
+  }, [normalizedGeo, data, isDark, isNarrow, colors.textPrimary, colors.chartBg, metric]);
+
