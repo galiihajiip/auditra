@@ -227,3 +227,39 @@ export default function KgNetwork({ nodes, edges }: Props) {
 
     setPhysicsOn(true);
     setSelectedId(null);
+
+    const nodeMap = new Map<string, Record<string, unknown>>();
+    nodes.forEach((n) => nodeMap.set(String(n.node_id), n));
+    nodeMapRef.current = nodeMap;
+    nodeBaseRef.current.clear();
+
+    const visNodes = new DataSet(
+      nodes.map((n) => {
+        const id = String(n.node_id);
+        const high = isHighRisk(n.avg_rpi);
+        const label = formatNodeLabel(n.label, n.node_type);
+        const base = {
+          id,
+          label: label.length > 28 ? `${label.slice(0, 26)}…` : label,
+          title: `${nodeTypeLabel(n.node_type)}: ${label}\nRPI rata-rata: ${n.avg_rpi}\nJumlah paket: ${n.n_paket}`,
+          color: high
+            ? { background: HIGH_COLOR, border: "#c2410c", highlight: { background: "#fb923c", border: "#ea580c" } }
+            : { background: LOW_COLOR, border: "#1d4ed8", highlight: { background: "#60a5fa", border: "#2563eb" } },
+          font: {
+            color: colors.kgLabel,
+            size: 13,
+            face: "Inter, system-ui, sans-serif",
+            strokeWidth: 4,
+            strokeColor: colors.kgLabelStroke,
+            background: colors.kgLabelBg,
+          },
+          size: Math.max(16, Math.min(32, Number(n.n_paket || 1) / 400)),
+          borderWidth: 2,
+          opacity: 1,
+          _high: high,
+        };
+        nodeBaseRef.current.set(id, base);
+        return base;
+      })
+    );
+
