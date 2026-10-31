@@ -130,3 +130,39 @@ export default function PackagesTable({ result, page, loading, onPage }: Props) 
       <div className="table-wrap">
         <table className="data-table">
           <thead>
+            <tr>
+              <th>RPI</th>
+              <th>Label</th>
+              <th>Paket</th>
+              <th>Lembaga</th>
+              <th>Metode</th>
+              <th title="Rupiah miliar">Pagu (Rp miliar)</th>
+              <th>Lokasi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {result.data.map((row) => {
+              const label = String(row.risk_label || "");
+              const rowClass =
+                label === "KRITIS" ? "row-kriti" : label === "TINGGI" ? "row-tinggi" : "";
+              return (
+                <tr
+                  key={String(row.id)}
+                  className={`${rowClass} cursor-pointer`}
+                  tabIndex={0}
+                  role="button"
+                  aria-label={`Rincian paket ${String(row.paket)}`}
+                  onClick={() => setSelected(row)}
+                  onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), setSelected(row))}
+                >
+                  <td className="font-semibold">{Number(row.RPI).toFixed(1)}</td>
+                  <td>{label}</td>
+                  <td className="max-w-xs truncate" title={String(row.paket)}>
+                    {String(row.paket)}
+                  </td>
+                  <td className="max-w-[180px] truncate">{String(row.lembaga)}</td>
+                  <td>{String(row.metode)}</td>
+                  <td>
+                    {row.pagu_miliar != null
+                      ? Number(row.pagu_miliar).toFixed(2)
+                      : row.pagu != null
