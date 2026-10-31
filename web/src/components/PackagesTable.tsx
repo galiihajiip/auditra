@@ -76,3 +76,23 @@ function PackageDetail({ row, onClose }: { row: Row; onClose: () => void }) {
                 <p className="text-[10px] text-muted">{sig.hint}</p>
               </li>
             );
+          })}
+        </ul>
+        <p className="mt-3 text-[10px] leading-relaxed text-muted">
+          RPI adalah alat <strong>prioritas</strong> audit, bukan temuan atau vonis pelanggaran.
+          Sumber: data rencana umum pengadaan SIRUP LKPP; metodologi di docs/METODOLOGI.md.
+          Verifikasi lapangan/dokumen tetap diperlukan oleh auditor.
+        </p>
+        <a
+          className="btn-secondary mt-3 inline-block text-xs"
+          href="https://sirup.inaproc.id/sirup/caripaketctr/index"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Cari paket di SIRUP LKPP ↗
+        </a>
+      </div>
+    </div>
+  );
+}
+
