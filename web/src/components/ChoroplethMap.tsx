@@ -214,3 +214,37 @@ export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRe
     return <div className="flex h-[480px] items-center justify-center text-muted">Memuat peta…</div>;
   }
 
+  const legendItems =
+    metric === "pagu_risiko"
+      ? quantileLabels(paguValues, isDark)
+      : [
+          { color: isDark ? "#1e293b" : "#e2e8f0", label: "Tidak ada / RPI ≈ 0" },
+          { color: isDark ? "#60a5fa" : "#93c5fd", label: "Rendah" },
+          { color: isDark ? "#fbbf24" : "#fde047", label: "Sedang" },
+          { color: isDark ? "#f97316" : "#fb923c", label: "Tinggi" },
+          { color: "#ef4444", label: "Sangat tinggi (RPI ≥ 50)" },
+        ];
+
+  return (
+    <div>
+      <div className="mb-2 flex flex-wrap gap-1.5">
+        {MODE_OPTIONS.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            className={`tab-btn ${ownerMode === m.id ? "tab-btn-active" : ""}`}
+            onClick={() => setOwnerMode(m.id)}
+          >
+            {m.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          className={`tab-btn ${metric === "pagu_risiko" ? "tab-btn-active" : ""}`}
+          onClick={() => setMetric("pagu_risiko")}
+        >
+          Pagu Berisiko
+        </button>
