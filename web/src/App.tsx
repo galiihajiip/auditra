@@ -296,3 +296,28 @@ export default function App() {
           <h2 className="mb-1 text-sm font-semibold text-primary">Knowledge Graph Lembaga & Satker</h2>
           <p className="mb-3 text-xs text-muted">
             Subgraf lembaga–satker mengikuti filter aktif · kesimpulan diperbarui otomatis
+          </p>
+          <Suspense fallback={<PanelFallback h={400} />}>
+            <KgNetwork
+              key={`${debouncedFilters.provinsi}|${debouncedFilters.lembaga}|${debouncedFilters.metode}|${debouncedFilters.riskMin}`}
+              nodes={kg.nodes}
+              edges={kg.edges}
+            />
+          </Suspense>
+        </div>
+
+        <div className="panel">
+          <h2 className="mb-3 text-sm font-semibold text-primary">Daftar Paket Prioritas Audit</h2>
+          <PackagesTable
+            result={packages}
+            page={page}
+            loading={packagesLoading}
+            onPage={setPage}
+          />
+        </div>
+
+        <SiteFooter />
+      </div>
+    </div>
+  );
+}
