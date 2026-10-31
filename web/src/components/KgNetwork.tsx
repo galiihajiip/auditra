@@ -60,3 +60,28 @@ function dimNodeStyle(base: Record<string, unknown>, colors: { kgLabel: string }
   };
 }
 
+function buildKgSummary(nodes: Record<string, unknown>[], edges: Record<string, unknown>[]): string {
+  const lembaga = nodes.filter((n) => n.node_type === "lembaga").length;
+  const satker = nodes.filter((n) => n.node_type === "satker").length;
+  const high = nodes.filter((n) => isHighRisk(n.avg_rpi)).length;
+  const low = nodes.length - high;
+
+  const top = [...nodes]
+    .filter((n) => n.node_type === "lembaga")
+    .sort((a, b) => Number(b.risk_influence ?? 0) - Number(a.risk_influence ?? 0))
+    .slice(0, 2)
+    .map((n) => formatNodeLabel(n.label, n.node_type))
+    .join(" & ");
+
+  return [
+    `Graf ini menampilkan ${lembaga} lembaga dan ${satker} satker yang saling terhubung melalui ${edges.length} relasi pengadaan.`,
+    `Node oranye (${high}): rata-rata RPI ≥ 30 (prioritas audit). Node biru (${low}): RPI di bawah ambang.`,
+    top
+      ? `Lembaga dengan pengaruh risiko tertinggi dalam subgraf: ${top}.`
+      : "",
+    "Arahkan kursor ke node untuk sorot relasi · klik untuk panel detail (keluar ↑ / masuk ↓).",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
