@@ -102,3 +102,44 @@
     font-weight: 700;
   }
 
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background-color: var(--bg-panel);
+  }
+
+  .data-table {
+    width: 100%;
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--text);
+  }
+
+  .data-table thead {
+    background-color: var(--bg-table-head);
+    color: var(--text);
+  }
+
+  .data-table th {
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+  }
+
+  .data-table td {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .data-table tbody tr {
+    border-top: 1px solid var(--border-subtle);
+    background-color: var(--bg-table-row);
+  }
+
+  .row-kriti {
+    background-color: var(--bg-kriti) !important;
+  }
+
+  .row-tinggi {
+    background-color: var(--bg-tinggi) !important;
+  }
+
