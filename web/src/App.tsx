@@ -46,3 +46,43 @@ const defaultFilters: Filters = {
   riskMin: 0,
 };
 
+export default function App() {
+  const { toggle, isDark } = useTheme();
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
+  const [options, setOptions] = useState<FilterOptions>({
+    lembaga: [],
+    metode: [],
+    provinsi: [],
+  });
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [packagesLoading, setPackagesLoading] = useState(false);
+
+  const [overview, setOverview] = useState<OverviewStats | null>(null);
+  const [geoCoverage, setGeoCoverage] = useState<GeoCoverage | null>(null);
+  const [choroplethModes, setChoroplethModes] = useState<Record<MapOwnerMode, ChoroplethRow[]>>({
+    kl: [],
+    pemprov: [],
+    pemkot: [],
+    others: [],
+  });
+  const [geojson, setGeojson] = useState<GeoJSON.FeatureCollection | null>(null);
+  const [riskDist, setRiskDist] = useState<{ risk_label: string; count: number }[]>([]);
+  const [metode, setMetode] = useState<{ metode: string; jumlah: number; avg_rpi: number }[]>([]);
+  const [scatter, setScatter] = useState<{ pagu_miliar: number; RPI: number; risk_label: string }[]>(
+    []
+  );
+  const [signals, setSignals] = useState<Record<string, number>>({});
+  const [rankLembaga, setRankLembaga] = useState<RankRow[]>([]);
+  const [rankProvinsi, setRankProvinsi] = useState<RankRow[]>([]);
+  const [kg, setKg] = useState<{ nodes: Record<string, unknown>[]; edges: Record<string, unknown>[] }>(
+    { nodes: [], edges: [] }
+  );
+  const [packages, setPackages] = useState<PaginatedPackages | null>(null);
+  const [page, setPage] = useState(1);
+
+  const debouncedFilters = useDebouncedValue(filters, 350);
+  const dashboardGen = useRef(0);
+  const packagesGen = useRef(0);
+
