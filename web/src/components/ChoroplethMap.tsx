@@ -81,3 +81,37 @@ function quantileLabels(values: number[], isDark: boolean): { color: string; lab
   return items;
 }
 
+export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRegionClick }: Props) {
+  const { colors, isDark: isDarkTheme } = useTheme();
+  const isDark = isDarkProp ?? isDarkTheme;
+  const [ownerMode, setOwnerMode] = useState<MapOwnerMode>("kl");
+  const [metric, setMetric] = useState<MapMetric>("pagu_risiko");
+
+  const data = modes[ownerMode] ?? [];
+
+  // Paket K/L (pusat) umumnya tidak punya lokasi kab/kota → mode default bisa kosong.
+  // Pindah otomatis ke mode terbesar yang berisi data agar peta tidak tampil kosong.
+  useEffect(() => {
+    if ((modes[ownerMode] ?? []).length > 0) return;
+    const next = (["pemprov", "pemkot", "others", "kl"] as MapOwnerMode[]).find(
+      (id) => (modes[id] ?? []).length > 0
+    );
+    if (next) setOwnerMode(next);
+  }, [modes, ownerMode]);
+
+  const isNarrow = typeof window !== "undefined" && window.innerWidth < 640;
+
+  const normalizedGeo = useMemo(() => {
+    if (!geojson) return null;
+    return {
+      ...geojson,
+      features: geojson.features.map((f) => ({
+        ...f,
+        properties: {
+          ...f.properties,
+          kabkot_id: normalizeKabkotId(f.properties?.kabkot_id as string | number),
+        },
+      })),
+    };
+  }, [geojson]);
+
