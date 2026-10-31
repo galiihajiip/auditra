@@ -139,3 +139,21 @@ export default function KgNetwork({ nodes, edges }: Props) {
     return rows.sort((a, b) => b.weight - a.weight).slice(0, 12);
   }, [selectedId, selectedNode, nodes, edges]);
 
+  const resetGraphVisuals = useCallback(() => {
+    const nodesDs = nodesDsRef.current;
+    const edgesDs = edgesDsRef.current;
+    if (!nodesDs || !edgesDs) return;
+
+    nodeBaseRef.current.forEach((base) => {
+      nodesDs.update(base);
+    });
+    edgeMetaRef.current.forEach((e) => {
+      edgesDs.update({
+        id: e.id,
+        color: edgeColors(colors),
+        width: Math.min(4, Math.max(2, Math.log(e.weight + 1))),
+      });
+    });
+    networkRef.current?.unselectAll();
+  }, [colors]);
+
