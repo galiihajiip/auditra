@@ -133,3 +133,23 @@ export function RadarChart({ signals }: { signals: Record<string, number> }) {
         areaStyle: {
           color: isDark
             ? ["rgba(30,41,59,0.4)", "rgba(30,41,59,0.2)"]
+            : ["rgba(226,232,240,0.6)", "rgba(241,245,249,0.9)"],
+        },
+      },
+    },
+    series: [
+      {
+        type: "radar",
+        data: [
+          {
+            value: values,
+            areaStyle: { color: "rgba(249,115,22,0.25)" },
+            lineStyle: { color: colors.accentOrange },
+            itemStyle: { color: colors.accentOrange },
+          },
+        ],
+      },
+    ],
+  };
+  return <ReactECharts key={mode} option={option} style={{ height: 260, background: colors.chartBg }} notMerge />;
+}
