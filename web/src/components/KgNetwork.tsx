@@ -286,3 +286,42 @@ export default function KgNetwork({ nodes, edges }: Props) {
     nodesDsRef.current = visNodes;
     edgesDsRef.current = visEdges;
 
+    const network = new Network(
+      ref.current,
+      { nodes: visNodes as never, edges: visEdges as never },
+      {
+        physics: {
+          enabled: true,
+          stabilization: { iterations: 100, fit: true },
+          barnesHut: {
+            gravitationalConstant: -3000,
+            centralGravity: 0.15,
+            springLength: 140,
+            springConstant: 0.04,
+            damping: 0.15,
+          },
+        },
+        interaction: {
+          hover: true,
+          hoverConnectedEdges: false,
+          tooltipDelay: 120,
+          dragNodes: true,
+          dragView: true,
+          zoomView: true,
+          navigationButtons: true,
+          keyboard: { enabled: true, bindToWindow: false },
+          zoomSpeed: 0.3,
+          selectConnectedEdges: false,
+        },
+        nodes: { shape: "dot", scaling: { min: 12, max: 36 } },
+        edges: {
+          color: edgeColors(colors),
+          arrows: { to: { enabled: true, scaleFactor: 0.75, type: "arrow" } },
+        },
+      }
+    );
+
+    network.on("stabilizationIterationsDone", () => {
+      network.setOptions({ physics: { enabled: false } });
+      setPhysicsOn(false);
+    });
