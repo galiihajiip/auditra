@@ -266,3 +266,33 @@ export default function App() {
             <RadarChart signals={signals} />
           </div>
           <div className="panel max-h-[360px] overflow-y-auto lg:col-span-4">
+            <h2 className="mb-3 text-sm font-semibold text-primary">Provinsi Paling Berisiko</h2>
+            <RankProvinsi data={rankProvinsi} />
+          </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div className="panel lg:col-span-5">
+            <h2 className="mb-2 text-sm font-semibold text-primary">Rata-rata RPI per Metode</h2>
+            <MetodeBar data={metode} />
+            <ColorLegend
+              className="mt-2"
+              items={[
+                { color: "#3b82f6", label: "Biru — RPI < 30" },
+                { color: "#f97316", label: "Oranye — RPI ≥ 30" },
+              ]}
+            />
+          </div>
+          <div className="panel lg:col-span-7">
+            <h2 className="mb-2 text-sm font-semibold text-primary">Distribusi Pagu vs RPI</h2>
+            <p className="mb-2 text-[11px] text-muted">
+              Scatter max 3.000 titik · Biru = rendah, oranye/merah = tinggi risiko
+            </p>
+            <ScatterChart points={scatter} />
+          </div>
+        </div>
+
+        <div className="panel mb-4">
+          <h2 className="mb-1 text-sm font-semibold text-primary">Knowledge Graph Lembaga & Satker</h2>
+          <p className="mb-3 text-xs text-muted">
+            Subgraf lembaga–satker mengikuti filter aktif · kesimpulan diperbarui otomatis
