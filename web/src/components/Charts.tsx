@@ -35,3 +35,38 @@ export function RiskDonut({ data }: { data: { risk_label: string; count: number 
   return <ReactECharts key={mode} option={option} style={{ height: 240, background: colors.chartBg }} notMerge />;
 }
 
+export function MetodeBar({
+  data,
+}: {
+  data: { metode: string; jumlah: number; avg_rpi: number }[];
+}) {
+  const { colors, mode } = useTheme();
+  const sorted = [...data].sort((a, b) => a.avg_rpi - b.avg_rpi);
+  const option = {
+    backgroundColor: colors.chartBg,
+    grid: { left: 140, right: 40, top: 10, bottom: 30 },
+    tooltip: { trigger: "axis", backgroundColor: colors.bgPanel, textStyle: { color: colors.textPrimary } },
+    xAxis: {
+      type: "value",
+      axisLabel: { color: colors.chartText },
+      splitLine: { lineStyle: { color: colors.chartGrid } },
+    },
+    yAxis: {
+      type: "category",
+      data: sorted.map((d) => d.metode),
+      axisLabel: { color: colors.chartText, width: 130, overflow: "truncate" },
+    },
+    series: [
+      {
+        type: "bar",
+        data: sorted.map((d) => ({
+          value: d.avg_rpi,
+          itemStyle: { color: d.avg_rpi >= 30 ? colors.accentOrange : colors.accentBlue },
+        })),
+        label: { show: true, position: "right", color: colors.textPrimary, formatter: "{c}" },
+      },
+    ],
+  };
+  return <ReactECharts key={mode} option={option} style={{ height: 280, background: colors.chartBg }} notMerge />;
+}
+
