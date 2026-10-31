@@ -223,3 +223,46 @@ export default function App() {
         {dashboardError && (
           <p className="mb-2 rounded-lg border border-red-400/50 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">
             Gagal memuat data filter: {dashboardError}
+          </p>
+        )}
+
+        <StatCards stats={overview} geoCoverage={geoCoverage} />
+
+        <div className="mb-4 grid grid-cols-1 gap-4 lg:grid-cols-12">
+          <div className="panel lg:col-span-8">
+            <h2 className="mb-1 text-sm font-semibold text-primary">Peta Prioritas Audit per Kab/Kota</h2>
+            <p className="mb-3 text-xs text-muted">
+              Mode pemilik paket (K/L · Pemprov · Pemkot · Lainnya) · peta seluruh Indonesia
+            </p>
+            <Suspense fallback={<PanelFallback />}>
+              <ChoroplethMap
+                modes={choroplethModes}
+                geojson={geojson}
+                isDark={isDark}
+                onRegionClick={onRegionClick}
+              />
+            </Suspense>
+          </div>
+          <div className="panel lg:col-span-4 lg:self-start">
+            <h2 className="mb-1 text-sm font-semibold text-primary">Lembaga Prioritas Audit</h2>
+            <p className="mb-2 text-[10px] text-muted">
+              Top {8} default · klik untuk filter · Eks = KRITIS + anomali pagu/fragmentasi
+            </p>
+            <EntitySidebar
+              data={rankLembaga}
+              selectedLembaga={filters.lembaga !== "ALL" ? filters.lembaga : undefined}
+              onSelect={onLembagaSelect}
+            />
+          </div>
+        </div>
+
+        <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-12">
+          <div className="panel lg:col-span-4">
+            <h2 className="mb-2 text-sm font-semibold text-primary">Distribusi Risiko</h2>
+            <RiskDonut data={riskDist} />
+          </div>
+          <div className="panel lg:col-span-4">
+            <h2 className="mb-2 text-sm font-semibold text-primary">Profil 7 Sinyal RPI</h2>
+            <RadarChart signals={signals} />
+          </div>
+          <div className="panel max-h-[360px] overflow-y-auto lg:col-span-4">
