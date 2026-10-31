@@ -70,3 +70,44 @@ export function MetodeBar({
   return <ReactECharts key={mode} option={option} style={{ height: 280, background: colors.chartBg }} notMerge />;
 }
 
+export function ScatterChart({
+  points,
+}: {
+  points: { pagu_miliar: number; RPI: number; risk_label: string }[];
+}) {
+  const { colors, mode } = useTheme();
+  const groups = ["KRITIS", "TINGGI", "SEDANG", "RENDAH"];
+  const series = groups.map((label) => ({
+    name: label,
+    type: "scatter",
+    symbolSize: 8,
+    itemStyle: { color: RISK_COLORS[label], opacity: 0.65 },
+    data: points
+      .filter((p) => p.risk_label === label)
+      .map((p) => [p.pagu_miliar, p.RPI]),
+  }));
+
+  const option = {
+    backgroundColor: colors.chartBg,
+    legend: { textStyle: { color: colors.chartText }, top: 0 },
+    grid: { left: 50, right: 20, top: 40, bottom: 40 },
+    tooltip: { trigger: "item", backgroundColor: colors.bgPanel, textStyle: { color: colors.textPrimary } },
+    xAxis: {
+      type: "value",
+      name: "Pagu (Miliar)",
+      nameTextStyle: { color: colors.chartText },
+      axisLabel: { color: colors.chartText },
+      splitLine: { lineStyle: { color: colors.chartGrid } },
+    },
+    yAxis: {
+      type: "value",
+      name: "RPI",
+      nameTextStyle: { color: colors.chartText },
+      axisLabel: { color: colors.chartText },
+      splitLine: { lineStyle: { color: colors.chartGrid } },
+    },
+    series,
+  };
+  return <ReactECharts key={mode} option={option} style={{ height: 320, background: colors.chartBg }} notMerge />;
+}
+
