@@ -129,3 +129,41 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (error) return;
+    const gen = ++dashboardGen.current;
+    setLoading(true);
+    setDashboardError(null);
+    (async () => {
+      try {
+        const bundle = await fetchDashboardBundle(debouncedFilters);
+        if (gen !== dashboardGen.current) return;
+        setOverview(bundle.overview);
+        setGeoCoverage(bundle.geo_coverage);
+        setChoroplethModes(
+          bundle.choropleth_modes ?? {
+            kl: bundle.choropleth,
+            pemprov: [],
+            pemkot: [],
+            others: [],
+          }
+        );
+        setRiskDist(bundle.risk_distribution);
+        setMetode(bundle.metode);
+        setScatter(bundle.scatter);
+        setSignals(bundle.signals);
+        setRankLembaga(bundle.rank_lembaga);
+        setRankProvinsi(bundle.rank_provinsi);
+        setKg(bundle.kg);
+        setDashboardError(null);
+      } catch (e) {
+        console.error(e);
+        if (gen === dashboardGen.current) {
+          setDashboardError(formatApiError(e));
+        }
+      } finally {
+        if (gen === dashboardGen.current) setLoading(false);
+      }
+    })();
+  }, [debouncedFilters, error]);
+
+  useEffect(() => {
