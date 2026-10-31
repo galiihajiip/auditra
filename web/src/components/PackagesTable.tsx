@@ -55,3 +55,24 @@ function PackageDetail({ row, onClose }: { row: Row; onClose: () => void }) {
             {Number(row.RPI).toFixed(1)} · {String(row.risk_label)}
           </dd>
         </dl>
+        <h4 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted">
+          Mengapa paket ini berprioritas? (sinyal 0–1)
+        </h4>
+        <ul className="space-y-2">
+          {SIGNALS.map((sig) => {
+            const v = Math.max(0, Math.min(1, Number(row[sig.key]) || 0));
+            return (
+              <li key={sig.key} title={sig.hint}>
+                <div className="flex justify-between text-[11px] text-primary">
+                  <span>{sig.label} <span className="text-muted">· bobot {sig.weight}</span></span>
+                  <span className="font-semibold">{v.toFixed(2)}</span>
+                </div>
+                <div className="h-1.5 overflow-hidden rounded bg-[var(--bg-subtle)]">
+                  <div
+                    className="h-full rounded"
+                    style={{ width: `${v * 100}%`, background: v >= 0.6 ? "var(--accent-orange)" : "var(--accent-blue)" }}
+                  />
+                </div>
+                <p className="text-[10px] text-muted">{sig.hint}</p>
+              </li>
+            );
