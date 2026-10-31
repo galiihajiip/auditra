@@ -263,3 +263,26 @@ export default function KgNetwork({ nodes, edges }: Props) {
       })
     );
 
+    const edgeMeta: EdgeMeta[] = edges.map((e, idx) => ({
+      id: idx,
+      from: String(e.source),
+      to: String(e.target),
+      relation: String(e.relation ?? ""),
+      weight: Number(e.weight || 1),
+    }));
+    edgeMetaRef.current = edgeMeta;
+
+    const visEdges = new DataSet(
+      edgeMeta.map((e) => ({
+        id: e.id,
+        from: e.from,
+        to: e.to,
+        width: Math.min(4, Math.max(2, Math.log(e.weight + 1))),
+        color: edgeColors(colors),
+        smooth: { type: "cubicBezier", forceDirection: "none", roundness: 0.2 },
+      }))
+    );
+
+    nodesDsRef.current = visNodes;
+    edgesDsRef.current = visEdges;
+
