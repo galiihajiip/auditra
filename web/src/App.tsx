@@ -167,3 +167,23 @@ export default function App() {
   }, [debouncedFilters, error]);
 
   useEffect(() => {
+    if (error) return;
+    const gen = ++packagesGen.current;
+    setPackagesLoading(true);
+    (async () => {
+      try {
+        const pkg = await fetchPackages(debouncedFilters, page, 50);
+        if (gen !== packagesGen.current) return;
+        setPackages(pkg);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (gen === packagesGen.current) setPackagesLoading(false);
+      }
+    })();
+  }, [debouncedFilters, page, error]);
+
+  if (error) {
+    return (
+      <div className="app-shell flex min-h-screen flex-col items-center justify-center gap-6 p-6 sm:p-8">
+        <Logo size="lg" />
