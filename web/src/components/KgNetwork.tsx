@@ -109,3 +109,33 @@ export default function KgNetwork({ nodes, edges }: Props) {
     [selectedId, nodes]
   );
 
+  const connections = useMemo((): ConnectionRow[] => {
+    if (!selectedId || !selectedNode) return [];
+
+    const nodeMap = new Map(nodes.map((n) => [String(n.node_id), n]));
+
+    const rows: ConnectionRow[] = [];
+    for (const e of edgeMetaRef.current) {
+      if (e.from === selectedId) {
+        const peer = nodeMap.get(e.to);
+        rows.push({
+          direction: "keluar",
+          peerLabel: formatNodeLabel(peer?.label, peer?.node_type),
+          peerType: nodeTypeLabel(peer?.node_type),
+          relation: formatRelation(e.relation),
+          weight: e.weight,
+        });
+      } else if (e.to === selectedId) {
+        const peer = nodeMap.get(e.from);
+        rows.push({
+          direction: "masuk",
+          peerLabel: formatNodeLabel(peer?.label, peer?.node_type),
+          peerType: nodeTypeLabel(peer?.node_type),
+          relation: formatRelation(e.relation),
+          weight: e.weight,
+        });
+      }
+    }
+    return rows.sort((a, b) => b.weight - a.weight).slice(0, 12);
+  }, [selectedId, selectedNode, nodes, edges]);
+
