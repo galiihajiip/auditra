@@ -19,3 +19,39 @@ function paguRupiah(row: Row): string {
   return "Rp " + v.toLocaleString("id-ID");
 }
 
+function PackageDetail({ row, onClose }: { row: Row; onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 p-0 sm:items-center sm:p-4"
+      onClick={onClose}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Rincian paket"
+        className="panel max-h-[90vh] w-full max-w-xl overflow-y-auto rounded-b-none sm:rounded-b-xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="mb-2 flex items-start justify-between gap-3">
+          <h3 className="text-base font-bold text-primary">{String(row.paket)}</h3>
+          <button type="button" className="btn-secondary text-xs" onClick={onClose} autoFocus>
+            Tutup ✕
+          </button>
+        </div>
+        <dl className="mb-3 grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 text-xs">
+          <dt className="text-muted">ID SIRUP</dt><dd className="text-primary">{String(row.id)}</dd>
+          <dt className="text-muted">Lembaga</dt><dd className="text-primary">{String(row.lembaga)}</dd>
+          <dt className="text-muted">Metode</dt><dd className="text-primary">{String(row.metode)}</dd>
+          <dt className="text-muted">Pagu</dt><dd className="text-primary">{paguRupiah(row)}</dd>
+          <dt className="text-muted">Lokasi</dt><dd className="text-primary">{String(row.lokasi || "—")}</dd>
+          <dt className="text-muted">RPI</dt>
+          <dd className="font-semibold text-primary">
+            {Number(row.RPI).toFixed(1)} · {String(row.risk_label)}
+          </dd>
+        </dl>
