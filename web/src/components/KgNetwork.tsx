@@ -157,3 +157,48 @@ export default function KgNetwork({ nodes, edges }: Props) {
     networkRef.current?.unselectAll();
   }, [colors]);
 
+  const applyNodeFocus = useCallback(
+    (nodeId: string | null, mode: "hover" | "select") => {
+      const network = networkRef.current;
+      const nodesDs = nodesDsRef.current;
+      const edgesDs = edgesDsRef.current;
+      if (!nodesDs || !edgesDs) return;
+
+      if (!nodeId) {
+        resetGraphVisuals();
+        return;
+      }
+
+      const connectedEdges = (network?.getConnectedEdges(nodeId) ?? []) as number[];
+      const focusNodes = new Set<string>([
+        nodeId,
+        ...((network?.getConnectedNodes(nodeId) ?? []) as string[]),
+      ]);
+      const focusEdgeSet = new Set(connectedEdges);
+      const accentEdge = mode === "select" ? HIGH_COLOR : colors.kgEdgeHover;
+
+      nodeBaseRef.current.forEach((base, id) => {
+        if (focusNodes.has(id)) {
+          const isCenter = id === nodeId;
+          nodesDs.update({
+            ...base,
+            opacity: 1,
+            borderWidth: isCenter ? 3 : 2,
+            size: isCenter ? Number(base.size) * 1.1 : base.size,
+          });
+        } else {
+          nodesDs.update(dimNodeStyle(base, colors));
+        }
+      });
+
+      edgeMetaRef.current.forEach((e) => {
+        if (focusEdgeSet.has(e.id)) {
+          edgesDs.update({
+            id: e.id,
+            color: { color: accentEdge, opacity: 1, hover: accentEdge, highlight: accentEdge },
+            width: mode === "select" ? 4 : 3,
+          });
+        } else {
+          edgesDs.update({
+            id: e.id,
+            color: {
