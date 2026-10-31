@@ -108,3 +108,24 @@ export default function App() {
     },
     [filters.provinsi, onFilterChange]
   );
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const [, opt, geo] = await Promise.all([
+          fetchMeta(),
+          fetchFilterOptions(),
+          fetchGeoJson(),
+        ]);
+        setOptions(opt);
+        setGeojson(geo as GeoJSON.FeatureCollection);
+        setError(null);
+      } catch (e: unknown) {
+        setError(formatApiError(e));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
