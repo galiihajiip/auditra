@@ -202,3 +202,28 @@ export default function KgNetwork({ nodes, edges }: Props) {
           edgesDs.update({
             id: e.id,
             color: {
+              color: colors.kgEdge,
+              opacity: DIM_EDGE_OPACITY,
+              hover: colors.kgEdgeHover,
+              highlight: colors.kgEdgeHover,
+            },
+            width: 1,
+          });
+        }
+      });
+
+      if (mode === "select") {
+        network?.selectNodes([nodeId]);
+        network?.selectEdges(connectedEdges);
+      } else {
+        network?.unselectAll();
+      }
+    },
+    [colors, resetGraphVisuals]
+  );
+
+  useEffect(() => {
+    if (!ref.current || nodes.length === 0) return;
+
+    setPhysicsOn(true);
+    setSelectedId(null);
