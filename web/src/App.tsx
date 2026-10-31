@@ -86,3 +86,25 @@ export default function App() {
   const dashboardGen = useRef(0);
   const packagesGen = useRef(0);
 
+  const onFilterChange = useCallback((next: Partial<Filters>) => {
+    setFilters((prev) => ({ ...prev, ...next }));
+    setPage(1);
+  }, []);
+
+  const onLembagaSelect = useCallback(
+    (lembaga: string) => {
+      onFilterChange({
+        lembaga: filters.lembaga === lembaga ? "ALL" : lembaga,
+      });
+    },
+    [filters.lembaga, onFilterChange]
+  );
+
+  const onRegionClick = useCallback(
+    (provinsi: string) => {
+      onFilterChange({
+        provinsi: filters.provinsi === provinsi ? "ALL" : provinsi,
+      });
+    },
+    [filters.provinsi, onFilterChange]
+  );
