@@ -49,3 +49,35 @@ const INDONESIA_GEO = {
   lataxis: { range: [-12, 7] as [number, number] },
 };
 
+interface Props {
+  modes: Record<MapOwnerMode, ChoroplethRow[]>;
+  geojson: GeoJSON.FeatureCollection | null;
+  isDark?: boolean;
+  onRegionClick?: (provinsi: string, kabkotName: string) => void;
+}
+
+function quantileLabels(values: number[], isDark: boolean): { color: string; label: string }[] {
+  const positive = values.filter((v) => v > 0);
+  if (positive.length === 0) {
+    return [{ color: isDark ? "#1e293b" : "#e2e8f0", label: "Tidak ada data" }];
+  }
+  const sorted = [...positive].sort((a, b) => a - b);
+  const q = (p: number) => sorted[Math.min(sorted.length - 1, Math.floor(p * (sorted.length - 1)))];
+
+  const breaks = [0, q(0.2), q(0.4), q(0.6), q(0.8), q(1)];
+  const palette = isDark ? COLORSCALE_DARK : COLORSCALE_LIGHT;
+
+  const items = [{ color: palette[0][1], label: "Tidak ada / nol" }];
+  for (let i = 0; i < 5; i++) {
+    const lo = breaks[i];
+    const hi = breaks[i + 1];
+    const color = palette[Math.min(i + 2, palette.length - 1)][1];
+    const label =
+      i === 0 && lo === hi
+        ? formatPaguCompact(lo)
+        : `${formatPaguCompact(Math.max(lo, 0.0001))} – ${formatPaguCompact(hi)}`;
+    items.push({ color, label });
+  }
+  return items;
+}
+
