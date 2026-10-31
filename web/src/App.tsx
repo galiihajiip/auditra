@@ -187,3 +187,39 @@ export default function App() {
     return (
       <div className="app-shell flex min-h-screen flex-col items-center justify-center gap-6 p-6 sm:p-8">
         <Logo size="lg" />
+        <div className="panel max-w-lg border-red-400 dark:border-red-800">
+          <h1 className="text-lg font-bold text-red-600 dark:text-red-400">Dataset belum siap</h1>
+          <p className="mt-2 whitespace-pre-line text-sm text-muted">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="app-shell pb-10">
+      <div className="mx-auto max-w-[1500px] px-3 sm:px-4">
+        <AppHeader isDark={isDark} onToggleTheme={toggle} />
+
+        <section className="panel mb-4" aria-label="Tentang Auditra">
+          <h2 className="text-lg font-extrabold text-primary sm:text-xl">
+            Dari 3 juta paket pengadaan, mana yang harus diaudit lebih dulu?
+          </h2>
+          <p className="mt-1 text-sm text-muted">
+            Auditra memberi skor prioritas (RPI 0–100) pada setiap rencana paket SIRUP LKPP
+            berdasarkan 7 sinyal risiko yang bisa ditelusuri. Pilih provinsi, lembaga atau metode
+            di bawah, lalu klik paket mana pun untuk melihat <em>alasan</em> skornya.
+            RPI adalah alat prioritas, bukan vonis pelanggaran.
+          </p>
+        </section>
+
+        <FilterBar filters={filters} onChange={onFilterChange} options={options} />
+
+        {loading && (
+          <p className="mb-2 text-xs font-medium" style={{ color: "var(--accent-loading)" }}>
+            Memperbarui dari seluruh dataset…
+          </p>
+        )}
+
+        {dashboardError && (
+          <p className="mb-2 rounded-lg border border-red-400/50 bg-red-500/10 px-3 py-2 text-xs text-red-600 dark:text-red-400">
+            Gagal memuat data filter: {dashboardError}
