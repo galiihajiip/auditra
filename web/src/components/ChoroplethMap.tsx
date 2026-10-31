@@ -115,3 +115,34 @@ export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRe
     };
   }, [geojson]);
 
+  const plotConfig = useMemo(() => {
+    if (!normalizedGeo) return null;
+
+    const dataById = new Map(
+      data.map((d) => [normalizeKabkotId(d.kabkot_id), d] as const)
+    );
+
+    const locations = normalizedGeo.features.map(
+      (f) => f.properties?.kabkot_id as string
+    );
+    const isPagu = metric === "pagu_risiko";
+    const z = locations.map((id) => {
+      const row = dataById.get(id);
+      return isPagu ? (row?.pagu_risiko_miliar ?? 0) : (row?.avg_rpi ?? 0);
+    });
+    const text = locations.map((id) => {
+      const row = dataById.get(id);
+      if (!row) return `${id}<br>Tidak ada paket (mode ini)`;
+      const paguLine = `Pagu berisiko: ${formatPaguCompact(row.pagu_risiko_miliar ?? 0)}`;
+      return `${row.kabkot_name}<br>${row.prov_name}<br>Paket: ${row.n_paket}<br>Avg RPI: ${row.avg_rpi}<br>${paguLine}<br>Kritis: ${row.n_kritis}`;
+    });
+
+    const colorscale = isDark ? COLORSCALE_DARK : COLORSCALE_LIGHT;
+    const positiveZ = z.filter((v) => v > 0);
+    const zmax = isPagu
+      ? Math.max(...positiveZ, 0.01)
+      : Math.max(60, ...positiveZ, 1);
+
+    return {
+      data: [
+        {
