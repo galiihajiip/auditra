@@ -192,3 +192,25 @@ export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRe
     };
   }, [normalizedGeo, data, isDark, isNarrow, colors.textPrimary, colors.chartBg, metric]);
 
+  const paguValues = useMemo(
+    () => data.map((d) => d.pagu_risiko_miliar ?? 0).filter((v) => v > 0),
+    [data]
+  );
+
+  const handleClick = (ev: Readonly<PlotMouseEvent>) => {
+    if (!onRegionClick) return;
+    const pt = ev.points?.[0];
+    if (!pt || !("location" in pt)) return;
+    const loc = normalizeKabkotId(String(pt.location));
+    const row = data.find((d) => normalizeKabkotId(d.kabkot_id) === loc);
+    if (row?.prov_name) onRegionClick(row.prov_name, row.kabkot_name);
+  };
+
+  if (!geojson) {
+    return <div className="flex h-[480px] items-center justify-center text-muted">Memuat peta…</div>;
+  }
+
+  if (!plotConfig) {
+    return <div className="flex h-[480px] items-center justify-center text-muted">Memuat peta…</div>;
+  }
+
