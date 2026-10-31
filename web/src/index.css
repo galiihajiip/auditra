@@ -215,3 +215,26 @@
     background-color: var(--bg-subtle);
     color: var(--text);
   }
+
+  .entity-card:hover {
+    border-color: var(--border);
+    background-color: var(--bg-btn-hover);
+  }
+
+  .entity-card-active {
+    border-color: #3b82f6;
+    background-color: var(--bg-subtle);
+  }
+
+  .entity-badge {
+    border-radius: 0.25rem;
+    border: 1px solid var(--border);
+    background-color: var(--bg-badge);
+    padding: 0.0625rem 0.375rem;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+  }
+
