@@ -96,3 +96,37 @@ function PackageDetail({ row, onClose }: { row: Row; onClose: () => void }) {
   );
 }
 
+interface Props {
+  result: PaginatedPackages | null;
+  page: number;
+  loading?: boolean;
+  onPage: (p: number) => void;
+}
+
+export default function PackagesTable({ result, page, loading, onPage }: Props) {
+  const [selected, setSelected] = useState<Row | null>(null);
+
+  if (!result && loading) {
+    return <div className="text-muted">Memuat tabel…</div>;
+  }
+
+  if (!result) {
+    return <div className="text-muted">Tidak ada data.</div>;
+  }
+
+  return (
+    <div>
+      <p className="mb-3 text-xs text-muted">
+        Menampilkan halaman {result.page} dari {result.total_pages} —{" "}
+        <strong className="text-primary">{result.total.toLocaleString("id-ID")}</strong> paket
+        dengan RPI ≥ 30 (Sedang ke atas) sesuai filter — paket RPI rendah (&lt; 30) tidak ditampilkan di tabel
+        tetapi tetap dihitung di statistik. Klik baris untuk rincian sinyal.
+        {loading && (
+          <span className="ml-2 font-medium" style={{ color: "var(--accent-loading)" }}>
+            Memuat…
+          </span>
+        )}
+      </p>
+      <div className="table-wrap">
+        <table className="data-table">
+          <thead>
