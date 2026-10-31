@@ -111,3 +111,25 @@ export function ScatterChart({
   return <ReactECharts key={mode} option={option} style={{ height: 320, background: colors.chartBg }} notMerge />;
 }
 
+export function RadarChart({ signals }: { signals: Record<string, number> }) {
+  const { colors, isDark, mode } = useTheme();
+  const keys = Object.keys(signals);
+  const values = Object.values(signals);
+  if (keys.length === 0) {
+    return (
+      <div className="flex items-center justify-center text-muted" style={{ height: 260 }}>
+        Memuat sinyal…
+      </div>
+    );
+  }
+  const max = Math.max(...values, 0.001);
+  const option = {
+    backgroundColor: colors.chartBg,
+    radar: {
+      indicator: keys.map((k) => ({ name: k, max: max * 1.1 })),
+      axisName: { color: colors.chartText },
+      splitLine: { lineStyle: { color: colors.chartGrid } },
+      splitArea: {
+        areaStyle: {
+          color: isDark
+            ? ["rgba(30,41,59,0.4)", "rgba(30,41,59,0.2)"]
