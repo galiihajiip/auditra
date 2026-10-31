@@ -22,3 +22,38 @@
   }
 }
 
+@layer components {
+  .app-shell {
+    min-height: 100vh;
+    background-color: var(--bg-page);
+    color: var(--text);
+  }
+
+  .panel {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    background-color: var(--bg-panel);
+    color: var(--text);
+    padding: 1rem;
+    box-shadow: var(--shadow-panel);
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .stat-card {
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+    border-top-width: 4px;
+    background-color: var(--bg-panel);
+    color: var(--text);
+    padding: 1rem;
+    box-shadow: var(--shadow-panel);
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  .text-primary {
+    color: var(--text);
+  }
