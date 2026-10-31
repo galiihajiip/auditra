@@ -358,3 +358,48 @@ export default function KgNetwork({ nodes, edges }: Props) {
     };
   }, [nodes, edges, colors, applyNodeFocus, resetGraphVisuals]);
 
+  const handleFit = () =>
+    networkRef.current?.fit({ animation: { duration: 400, easingFunction: "easeInOutQuad" } });
+
+  const handleTogglePhysics = () => {
+    const next = !physicsOn;
+    networkRef.current?.setOptions({ physics: { enabled: next } });
+    setPhysicsOn(next);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedId(null);
+    resetGraphVisuals();
+  };
+
+  if (nodes.length === 0) {
+    return (
+      <div className="flex h-[460px] items-center justify-center text-muted">
+        Knowledge Graph belum tersedia — jalankan 03_network_analysis.py
+      </div>
+    );
+  }
+
+  const selectedLabel = selectedNode
+    ? formatNodeLabel(selectedNode.label, selectedNode.node_type)
+    : null;
+
+  return (
+    <div>
+      <div className="mb-2 flex flex-wrap gap-2">
+        <button type="button" onClick={handleFit} className="btn-secondary text-xs">
+          Sesuaikan tampilan
+        </button>
+        <button type="button" onClick={handleTogglePhysics} className="btn-secondary text-xs">
+          {physicsOn ? "Kunci layout" : "Gerakkan lagi"}
+        </button>
+        {selectedId && (
+          <button type="button" onClick={handleClearSelection} className="btn-secondary text-xs">
+            Hapus pilihan
+          </button>
+        )}
+        <span className="self-center text-[11px] text-muted">
+          Arahkan ke node · klik detail · scroll zoom · drag geser
+        </span>
+      </div>
+
