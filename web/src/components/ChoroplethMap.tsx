@@ -248,3 +248,32 @@ export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRe
         >
           Pagu Berisiko
         </button>
+        <button
+          type="button"
+          className={`tab-btn ${metric === "rpi" ? "tab-btn-active" : ""}`}
+          onClick={() => setMetric("rpi")}
+        >
+          Prioritas RPI
+        </button>
+      </div>
+
+      <Plot
+        data={plotConfig.data}
+        layout={plotConfig.layout}
+        config={{ displayModeBar: false, responsive: true }}
+        useResizeHandler
+        style={{ width: "100%", height: isNarrow ? 300 : 480, background: colors.chartBg }}
+        onClick={handleClick}
+      />
+
+      <p className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-muted">
+        {MODE_LEGEND_TITLE[ownerMode]}
+      </p>
+      <ColorLegend className="mt-1 justify-center sm:justify-start" items={legendItems} />
+      <p className="mt-2 text-[10px] text-muted">
+        Peta seluruh Indonesia · Wilayah tanpa warna = tidak ada paket pada mode ini · Klik wilayah
+        untuk filter provinsi · Multi-lokasi dihitung penuh per kab/kota.
+      </p>
+    </div>
+  );
+}
