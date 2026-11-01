@@ -29,3 +29,20 @@ Dokumen ini memetakan implementasi proyek Auditra terhadap **teori sains data** 
 
 ---
 
+## Alur End-to-End
+
+```mermaid
+flowchart LR
+    A[Data Mentah SIRUP] --> B[00 EDA]
+    B --> C[01 Cleaning]
+    C --> D[01b Patch DQ]
+    D --> E[02 Feature + RPI]
+    E --> F[03 Knowledge Graph]
+    F --> G[03b Geo Matching]
+    G --> H[05 Validation]
+    H --> I[Parquet + DuckDB]
+    I --> J[FastAPI + React]
+```
+
+---
+
