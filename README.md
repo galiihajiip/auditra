@@ -171,3 +171,35 @@ python run_pipeline.py --validate-only # QA gate saja
 
 *(Opsional, startup API lebih cepat)* `python scripts/export_parquet.py`
 
+### 3. Jalankan dashboard web
+
+**Terminal 1 — API:**
+
+```powershell
+pip install -r requirements-web.txt
+uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Docs interaktif: http://127.0.0.1:8000/docs
+
+**Terminal 2 — Frontend:**
+
+```powershell
+cd web
+npm install
+npm run dev
+```
+
+Buka **http://localhost:5173**
+
+Build production frontend:
+
+```powershell
+cd web
+npm run build
+npm run preview
+```
+
+Panduan deploy split (Vercel + Railway/VPS): [`docs/DEPLOY.md`](docs/DEPLOY.md) · detail web: [`WEB.md`](WEB.md)
+
+---
