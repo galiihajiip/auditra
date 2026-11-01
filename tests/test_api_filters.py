@@ -25,3 +25,18 @@ def test_packages_geo_uses_prov_column():
     assert "prov_name" in where and params == ["PAPUA"]
 
 
+def test_dashboard_bundle_preserves_503(monkeypatch):
+    from fastapi import HTTPException
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+    from api.routers import dashboard
+
+    def not_ready():
+        raise HTTPException(status_code=503, detail="warming")
+
+    monkeypatch.setattr(dashboard, "require_store", not_ready)
+    r = TestClient(app).get("/api/dashboard/bundle")
+    assert r.status_code == 503  # was 500 → frontend warm-up retry never fired
+
+
