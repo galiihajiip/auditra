@@ -79,3 +79,26 @@ flowchart LR
 
 ---
 
+## Tingkat Menengah
+
+### 4. Feature Engineering
+**Script:** `02_scoring.py`
+
+| Sinyal | Metode | Teori DS |
+|--------|--------|----------|
+| S1 Metode | Rule-based mapping | Domain knowledge encoding |
+| S2 Pagu anomali | Z-score dalam grup | Statistical anomaly detection |
+| S3 Fragmentasi | TF-IDF + cosine similarity | NLP + similarity learning |
+| S4 Konsentrasi | Rasio agregat per satker | Aggregation features |
+| S5 UMKM | Percentile threshold | Rule + distribution |
+| S6 Dana+Metode | Boolean combination | Feature interaction |
+| S7 Reputasi | KG node weight | Graph-derived feature |
+
+**RPI** = weighted sum (bobot di `config/pipeline.yaml`), skala 0–100.
+
+### 5. Agregasi & Visualisasi
+- Pipeline: summary print di setiap script
+- Web: agregat penuh via DuckDB (bukan sample kecuali scatter max 3.000 titik)
+
+---
+
