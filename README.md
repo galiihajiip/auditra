@@ -241,3 +241,30 @@ auditra/
 ```
 
 ---
+
+## Teknik Sains Data
+
+- **EDA** — profil, missing value, IQR outlier, distribusi kategorikal
+- **Preprocessing** — deduplikasi, normalisasi teks, patch artefak SIRUP
+- **Statistik** — z-score anomali pagu, persentil, agregasi multi-dimensi
+- **NLP** — TF-IDF + cosine similarity (deteksi fragmentasi paket)
+- **Graph** — NetworkX: centrality, betweenness, community detection
+- **Geo-spatial** — fuzzy matching lokasi SIRUP → kab/kota GeoJSON (514 fitur)
+- **Serving** — DuckDB materialized cache; API agregat penuh, bukan sample
+
+Lifecycle lengkap: [`docs/DATA_SCIENCE.md`](docs/DATA_SCIENCE.md)
+
+---
+
+## Dokumentasi Lengkap
+
+| Dokumen | Isi |
+|---------|-----|
+| [`docs/METODOLOGI.md`](docs/METODOLOGI.md) | Algoritma step-by-step + dasar regulasi |
+| [`docs/DATA_SCIENCE.md`](docs/DATA_SCIENCE.md) | Lifecycle sains data (EDA → deploy) |
+| [`docs/SUMBER_DATA.md`](docs/SUMBER_DATA.md) | Provenance SIRUP & geo |
+| [`docs/CHECKLIST_JURI_SEC.md`](docs/CHECKLIST_JURI_SEC.md) | Pemetaan kriteria SEC Satria Data |
+| [`docs/DEPLOY.md`](docs/DEPLOY.md) | Deploy production (Vercel + backend) |
+| [`WEB.md`](WEB.md) | Setup & performa dashboard web |
+
+---
