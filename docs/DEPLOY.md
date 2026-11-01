@@ -137,3 +137,25 @@ npm run build && npm run preview
 
 ---
 
+## Checklist sebelum deploy
+
+- [ ] Pipeline selesai: `python run_pipeline.py`
+- [ ] `output/auditra.duckdb` ada di server backend
+- [ ] `CORS_ORIGINS` berisi domain frontend production
+- [ ] `VITE_API_URL` di Vercel mengarah ke `/api` backend (dengan prefix `/api`)
+- [ ] Tes: `curl https://BACKEND/api/meta` → `total_rows: 3002992`
+
+---
+
+## Ukuran & biaya (perkiraan)
+
+| Resource | Ukuran |
+|----------|--------|
+| `auditra.duckdb` | ~500 MB – 2 GB |
+| `web/dist` | ~5–15 MB |
+| RAM backend | min **2 GB** (disarankan 4 GB) |
+
+Railway/Render free tier mungkin kurang RAM — upgrade atau pakai VPS untuk demo 3M baris.
+
+---
+
