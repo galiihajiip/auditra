@@ -268,3 +268,31 @@ Lifecycle lengkap: [`docs/DATA_SCIENCE.md`](docs/DATA_SCIENCE.md)
 | [`WEB.md`](WEB.md) | Setup & performa dashboard web |
 
 ---
+
+## Tim & Institusi
+
+**Universitas Pembangunan Nasional Veteran Jawa Timur** · Tim `SD2026020000253`
+
+Developed by **Dani Shofi Nur Izza**, **Danisha Rizka Hapsari**, **Galih Aji Pangestu**
+
+---
+
+## Lisensi & Sumber Data
+
+| Aset | Lisensi / Catatan |
+|------|-------------------|
+| Kode sumber (repo ini) | Open source — lihat repositori |
+| Data SIRUP | [LKPP — sirup.lkpp.go.id](https://sirup.lkpp.go.id/) — **tidak** di-commit (`.gitignore`) |
+| GeoJSON Indonesia | [eppofahmi/geojson-indonesia](https://github.com/eppofahmi/geojson-indonesia) |
+
+---
+
+## Kutipan Data
+
+> Lembaga Kebijakan Pengadaan Barang/Jasa Pemerintah. (2026). *Sistem Informasi Rencana Umum Pengadaan (SIRUP)*. Diakses dari https://sirup.lkpp.go.id/
+
+---
+
+<p align="center">
+  <sub>Auditra © 2026 — Prioritas audit yang transparan, berbasis data, dan dapat diaudit.</sub>
+</p>
