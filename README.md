@@ -56,3 +56,19 @@ GET http://127.0.0.1:8000/api/meta
 ```
 
 ---
+
+## 7 Sinyal RPI (Ringkas)
+
+| # | Sinyal | Bobot | Intuisi |
+|---|--------|-------|---------|
+| S1 | Metode pemilihan | 20% | Penunjukan langsung / dikecualikan = risiko tata kelola lebih tinggi |
+| S2 | Anomali pagu | 20% | Z-score pagu dalam grup `(jenis, metode)` |
+| S3 | Fragmentasi / split contract | 15% | TF-IDF + cosine similarity uraian dalam satker (batas PL Rp 200 jt) |
+| S4 | Konsentrasi metode berisiko | 15% | Proporsi penunjukan/dikecualikan per satker |
+| S5 | Anomali UMKM | 10% | Flag UMKM vs pagu besar |
+| S6 | Dana + metode | 10% | Kombinasi sumber dana APBN dan metode berisiko |
+| S7 | Reputasi lembaga (KG) | 10% | Risk influence node lembaga di Knowledge Graph (weighted degree × avg RPI) |
+
+Formula lengkap, dasar regulasi (PP 12/2019, Perpres 16/2018), dan analisis sensitivitas bobot → [`docs/METODOLOGI.md`](docs/METODOLOGI.md).
+
+---
