@@ -77,3 +77,7 @@ Backend mem-materialize data ke `output/auditra.duckdb` + `output/data_network.p
 
 Endpoint utama: `GET /api/dashboard/bundle` — menggantikan 9 call terpisah.
 
+## Deploy production
+
+Frontend bisa **Vercel**; backend **tidak** (butuh DuckDB + file besar). Panduan lengkap: [docs/DEPLOY.md](docs/DEPLOY.md).
+
