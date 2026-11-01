@@ -142,3 +142,30 @@ flowchart LR
 
 ---
 
+## Menjalankan Pipeline Lengkap
+
+```powershell
+# Install dependencies pipeline
+pip install -r requirements.txt
+
+# Full lifecycle (EDA → … → validation)
+python run_pipeline.py
+
+# Atau step-by-step:
+python 00_eda.py
+python 01_cleaning.py
+python 01b_patch_lembaga_provinsi.py
+python 02_scoring.py
+python 03_network_analysis.py
+python 03b_geo_matching.py
+python 05_validate.py
+
+# Deploy web (setelah pipeline)
+pip install -r requirements-web.txt
+python run_pipeline.py --validate-only   # cek data dulu
+uvicorn api.main:app --reload --port 8000
+cd web && npm run dev
+```
+
+---
+
