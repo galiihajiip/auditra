@@ -192,3 +192,29 @@ tests/test_validate.py   # Unit tests validasi
 
 ---
 
+## Checklist Deploy Production
+
+- [x] Pipeline reproducible (`run_pipeline.py` + `config/pipeline.yaml`)
+- [x] Data validation gate (`05_validate.py`)
+- [x] API dengan caching & integrity check
+- [x] Frontend agregat-only (3M baris tidak ke browser)
+- [ ] Docker container (opsional — belum wajib untuk dev lokal)
+- [ ] CI/CD GitHub Actions (opsional)
+- [ ] Scheduled pipeline refresh (cron/airflow — jika data SIRUP di-update rutin)
+
+---
+
+## Referensi Teori → Kode
+
+| Konsep | File |
+|--------|------|
+| EDA, outlier IQR | `00_eda.py` |
+| Missing value analysis | `00_eda.py`, `01_cleaning.py` |
+| Feature scaling (0–1) | `02_scoring.py` |
+| TF-IDF vectorization | `02_scoring.py` |
+| Cosine similarity | `02_scoring.py` |
+| Graph centrality | `03_network_analysis.py` |
+| Community detection | `03_network_analysis.py` |
+| Spatial join | `03b_geo_matching.py` |
+| OLAP aggregation | `api/db.py` |
+| Caching | `api/cache.py` |
