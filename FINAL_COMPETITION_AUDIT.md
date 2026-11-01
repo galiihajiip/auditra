@@ -148,3 +148,39 @@ if the judges' rubric is instead "analytics/data-science dashboard", remove the 
 rescale: ≈ 64 %. I did not score the pre-fix state numerically.
 
 ---
+
+## 5. What I ran (reproducible)
+
+```bash
+# backend (Python 3.11 venv)
+pip install -r requirements-web.txt pytest httpx
+cd web && npm install && VITE_API_URL=/api npm run build && cd ..
+uvicorn api.main:app --port 8000        # serves API + built UI, http://127.0.0.1:8000
+pytest tests                            # 12 passed
+```
+
+API matrix (all against live data): `page=0`→422; `page_size=501`→422; `risk_min=abc`→422; `risk_min=-5`→200;
+`risk_min=1e9`→200 empty; `lembaga=' OR 1=1--`→200 empty (bound param, not injected); unknown province→200 zeros;
+`DELETE /api/packages`→405; unknown route→404 JSON; `page=999999`→200 empty (P2-4).
+Timings: packages page 5–190 ms, bundle (uncached filter) ≈ 0.35 s, cold init ≈ 7 s locally.
+Browser: 3 viewports, filters (province/RPI/lembaga via sidebar), pagination, theme toggle, row dialog + Esc,
+4 map modes (each switch ≈ 250–370 ms), console/page errors captured: prod build **0**, before fixes **2–3**.
+
+**Not tested (disclosure):** KG interactions (click/zoom/physics toggle), sidebar search/"By Pagu", map region click →
+filter, light-mode pixel review beyond one screenshot, PWA install/offline, real touch devices, screen reader,
+Lighthouse/axe, load testing, Safari/Firefox.
+
+## 6. Files changed
+
+`api/main.py` (static SPA serving), `api/routers/dashboard.py` (503 preserved, no error leak),
+`web/src/App.tsx` (hero, lazy loading), `web/src/components/ChoroplethMap.tsx` (auto mode, mobile),
+`web/src/components/Charts.tsx` (radar guard, axis types), `web/src/components/PackagesTable.tsx` (detail dialog,
+honest copy), `web/vite.config.ts` (chunking, configurable proxy `AUDITRA_API_URL`), `README.md` (S6/S7),
+`tests/test_api_filters.py` (new), this file.
+
+## 7. Priority list before judging
+
+1. Decide honestly how the product maps to the brief; if the brief really requires evidence/moderation, that is a build, not a polish task.
+2. Redeploy the backend or demo from the single-process local build (§5). Pre-warm it 30 s before judges arrive.
+3. Add per-package provenance (source row id, ingest date, deep link) and a filter reset/URL state.
+4. Replace the Plotly map; add a mobile layout; run axe/Lighthouse; add a Playwright smoke test to CI.
