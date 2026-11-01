@@ -102,3 +102,32 @@ flowchart LR
 
 ---
 
+## Tingkat Lanjut / Tinggi
+
+### 6. Knowledge Graph & Network Science
+**Script:** `03_network_analysis.py`
+
+- **Graph construction:** Node (lembaga, satker, metode, jenis, provinsi) + weighted edges
+- **Centrality:** degree, in-degree, betweenness (subgraph)
+- **Influence score:** weighted degree × avg RPI
+- **Community detection:** greedy modularity (cluster lembaga berisiko)
+- **Feedback loop:** S7 di-update dari graph metrics → RPI recalculated
+
+### 7. Geo-Spatial Integration
+**Script:** `03b_geo_matching.py`
+
+- Normalisasi Unicode + fuzzy matching
+- Join lokasi SIRUP → kab/kota GeoJSON (514 features)
+- Unmatched report untuk manual QA
+
+### 8. Production Data Layer
+**Folder:** `api/`
+
+- Materialized DuckDB cache (`output/auditra.duckdb`)
+- Parquet columnar storage
+- TTL LRU cache untuk dashboard bundle
+- Thread-safe queries
+- Integrity endpoint `GET /api/meta`
+
+---
+
