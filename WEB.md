@@ -32,3 +32,25 @@ python run_pipeline.py          # EDA → cleaning → scoring → KG → geo �
 python scripts/export_parquet.py
 ```
 
+## Install & run
+
+**Terminal 1 — API:**
+
+```powershell
+cd C:\GALIH\CODING\AUDITRA
+pip install -r requirements-web.txt
+uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+Docs: http://127.0.0.1:8000/docs
+
+**Terminal 2 — Frontend:**
+
+```powershell
+cd C:\GALIH\CODING\AUDITRA\web
+npm install
+npm run dev
+```
+
+Buka: http://localhost:5173
+
