@@ -53,3 +53,30 @@ Tidak ada yang **otomatis** menjamin lolos final — kompetisi memilih 12 tim da
 ### 4. Substansi dan Data (40%) — **PALING KRITIS**
 
 | Kriteria | Status | Bukti di Repo |
+|----------|--------|---------------|
+| Sumber data jelas | ✅ | [SUMBER_DATA.md](SUMBER_DATA.md) — SIRUP LKPP 2026 |
+| Data terkini & reliabel | ✅ | 3.009.760 baris mentah → 3.002.992 setelah cleaning |
+| Metode step-by-step | ✅ | `00`→`05` + [METODOLOGI.md](METODOLOGI.md) |
+| Analisis deskriptif → lanjutan | ✅ | EDA → z-score → TF-IDF → KG → geo |
+| Inovatif & aplikatif | ✅ | RPI + KG + dashboard interaktif |
+| **Tanpa ML supervised** | ✅ by design | Jelaskan: tidak ada label ground-truth audit |
+
+**Yang WAJIB disebutkan di esai (juri pasti tanya):**
+
+1. **Kenapa rule-based, bukan ML?** — Tidak ada label "terbukti korup"; RPI = heuristik regulasi + statistik deskriptif.
+2. **Bobot RPI 0.20/0.20/…** — Dasar domain + sensitivity analysis (`06_sensitivity_analysis.py`).
+3. **Scatter chart 3.000 titik** — Hanya visualisasi; statistik card/peta/tabel = **100% baris** via DuckDB.
+4. **Limitasi geo** — 46 lokasi komposit edge case (`geo/unmatched_report.txt`), match rate 99,2%.
+
+---
+
+### 5. Penarikan Kesimpulan (10%)
+
+| Kriteria | Status |
+|----------|--------|
+| Kesimpulan selaras analisis | ⚠️ Esai tim — gunakan angka dari `output/scoring_log.txt`, `kg_summary.txt` |
+| Rekomendasi aplikatif | ✅ Integrasi API BPK/Inspektorat, refresh data SIRUP berkala |
+| Saran penelitian lanjut | ✅ Validasi dengan temuan audit riil, semi-supervised learning |
+
+---
+
