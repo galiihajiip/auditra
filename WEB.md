@@ -14,3 +14,21 @@ Stack **Opsi A**: Python backend + React frontend. **Seluruh 3 juta baris tetap 
 
 Satu-satunya "sample" eksplisit: **scatter chart** (max 3.000 titik random untuk performa). Stat cards, peta, ranking, dan tabel menghitung dari **seluruh** baris yang match filter.
 
+## Prasyarat
+
+1. Jalankan pipeline (dari root proyek):
+
+```powershell
+# Pastikan data mentah ada di data/year-2026_merged.csv
+pip install -r requirements.txt
+python run_pipeline.py          # EDA → cleaning → scoring → KG → geo → validation
+
+# Atau manual per-step — lihat docs/DATA_SCIENCE.md
+```
+
+2. (Opsional, lebih cepat) Export Parquet:
+
+```powershell
+python scripts/export_parquet.py
+```
+
