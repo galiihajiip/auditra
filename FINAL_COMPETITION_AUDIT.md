@@ -124,3 +124,27 @@ Severity: P0 = demo/product-breaking, P1 = serious, P2 = noticeable, P3 = polish
 ### P3
 Emoji icons (🔍, ☀, 🌙) instead of SVG icons; footer lists student names/ID but no licence/data-use statement; ECharts console warning about `alignTicks` (non-blocking); `web/package.json` lacks maplibre-gl though `package-lock.json` references it (stale lock).
 
+---
+
+## 4. Scorecard (skeptical, observed only)
+
+| Criterion | Weight | Score | Notes |
+|-----------|-------:|------:|-------|
+| Problem clarity & first impression | 10 | 7 | Good after hero; before: 3 |
+| Core journey (discover → evidence) | 15 | **2** | Absent |
+| Passport / provenance | 10 | **3** | Detail card only; weak provenance |
+| Moderation / verification | 10 | **0** | Absent |
+| Architecture & separation | 10 | 8 | Clean REST, aggregation server-side |
+| Data model | 5 | 3 | Fine for analytics only |
+| Validation / errors / security | 10 | 6 | Strong input validation; one P0 error bug fixed; no authn/rate-limit |
+| Visual quality | 10 | 7 | Consistent dark theme; dense |
+| Responsiveness | 5 | 3 | No overflow; mobile map/page weak |
+| Reliability for live demo | 10 | 5 | Hosted dead; local good after fixes |
+| Evidence for claims / testing | 5 | 3 | 12 tests pass; no FE tests; RPI unvalidated against ground truth |
+| **Total (after fixes)** | 100 | **≈ 47 literal brief** | |
+
+Reading the table honestly: against **this brief** the product scores ~47 *with* the zero-score rows included;
+if the judges' rubric is instead "analytics/data-science dashboard", remove the three absent rows (35 pts) and
+rescale: ≈ 64 %. I did not score the pre-fix state numerically.
+
+---
