@@ -69,3 +69,12 @@ if _DIST.is_dir() and (_DIST / "index.html").exists():
     app.mount("/assets", StaticFiles(directory=_DIST / "assets"), name="assets")
 
     @app.get("/{full_path:path}", include_in_schema=False)
+    def spa(full_path: str):
+        if full_path.startswith("api/"):
+            from fastapi import HTTPException
+
+            raise HTTPException(status_code=404, detail="Not Found")
+        candidate = (_DIST / full_path).resolve()
+        if full_path and candidate.is_file() and _DIST in candidate.parents:
+            return FileResponse(candidate)
+        return FileResponse(_DIST / "index.html")
