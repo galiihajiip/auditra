@@ -60,3 +60,12 @@ app.include_router(charts.router)
 app.include_router(kg.router)
 app.include_router(geo.router)
 
+
+# ── Single-process demo mode ────────────────────────────────────────────────
+# Jika frontend sudah di-build (web/dist, VITE_API_URL=/api), API ikut menyajikannya
+# sehingga demo hanya butuh satu perintah: `uvicorn api.main:app` → http://127.0.0.1:8000
+_DIST = Path(__file__).resolve().parent.parent / "web" / "dist"
+if _DIST.is_dir() and (_DIST / "index.html").exists():
+    app.mount("/assets", StaticFiles(directory=_DIST / "assets"), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
