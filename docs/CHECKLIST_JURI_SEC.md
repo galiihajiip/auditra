@@ -80,3 +80,35 @@ Tidak ada yang **otomatis** menjamin lolos final — kompetisi memilih 12 tim da
 
 ---
 
+## Tahap Final (Jika Lolos)
+
+| Indikator | Bobot | Persiapan |
+|-----------|-------|-----------|
+| Presentasi | 20% | Demo dashboard live + 1 slide pipeline |
+| Kreativitas | 50% | Jelaskan 7 sinyal + KG step-by-step; tunjukkan paket KRITIS contoh |
+| Tanya jawab | 30% | Latihan Q&A di bawah |
+
+---
+
+## Pertanyaan Juri — Jawaban Siap Pakai
+
+**Q: Kenapa tidak pakai machine learning?**  
+A: Label ground-truth (temuan audit) tidak tersedia publik. RPI memakai aturan PP 12/2019 & praktik audit (metode berisiko, fragmentasi, anomali pagu) — transparan dan explainable, sesuai prinsip Satu Data.
+
+**Q: Bagaimana memvalidasi RPI?**  
+A: (1) Face validity — top KRITIS dominan Penunjukan Langsung/Dikecualikan + pagu besar. (2) Sensitivity analysis bobot. (3) Cross-check dengan cluster KG lembaga berisiko.
+
+**Q: Apakah 3 juta baris benar-benar dipakai?**  
+A: Ya. `GET /api/meta` → 3.002.992 rows. DuckDB query agregat tanpa sampling. Satu-satunya sample: scatter (performa browser).
+
+**Q: Apa kontribusi Knowledge Graph?**  
+A: S7 reputasi lembaga + risk influence + deteksi 36 cluster lembaga berisiko — relasi yang tidak terlihat di tabel flat.
+
+**Q: Apakah ini menyimpulkan korupsi?**  
+A: **Tidak.** RPI = prioritas pemeriksaan, bukti awal untuk auditor manusia.
+
+**Q: Kenapa bobot S1 dan S2 masing-masing 20%?**  
+A: Metode pengadaan dan anomali pagu adalah dua indikator utama risiko tata kelola menurut literatur audit pengadaan; sensitivity test menunjukkan ranking top-100 stabil ±10% perturbasi bobot.
+
+---
+
