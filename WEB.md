@@ -54,3 +54,26 @@ npm run dev
 
 Buka: http://localhost:5173
 
+## Struktur
+
+```
+api/           FastAPI + DuckDB
+web/           React + Vite + Tailwind + ECharts + Plotly
+scripts/       export_parquet.py
+01-06_*.py       Pipeline analisis
+```
+
+## Performa (optimasi v1.1)
+
+Backend mem-materialize data ke `output/auditra.duckdb` + `output/data_network.parquet` (auto, sekali saja).
+
+| Operasi | Sebelum | Sesudah |
+|---|---|---|
+| Ganti filter (9 request CSV) | 10–60+ detik | **~0,3 detik** (1 request bundle) |
+| Filter sama lagi | 10–60+ detik | **instant** (cache) |
+| Pagination tabel | beberapa detik | **~0,03 detik** |
+
+**First run** setelah clone: startup API ~15–60 detik (build parquet + duckdb). Run berikutnya: ~2 detik.
+
+Endpoint utama: `GET /api/dashboard/bundle` — menggantikan 9 call terpisah.
+
