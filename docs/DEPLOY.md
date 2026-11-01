@@ -53,3 +53,36 @@ pip install -r requirements-web.txt && uvicorn api.main:app --host 0.0.0.0 --por
 ```
 CORS_ORIGINS=https://auditra.vercel.app,https://your-team.vercel.app
 ```
+
+**2. Frontend di Vercel**
+
+- Root directory: `web`
+- Framework: Vite
+- Build: `npm run build`
+- Output: `dist`
+
+**Environment variables (Vercel):**
+
+```
+VITE_API_URL=https://YOUR-BACKEND.up.railway.app/api
+```
+
+Deploy → buka URL Vercel → dashboard memanggil API Railway.
+
+---
+
+### Opsi B — Satu VPS (DigitalOcean / AWS EC2 / IDCloudHost)
+
+Cocok untuk presentasi final Satria Data (stabil, tidak cold start).
+
+```bash
+# Di VPS Ubuntu
+git clone <repo>
+cd AUDITRA
+pip install -r requirements-web.txt
+# upload output/ + geo/ ke server
+
+# Frontend build
+cd web && npm ci && npm run build
+
+# Serve API (port 8000)
