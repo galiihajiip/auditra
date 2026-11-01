@@ -159,3 +159,19 @@ Railway/Render free tier mungkin kurang RAM — upgrade atau pakai VPS untuk dem
 
 ---
 
+## Yang tidak perlu di-deploy
+
+- `data/year-2026_merged.csv` (mentah 1GB+) — hanya untuk pipeline
+- `node_modules/`, `__pycache__/`
+- Script pipeline `01_*.py` … (kecuali mau re-run di server)
+
+---
+
+## Troubleshooting
+
+| Gejala | Penyebab | Fix |
+|--------|----------|-----|
+| CORS error di browser | Backend belum allow origin Vercel | Set `CORS_ORIGINS` |
+| `Dataset belum siap` | DuckDB tidak ada di server | Upload `output/auditra.duckdb` |
+| Dashboard kosong | `VITE_API_URL` salah | Harus `https://host/api` bukan tanpa `/api` |
+| API lambat first hit | Cold start + warm DuckDB | Tunggu 30–60s atau keep-alive |
