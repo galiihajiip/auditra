@@ -131,3 +131,14 @@ flowchart LR
 
 ---
 
+## Apa yang Sengaja Tidak Dipakai
+
+| Teknik | Alasan |
+|--------|--------|
+| Supervised ML (Random Forest, XGBoost, dll.) | Tidak ada label ground-truth "audit finding"; scoring berbasis aturan regulasi |
+| Train/test split | Bukan prediktif model — scoring deterministik |
+| Hyperparameter tuning ML | Bobot RPI ditetapkan domain expert, bisa di-sensitivity test manual |
+| Real-time streaming | Batch pipeline + cached API cukup untuk dashboard analitik |
+
+---
+
