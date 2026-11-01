@@ -20,3 +20,8 @@ def test_provinsi_alias_resolved():
     assert resolve_provinsi("  JAWA BARAT ") == "JAWA BARAT"
 
 
+def test_packages_geo_uses_prov_column():
+    where, params = build_where(provinsi="PAPUA", packages_geo=True)
+    assert "prov_name" in where and params == ["PAPUA"]
+
+
