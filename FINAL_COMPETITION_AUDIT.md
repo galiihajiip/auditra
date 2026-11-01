@@ -46,3 +46,16 @@ Against the literal brief (journey, passport, moderation scored as absent): **47
 | 13 | Reliable to demo in front of judges? | **As configured: no.** Hosted backend is dead (see P0-2), cold start broke the page (P0-3, fixed). After fixes, a local one-process demo is reliable (verified from cold start → populated in ~7 s). | §3 |
 
 ---
+
+## 2. Claims vs. evidence
+
+| ID | Claim | Verdict |
+|----|-------|---------|
+| C1 | README: "Daftar Paket … akses penuh ke dataset via API"; UI: "semua baris dapat diakses via pagination" | **False.** Both UI and API force `RPI ≥ 30`; 2.38 M "RENDAH" rows are unreachable from the table/API list (only 623,805 of 3,002,992). UI text corrected; README line still overstated (not edited). |
+| C2 | README signal table: S6 = "Sentralitas jaringan", S7 = "Komunitas risiko" | **False vs code.** `02_scoring.py`: S6 = dana APBN + metode, S7 = KG reputation. README corrected. |
+| C3 | "LIVE" badge in header | **Misleading.** It is a static string; it never reflects backend health. Unfixed (P2). |
+| C4 | "Verified statistics" (568 KRITIS etc.) | **Numbers match the API** (568 / 3,002,992 / 1,015,601 reproduced live). That the RPI *identifies risky packages* is **not evidenced**: there is no ground truth (known audit findings) in the repo; `06_sensitivity_analysis.py` only shows weight robustness. RPI is a heuristic prioritisation, which the UI now states. |
+| C5 | Deployed app (`.env.production` → railway URL) | **Dead**: `GET https://auditra-production.up.railway.app/api/health` → `404 Application not found`. |
+| C6 | Map "seluruh Indonesia" | Misleading: K/L (central ministry) packages — where the largest risk values sit — have **no kab/kota location**, so K/L map mode is blank by design. |
+
+---
