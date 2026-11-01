@@ -72,3 +72,18 @@ GET http://127.0.0.1:8000/api/meta
 Formula lengkap, dasar regulasi (PP 12/2019, Perpres 16/2018), dan analisis sensitivitas bobot → [`docs/METODOLOGI.md`](docs/METODOLOGI.md).
 
 ---
+
+## Statistik Utama (Verified)
+
+| Metrik | Nilai |
+|--------|-------|
+| Baris dataset final | **3.002.992** |
+| Kolom pipeline | **32** |
+| Lembaga unik | 662 |
+| Satker unik | 34.602 |
+| Node Knowledge Graph | 35.320 |
+| Edge KG | 207.427 |
+| Paket tier KRITIS (RPI ≥ 70, post-KG) | 568 |
+| Geo match rate | **99,2%** lokasi unik (46 edge case → `geo/unmatched_report.txt`) |
+
+---
