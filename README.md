@@ -131,3 +131,43 @@ flowchart LR
 | Frontend | React 18, Vite 6, Tailwind, ECharts, Plotly, vis-network | Dashboard interaktif + PWA |
 
 ---
+
+## Quick Start
+
+### 1. Clone & siapkan data
+
+```powershell
+git clone https://github.com/danisharizka/auditra.git
+cd auditra
+```
+
+Letakkan export SIRUP sebagai `data/year-2026_merged.csv` (lihat [`data/README.md`](data/README.md)). File ini **tidak** di-commit ke repo.
+
+### 2. Jalankan pipeline analisis
+
+```powershell
+pip install -r requirements.txt
+python run_pipeline.py
+```
+
+Opsi lanjutan:
+
+```powershell
+python run_pipeline.py --skip-eda      # lewati EDA
+python run_pipeline.py --from 02       # mulai dari scoring
+python run_pipeline.py --validate-only # QA gate saja
+```
+
+| Step | Script | Output utama |
+|------|--------|--------------|
+| 0 | `00_eda.py` | `output/reports/eda_*` |
+| 1 | `01_cleaning.py` | `data/data_clean.csv` |
+| 1b | `01b_patch_lembaga_provinsi.py` | patch data quality |
+| 2 | `02_scoring.py` | `output/data_scored.csv` + 7 sinyal |
+| 3 | `03_network_analysis.py` | KG + `output/data_network.csv` |
+| 3b | `03b_geo_matching.py` | `geo/geo_lookup.csv` |
+| 5 | `05_validate.py` | laporan QA |
+| 6 | `06_sensitivity_analysis.py` | robustness bobot RPI |
+
+*(Opsional, startup API lebih cepat)* `python scripts/export_parquet.py`
+
