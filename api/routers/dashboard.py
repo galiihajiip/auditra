@@ -22,7 +22,11 @@ def dashboard_bundle(
     try:
         store = require_store()
         return store.fetch_dashboard_bundle(provinsi, lembaga, metode, risk_min)
+    except HTTPException:
+        # mis. 503 "database sedang disiapkan" dari require_store — jangan diubah jadi 500
+        raise
     except FileNotFoundError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        log.exception("dashboard bundle failed")
+        raise HTTPException(status_code=500, detail="Gagal menghitung dashboard.") from exc
