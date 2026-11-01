@@ -34,3 +34,25 @@ Bukan dengan skor hitam-putih, melainkan **Risk Priority Index (RPI)**: alat **p
 
 ---
 
+## Fitur Dashboard
+
+| Modul | Apa yang bisa dilakukan |
+|-------|-------------------------|
+| **KPI & Stat Cards** | Total paket, pagu berisiko, distribusi tier risiko, cakupan geografi |
+| **Peta Choropleth** | Prioritas audit per kab/kota — seluruh Indonesia; 4 mode pemilik (K/L · Pemprov · Pemkot · Lainnya); toggle RPI / Pagu Berisiko |
+| **Sidebar Lembaga** | Top lembaga prioritas audit; klik untuk filter; tier Ekstrem (KRITIS + anomali) |
+| **7 Sinyal RPI** | Radar chart profil risiko; bar chart per metode; scatter pagu vs RPI |
+| **Knowledge Graph** | Subgraf lembaga–satker mengikuti filter aktif; kesimpulan otomatis |
+| **Daftar Paket** | Tabel prioritas dengan pagination (50/halaman) — akses penuh ke dataset via API |
+| **Filter Global** | Provinsi · Lembaga · Metode · Ambang RPI minimum |
+| **Tema & PWA** | Dark / light mode; installable di mobile & desktop; responsif PC–tablet–ponsel |
+
+**Integritas data:** statistik agregat, ranking, peta, dan KG dihitung dari **seluruh baris** yang cocok filter. Satu-satunya sampling eksplisit: scatter chart (max 3.000 titik acak untuk performa render).
+
+Verifikasi runtime:
+
+```http
+GET http://127.0.0.1:8000/api/meta
+```
+
+---
