@@ -59,3 +59,30 @@ Against the literal brief (journey, passport, moderation scored as absent): **47
 | C6 | Map "seluruh Indonesia" | Misleading: K/L (central ministry) packages — where the largest risk values sit — have **no kab/kota location**, so K/L map mode is blank by design. |
 
 ---
+
+## 3. Weaknesses register
+
+Severity: P0 = demo/product-breaking, P1 = serious, P2 = noticeable, P3 = polish.
+
+### P0
+
+**P0-1 — Product does not implement the brief's core journey** — *Unfixed (out of scope; not "safe & feasible")*
+- Module: whole product (no passport, evidence, moderation, auth, DB writes).
+- Repro: open app; try to submit evidence / find a passport / moderate → no UI or endpoint (`grep -ri "passport\|moderat\|evidence" .` → nothing; `curl -X POST localhost:8010/api/packages` → 405).
+- Why: judges testing the stated criteria cannot score them.
+- Fix: building it properly = users + auth, `evidence`/`review` tables (Postgres), submission form w/ validation + file handling, reviewer queue with state machine (pending → verified/rejected), audit log, provenance fields. Multi-day work; faking it with UI-only buttons would violate your "no simulation" bar, so I did not.
+- Partial mitigation shipped: package detail panel (explains score), honest caveat text.
+
+**P0-2 — Hosted backend is down** — *Not fixable from here; mitigated*
+- Module: `web/.env.production`, `vercel.env`, `railway.toml`.
+- Repro: `curl https://auditra-production.up.railway.app/api/health` → 404 "Application not found". Production build then shows "Dataset belum siap" (observed in screenshot).
+- Why: any judge opening the deployed URL sees an error page.
+- Fix/mitigation: redeploy Railway service (needs your account). Meanwhile **FastAPI now serves `web/dist` itself** (`api/main.py`): `VITE_API_URL=/api npm run build` then `uvicorn api.main:app` → one process, one URL. Verified: `/`, deep links → index.html, `/api/*` unaffected, unknown `/api/x` → 404 JSON.
+- Fixed: **mitigated**, root cause (deployment) open.
+
+**P0-3 — Cold start leaves the dashboard permanently broken** — *Fixed*
+- Module: `api/routers/dashboard.py`.
+- Repro (before): start API, load page immediately → `/api/dashboard/bundle` returns **500** (a 503 "warming" was caught by `except Exception` and re-raised as 500); client retry only handles 502/503, so the banner "Gagal memuat data filter: 503…" stayed forever and KPIs showed "—" (observed for 40 s).
+- Why: the first thing judges see after launching the server.
+- Fix: re-raise `HTTPException`; hide internal exception text behind a generic message + server log. After: cold start → populated at ~7 s, no banner. Regression test `test_dashboard_bundle_preserves_503`.
+
