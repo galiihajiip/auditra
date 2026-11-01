@@ -218,3 +218,26 @@ Panduan deploy split (Vercel + Railway/VPS): [`docs/DEPLOY.md`](docs/DEPLOY.md) 
 **Performa:** bundle endpoint + cache in-memory DuckDB → ganti filter ~**0,3 detik** (vs puluhan detik scan CSV mentah). First startup setelah pipeline: build DuckDB ~15–60 detik; run berikutnya ~2 detik.
 
 ---
+
+## Struktur Repositori
+
+```
+auditra/
+├── run_pipeline.py                          # Orchestrator
+├── 00_eda.py … 06_sensitivity_analysis.py   # Pipeline step scripts
+├── api/                                     # FastAPI + DuckDB layer
+│   ├── db.py                                # Query & aggregations
+│   ├── filters.py                           # Dynamic WHERE builder
+│   └── routers/                             # REST endpoints
+├── web/                                     # React dashboard (PWA)
+│   ├── public/                              # Logo, favicon, manifest, SW
+│   └── src/components/                      # Map, charts, KG, tables
+├── pipeline/                                # Shared pipeline utilities
+├── geo/                                     # GeoJSON + lookup tables
+├── output/                                  # Generated artifacts (gitignored)
+├── scripts/                                 # export_parquet, gen_brand_assets
+├── tests/                                   # Unit tests (validation)
+└── docs/                                    # Metodologi, sains data, deploy
+```
+
+---
