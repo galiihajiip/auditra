@@ -116,3 +116,24 @@ Dengan opsi ini **tidak perlu Vercel** — satu domain untuk semua.
 ---
 
 ### Opsi C — Demo lokal (presentasi juri)
+
+Paling aman untuk final:
+
+```powershell
+# Terminal 1
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Terminal 2
+cd web && npm run dev
+```
+
+Atau build + preview:
+
+```powershell
+cd web
+$env:VITE_API_URL="http://127.0.0.1:8000/api"
+npm run build && npm run preview
+```
+
+---
+
