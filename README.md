@@ -203,3 +203,18 @@ npm run preview
 Panduan deploy split (Vercel + Railway/VPS): [`docs/DEPLOY.md`](docs/DEPLOY.md) · detail web: [`WEB.md`](WEB.md)
 
 ---
+
+## API Endpoints (Utama)
+
+| Endpoint | Fungsi |
+|----------|--------|
+| `GET /api/meta` | Verifikasi jumlah baris/kolom & integritas |
+| `GET /api/filters/options` | Opsi provinsi, lembaga, metode |
+| `GET /api/dashboard/bundle` | Satu request: overview, charts, KG, choropleth, ranking |
+| `GET /api/geo/kabkota` | GeoJSON kab/kota untuk peta |
+| `GET /api/packages?page=&…` | Pagination daftar paket (50/halaman) |
+| `GET /api/kg` | Node & edge Knowledge Graph (filtered) |
+
+**Performa:** bundle endpoint + cache in-memory DuckDB → ganti filter ~**0,3 detik** (vs puluhan detik scan CSV mentah). First startup setelah pipeline: build DuckDB ~15–60 detik; run berikutnya ~2 detik.
+
+---
