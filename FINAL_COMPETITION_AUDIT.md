@@ -86,3 +86,41 @@ Severity: P0 = demo/product-breaking, P1 = serious, P2 = noticeable, P3 = polish
 - Why: the first thing judges see after launching the server.
 - Fix: re-raise `HTTPException`; hide internal exception text behind a generic message + server log. After: cold start → populated at ~7 s, no banner. Regression test `test_dashboard_bundle_preserves_503`.
 
+### P1
+
+**P1-1 — Default map view blank** — *Fixed.* `ChoroplethMap.tsx`. Before: K/L tab default → all zeros, "Tidak ada data" under a 0–0.01 colour bar. After: auto-selects the first non-empty mode (Pemprov). Still blank if user manually picks K/L (by design of data, see C6; no explanatory text yet — P2).
+
+**P1-2 — No value proposition on first view** — *Fixed.* `App.tsx` hero + "RPI is a priority tool, not a verdict".
+
+**P1-3 — 6.7 MB single JS bundle (2.08 MB gzip)** — *Fixed (partly).* `vite.config.ts`, `App.tsx`. Entry chunk now 214 KB (72 KB gz); Plotly (4.9 MB, 1.48 MB gz) is a lazy chunk that loads with the map; ECharts 1.06 MB and vis 0.5 MB separate chunks. Plotly remains heavy — the real fix is MapLibre/deck.gl or a lighter Plotly partial bundle (`plotly.js-geo-dist-min`) (unfixed, P2).
+
+**P1-4 — Radar chart throws on every load** — *Fixed.* `Charts.tsx`: radar rendered with zero indicators before data → `TypeError … 'push'` page error. Also set `type:"value"` on scatter axes explicitly. Prod build now emits **0 page errors** (verified, desktop + mobile).
+
+**P1-5 — Unsupported "all rows accessible" claim (C1)** — *UI fixed, README partial.*
+
+**P1-6 — Methodology docs contradict code (C2)** — *Fixed (README).*
+
+**P1-7 — Mobile map unusable** — *Partly fixed.* Horizontal colour bar and 300 px height under 640 px. Verified visually; the map is now legible but small. Needs a true mobile layout (collapse sidebar, sticky filter drawer) — unfixed P2.
+
+**P1-8 — Table rows were dead; no drill-down** — *Fixed.* Keyboard-accessible (`role=button`, Enter/Space, Esc closes, `aria-modal`) detail dialog w/ per-signal bars and weights from `02_scoring.py`.
+
+### P2 (not fixed unless stated)
+
+| ID | Issue | Module | Repro | Fix |
+|----|-------|--------|-------|-----|
+| P2-1 | "LIVE" badge is decoration | `AppHeader.tsx` | Stop API → badge still says LIVE | Poll `/api/health`; show Warming/Offline |
+| P2-2 | No filter reset, no URL state/deep-linking, no table search/sort | `App.tsx`, `FilterBar.tsx` | Apply 3 filters, reload → lost | Sync filters to `URLSearchParams`; add Reset |
+| P2-3 | No auth, no rate limiting, `/docs` public, CORS `allow_credentials=True` with env-driven origins | `api/main.py` | `curl /docs` → 200 | Fine for public open data; add rate-limit + disable docs in prod if not intended |
+| P2-4 | `page` beyond `total_pages` returns 200 empty | `api/routers/packages.py` | `?page=999999` | Clamp or 404 |
+| P2-5 | Business rule `risk_min ≥ 30` duplicated FE+BE, silently changes the user's "Semua" filter semantics | `client.ts`, `db.py` | Select "Semua" → table says RPI≥30 | Return `effective_risk_min` in response; show it |
+| P2-6 | Entity naming quality: "lembaga" values include regencies (e.g. scatter "Kab. Simeulue"); sidebar shows only K/L-type | `db.py` rank queries | Hover scatter | Normalise owner type in pipeline |
+| P2-7 | Dev-only: React StrictMode + react-plotly throws `_scrollZoom` in `vite dev` | `main.tsx` | `npm run dev`, open console | Dev-only, absent in prod build; guard `Plot` mount or upgrade lib |
+| P2-8 | Accessibility not audited: 10–11 px captions, colour-only risk encoding in map/scatter, no labelled `<label for>` verified, KG canvas not keyboard-accessible | various | — | Run axe/Lighthouse; add text alternatives |
+| P2-9 | Mobile page ~7.5 k px, 5 stacked charts; KG with 43 overlapping nodes is hard to read | layout | 390 px screenshot | Tabs/accordions on mobile |
+| P2-10 | Service worker caches shell cache-first-with-network; a stale shell can survive deploys (`CACHE="auditra-v5"` manual bump) | `public/sw.js` | — | Build-hash cache name |
+| P2-11 | 440 MB of parquet committed/needed to run; repo not runnable without it; `npm install` fails under a root-owned npm cache (environmental) | repo | fresh clone | Git LFS / release asset + `make demo` |
+| P2-12 | No front-end tests, no E2E, no CI. Only pipeline tests existed | `tests/` | — | Add Playwright smoke test (script used here is a template) |
+
+### P3
+Emoji icons (🔍, ☀, 🌙) instead of SVG icons; footer lists student names/ID but no licence/data-use statement; ECharts console warning about `alignTicks` (non-blocking); `web/package.json` lacks maplibre-gl though `package-lock.json` references it (stale lock).
+
