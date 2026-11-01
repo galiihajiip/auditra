@@ -169,3 +169,26 @@ cd web && npm run dev
 
 ---
 
+## Struktur File Pipeline
+
+```
+config/pipeline.yaml     # Bobot, threshold, path — reproducibility
+pipeline/
+  config.py              # Load YAML
+  validate.py            # Validasi per tahap
+00_eda.py                # EDA
+01_cleaning.py           # Preprocessing
+01b_patch_*.py           # Data quality patch
+02_scoring.py            # Feature engineering + RPI
+03_network_analysis.py   # Knowledge Graph
+03b_geo_matching.py      # Geo join
+05_validate.py           # QA gate
+run_pipeline.py          # Orchestrator
+output/reports/          # EDA + validation reports
+api/                     # Serving layer
+web/                     # Frontend
+tests/test_validate.py   # Unit tests validasi
+```
+
+---
+
