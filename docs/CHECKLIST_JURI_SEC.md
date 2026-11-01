@@ -112,3 +112,36 @@ A: Metode pengadaan dan anomali pagu adalah dua indikator utama risiko tata kelo
 
 ---
 
+## Risiko Diskualifikasi — Hindari
+
+| Risiko | Mitigasi |
+|--------|----------|
+| Plagiarisme | Turnitin + surat orisinalitas |
+| Data tidak disebutkan | Cantumkan SIRUP + tanggal unduh di esai |
+| Klaim tanpa bukti | Setiap angka → `output/reports/` atau API `/meta` |
+| Sub-tema tidak sesuai form | Mapping ke **Sosial-Ekonomi** |
+| Demo gagal di final | Siapkan video backup + screenshot |
+
+---
+
+## Checklist Upload SEC
+
+- [ ] Esai PDF: `SEC_(ID tim).pdf` — 2000–3000 kata
+- [ ] Surat orisinalitas: `SEC_Orisinalitas_(ID tim).pdf`
+- [ ] Turnitin similarity < 25%
+- [ ] ID tim di header setiap halaman
+- [ ] Daftar pustaka (PP 12/2019, Perpres 16/2018, SIRUP, NetworkX, sklearn TF-IDF, dll.)
+- [ ] Minimal 1 tabel statistik + 1 visualisasi dari pipeline
+- [ ] (Final) Presentasi PDF: `SEC_Presentasi_(ID tim).pdf`
+
+---
+
+## Verifikasi Cepat Sebelum Submit
+
+```powershell
+python run_pipeline.py --validate-only
+python 06_sensitivity_analysis.py
+curl http://127.0.0.1:8000/api/meta
+```
+
+Semua harus PASS / return `total_rows: 3002992`.
