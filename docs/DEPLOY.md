@@ -86,3 +86,33 @@ pip install -r requirements-web.txt
 cd web && npm ci && npm run build
 
 # Serve API (port 8000)
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Serve static (nginx) dari web/dist, proxy /api → :8000
+```
+
+Nginx contoh:
+
+```nginx
+server {
+    listen 80;
+    server_name auditra.example.com;
+
+    root /var/www/auditra/web/dist;
+    index index.html;
+
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000/api/;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
+```
+
+Dengan opsi ini **tidak perlu Vercel** — satu domain untuk semua.
+
+---
+
+### Opsi C — Demo lokal (presentasi juri)
