@@ -46,3 +46,36 @@ flowchart LR
 
 ---
 
+## Tingkat Dasar
+
+### 1. Exploratory Data Analysis (EDA)
+**Script:** `00_eda.py`
+
+- Profil dimensi, tipe data, missing values
+- Statistik deskriptif `pagu` (mean, median, percentil)
+- Deteksi outlier IQR
+- Distribusi kategorikal (metode, jenis, lembaga)
+- Kardinalitas (unique lembaga, satker, lokasi)
+- Output: `output/reports/eda_report.md`, `eda_stats.json`, `eda_charts.html`
+
+### 2. Preprocessing
+**Script:** `01_cleaning.py`, `01b_patch_lembaga_provinsi.py`
+
+| Operasi | Detail |
+|---------|--------|
+| Column selection | Hanya kolom SIRUP murni; drop enrichment Nemesis AI |
+| Deduplication | `drop_duplicates(subset='id')` |
+| Invalid filter | `pagu > 0` |
+| Text normalization | Strip whitespace |
+| Category encoding | `sumberDana` → `sumberDana_cat` (APBN variants) |
+| Data quality patch | Hapus baris `lembaga` = nama provinsi polos |
+
+### 3. Validasi Kualitas Data
+**Script:** `05_validate.py`, modul `pipeline/validate.py`
+
+- Cek kolom wajib, duplikat, rentang RPI, label risiko
+- Integrity row count antar tahap
+- Geo lookup completeness
+
+---
+
