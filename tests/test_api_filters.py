@@ -40,3 +40,10 @@ def test_dashboard_bundle_preserves_503(monkeypatch):
     assert r.status_code == 503  # was 500 → frontend warm-up retry never fired
 
 
+@pytest.mark.parametrize("qs", ["page=0", "page_size=501", "risk_min=abc"])
+def test_packages_rejects_bad_params(qs):
+    from fastapi.testclient import TestClient
+
+    from api.main import app
+
+    assert TestClient(app).get(f"/api/packages?{qs}").status_code == 422
