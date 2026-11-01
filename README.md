@@ -87,3 +87,47 @@ Formula lengkap, dasar regulasi (PP 12/2019, Perpres 16/2018), dan analisis sens
 | Geo match rate | **99,2%** lokasi unik (46 edge case → `geo/unmatched_report.txt`) |
 
 ---
+
+## Arsitektur
+
+```mermaid
+flowchart LR
+  subgraph ingest [Ingest]
+    SIRUP[(SIRUP CSV\n~3M baris)]
+  end
+
+  subgraph pipeline [Pipeline Python]
+    EDA[00 EDA]
+    CLN[01 Cleaning]
+    SCR[02 Scoring RPI]
+    KG[03 Network / KG]
+    GEO[03b Geo Match]
+    VAL[05 Validate]
+    SEN[06 Sensitivity]
+  end
+
+  subgraph store [Materialized Store]
+    DUCK[(auditra.duckdb)]
+    PQ[(data_network.parquet)]
+  end
+
+  subgraph serve [Serving]
+    API[FastAPI + DuckDB]
+    WEB[React + Vite PWA]
+  end
+
+  SIRUP --> EDA --> CLN --> SCR --> KG --> GEO --> VAL --> SEN
+  KG --> DUCK
+  SCR --> PQ
+  DUCK --> API
+  API --> WEB
+```
+
+| Lapisan | Teknologi | Peran |
+|---------|-----------|-------|
+| Pipeline | Python, pandas, NetworkX, scikit-learn | EDA → cleaning → RPI → KG → geo |
+| Store | DuckDB, Parquet | Query cepat tanpa memotong source |
+| API | FastAPI 1.1 | Agregat, filter, pagination, bundle endpoint |
+| Frontend | React 18, Vite 6, Tailwind, ECharts, Plotly, vis-network | Dashboard interaktif + PWA |
+
+---
