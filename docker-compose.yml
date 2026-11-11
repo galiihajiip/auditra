@@ -1,0 +1,24 @@
+# docker compose up -d --build     → http://SERVER:8000
+services:
+  auditra:
+    build: .
+    image: auditra:latest
+    restart: unless-stopped
+    ports:
+      - "${AUDITRA_PORT:-8000}:8000"
+    environment:
+      # WAJIB diganti di server publik (string acak panjang): openssl rand -hex 32
+      AUDITRA_SECRET: ${AUDITRA_SECRET:?isi AUDITRA_SECRET di file .env (openssl rand -hex 32)}
+      # 1 = buat akun demo (auditor/reviewer, kata sandi publik) untuk pitching; 0 setelah selesai
+      AUDITRA_SEED_DEMO: ${AUDITRA_SEED_DEMO:-1}
+      # Asal yang boleh memanggil API bila UI dihosting di domain lain (tidak perlu bila satu domain)
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+    volumes:
+      - auditra_data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 1500M
+
+volumes:
+  auditra_data:
