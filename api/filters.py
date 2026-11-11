@@ -35,6 +35,7 @@ def build_where(
     use_geo: bool = False,
     packages_geo: bool = False,
     packages_via_geo: bool = False,
+    use_pkg_prov: bool = False,
     table_prefix: str = "",
 ) -> tuple[str, list]:
     """Return SQL WHERE clause and bound parameters (safe from injection)."""
@@ -55,9 +56,12 @@ def build_where(
         resolved = resolve_provinsi(provinsi)
         if packages_via_geo and not packages_geo and not use_geo:
             id_col = f"{pfx}id" if pfx else "id"
-            clauses.append(
-                f"{id_col} IN (SELECT id FROM packages_geo WHERE {provinsi_match_sql('prov_name')})"
-            )
+            if use_pkg_prov:
+                clauses.append(f"{id_col} IN (SELECT id FROM pkg_prov WHERE prov_upper = UPPER(TRIM(?)))")
+            else:
+                clauses.append(
+                    f"{id_col} IN (SELECT id FROM packages_geo WHERE {provinsi_match_sql('prov_name')})"
+                )
             params.append(resolved)
         elif prov_col == "lokasi":
             patterns = list({f"%{resolved}%", f"%{provinsi.strip()}%"})
