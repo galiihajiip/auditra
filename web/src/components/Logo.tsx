@@ -28,7 +28,7 @@ export default function Logo({ showWordmark = true, size = "md" }: Props) {
       />
 
       {showWordmark && (
-        <span className={`font-extrabold leading-none text-primary ${textSizes[size]}`}>
+        <span className={`hidden font-extrabold leading-none text-primary min-[480px]:inline ${textSizes[size]}`}>
           AUDITRA
         </span>
       )}
