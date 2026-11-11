@@ -1,0 +1,146 @@
+[
+ {
+  "file": "d01_dashboard_hero.png",
+  "route": "/",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:11:16.968Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d02_dashboard_prioritas.png",
+  "route": "/",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:11:27.376Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d03_peta.png",
+  "route": "/?tab=peta",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:11:41.356Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d04_analitik.png",
+  "route": "/?tab=analitik",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:11:54.326Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d05_knowledge_graph.png",
+  "route": "/?tab=jaringan",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:09.798Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d06_tabel_paket.png",
+  "route": "/?rpi=70",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:20.236Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d07_passport.png",
+  "route": "/paket/65938081",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:25.039Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d08_penugasan_rencana.png",
+  "route": "/kasus/1",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:32.242Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d09_penugasan_pengujian.png",
+  "route": "/kasus/1",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:39.602Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d10_penugasan_temuan.png",
+  "route": "/kasus/1",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:46.740Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d11_papan_penugasan.png",
+  "route": "/kasus",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:51.445Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": "Bagian footer dipotong dari tangkapan layar karena saat pengambilan masih memuat nama tim SEC. Footer pada kode sumber kini sudah diperbarui."
+ },
+ {
+  "file": "d12_metodologi.png",
+  "route": "/metodologi",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:55.084Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "d13_masuk.png",
+  "route": "/masuk",
+  "viewport": "1440x900",
+  "captured": "2026-11-11T08:12:58.327Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": "Bagian footer dipotong dari tangkapan layar karena saat pengambilan masih memuat nama tim SEC. Footer pada kode sumber kini sudah diperbarui."
+ },
+ {
+  "file": "m01_dashboard.png",
+  "route": "/",
+  "viewport": "390x844",
+  "captured": "2026-11-11T08:13:08.370Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "m02_passport.png",
+  "route": "/paket/65938081",
+  "viewport": "390x844",
+  "captured": "2026-11-11T08:13:12.947Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "m03_penugasan.png",
+  "route": "/kasus/1",
+  "viewport": "390x844",
+  "captured": "2026-11-11T08:13:20.319Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "t01_dashboard.png",
+  "route": "/",
+  "viewport": "820x1180",
+  "captured": "2026-11-11T08:13:30.471Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ },
+ {
+  "file": "t02_passport.png",
+  "route": "/paket/65938081",
+  "viewport": "820x1180",
+  "captured": "2026-11-11T08:13:35.152Z",
+  "dataStatus": "snapshot SIRUP TA 2026 (3.002.992 paket); penugasan dan bukti = data demo (database sementara)",
+  "note": ""
+ }
+]
