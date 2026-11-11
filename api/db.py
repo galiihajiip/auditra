@@ -773,6 +773,36 @@ class DataStore:
         return result
 
     # Legacy helpers for individual endpoints
+    def fetch_package(self, package_id: int) -> dict | None:
+        """Satu paket lengkap (termasuk sinyal & atribut sumber) untuk halaman paket / snapshot kasus."""
+        with self._lock:
+            df = self.conn.execute(
+                """
+                SELECT id, paket, jenisPengadaan, metode, lembaga, satker, lokasi, pagu,
+                       pemilihanDate, sumberDana, isUMKM, dalamNegeri, uraianPekerjaan, ownerType,
+                       RPI, risk_label,
+                       s1_metode, s2_pagu_anomali, s3_fragmentasi, s4_konsentrasi,
+                       s5_umkm, s6_dana_metode, s7_reputasi,
+                       kg_pagerank, kg_betweenness, kg_degree, kg_cluster
+                FROM packages WHERE id = ? LIMIT 1
+                """,
+                [int(package_id)],
+            ).fetchdf()
+        if df.empty:
+            return None
+        rec = df.iloc[0].to_dict()
+        out: dict = {}
+        for k, v in rec.items():
+            if v is None or (isinstance(v, float) and v != v):
+                out[k] = None
+            elif hasattr(v, "item"):
+                out[k] = v.item()
+            elif hasattr(v, "isoformat"):
+                out[k] = v.isoformat()
+            else:
+                out[k] = v
+        return out
+
     def fetch_df(self, sql: str, params: list | None = None) -> pd.DataFrame:
         with self._lock:
             if params:
