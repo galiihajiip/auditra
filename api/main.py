@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from api.config import CORS_ORIGINS
 from api.db import DataStore, _use_parquet_views
@@ -55,6 +56,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.add_middleware(GZipMiddleware, minimum_size=1024)  # bundel dasbor dan GeoJSON besar → jauh lebih kecil di jaringan
+
+
+@app.middleware("http")
+async def security_headers(request, call_next):
+    """Header keamanan dasar. CSP sengaja tidak dipasang agar peta/grafik pihak ketiga tidak terblokir."""
+    resp = await call_next(request)
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    resp.headers.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    path = request.url.path
+    if path.startswith("/assets/"):
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"  # nama berkas ber-hash
+    elif not path.startswith("/api/") and "Cache-Control" not in resp.headers:
+        resp.headers["Cache-Control"] = "no-cache"  # index.html selalu diperiksa ulang agar rilis baru terambil
+    return resp
+
 
 app.include_router(meta.router)
 app.include_router(auth.router)
