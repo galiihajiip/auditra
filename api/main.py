@@ -10,12 +10,17 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.config import CORS_ORIGINS
 from api.db import DataStore, _use_parquet_views
-from api.routers import charts, dashboard, filters, geo, kg, meta, overview, packages
+from api.appdb import init_db
+from api.auth import seed_demo_users
+from api.routers import auth, cases, charts, dashboard, filters, freshness, geo, kg, meta, overview, packages
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Warm DuckDB in background on Railway (parquet view mode); optional full warm-up."""
+    init_db()
+    if os.getenv("AUDITRA_SEED_DEMO", "1").lower() in {"1", "true", "yes"}:
+        seed_demo_users()
     warmup_enabled = os.getenv("AUDITRA_WARMUP_ON_STARTUP", "0").lower() in {
         "1",
         "true",
@@ -52,9 +57,12 @@ app.add_middleware(
 )
 
 app.include_router(meta.router)
+app.include_router(auth.router)
+app.include_router(cases.router)
 app.include_router(filters.router)
 app.include_router(dashboard.router)
 app.include_router(overview.router)
+app.include_router(freshness.router)
 app.include_router(packages.router)
 app.include_router(charts.router)
 app.include_router(kg.router)
