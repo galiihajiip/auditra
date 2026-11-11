@@ -398,7 +398,7 @@ export default function KgNetwork({ nodes, edges }: Props) {
             Hapus pilihan
           </button>
         )}
-        <span className="self-center text-[11px] text-muted">
+        <span className="self-center text-xs text-muted">
           Arahkan ke node · klik detail · scroll zoom · drag geser
         </span>
       </div>
@@ -420,11 +420,11 @@ export default function KgNetwork({ nodes, edges }: Props) {
             <h3 className="mb-1 text-xs font-semibold text-primary">
               Relasi · {nodeTypeLabel(selectedNode?.node_type)}
             </h3>
-            <p className="mb-2 text-[11px] font-medium text-primary">{selectedLabel}</p>
+            <p className="mb-2 text-xs font-medium text-primary">{selectedLabel}</p>
             {connections.length === 0 ? (
-              <p className="text-[11px] text-muted">Tidak ada relasi dalam subgraf ini.</p>
+              <p className="text-xs text-muted">Tidak ada relasi dalam subgraf ini.</p>
             ) : (
-              <ul className="max-h-[400px] space-y-1.5 overflow-y-auto text-[11px]">
+              <ul className="max-h-[400px] space-y-1.5 overflow-y-auto text-xs">
                 {connections.map((c, i) => (
                   <li
                     key={`${c.direction}-${c.peerLabel}-${i}`}
@@ -446,7 +446,7 @@ export default function KgNetwork({ nodes, edges }: Props) {
         )}
       </div>
 
-      <p className="mt-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-3 py-2 text-[11px] leading-relaxed text-muted">
+      <p className="mt-3 rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-subtle)] px-3 py-2 text-xs leading-relaxed text-muted">
         <span className="font-semibold text-primary">Kesimpulan: </span>
         {summary}
       </p>
