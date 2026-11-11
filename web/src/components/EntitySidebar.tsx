@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import Icon from "./Icon";
 import { formatPaguCompact } from "../utils/formatPagu";
 import type { RankRow } from "../types";
 
@@ -57,18 +58,18 @@ export default function EntitySidebar({ data, selectedLembaga, onSelect }: Props
         >
           By Pagu
         </button>
-        <span className="ml-auto self-center text-[10px] text-muted">
+        <span className="ml-auto self-center text-xs text-muted">
           {filtered.length} lembaga
         </span>
       </div>
 
       <div className="relative mb-2">
-        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted">
-          🔍
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">
+          <Icon name="search" size={15} />
         </span>
         <input
           type="search"
-          className="input-select pl-8"
+          className="input-text !pl-9"
           placeholder="Cari lembaga…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -94,20 +95,20 @@ export default function EntitySidebar({ data, selectedLembaga, onSelect }: Props
             >
               <div className="flex items-center justify-between gap-2">
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-semibold text-primary">
+                  <p className="truncate text-sm font-semibold text-primary">
                     <span className="mr-1 font-bold text-muted">#{idx + 1}</span>
                     {name}
                   </p>
                 </div>
                 <span className="entity-badge shrink-0">K/L</span>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10px] text-muted">
-                <span>{row.n_paket.toLocaleString("id-ID")} pkt</span>
+              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
+                <span>{row.n_paket.toLocaleString("id-ID")} paket</span>
                 <span>RPI {row.avg_rpi.toFixed(1)}</span>
-                <span style={{ color: "var(--accent-orange)" }}>Kr {row.n_kritis}</span>
-                <span style={{ color: "var(--accent-live)" }}>Tg {row.n_tinggi}</span>
+                <span style={{ color: "#ef4444" }}>{row.n_kritis} kritis</span>
+                <span style={{ color: "var(--accent-live)" }}>{row.n_tinggi} tinggi</span>
                 {(row.n_ekstrem ?? 0) > 0 && (
-                  <span style={{ color: "#ef4444" }}>Eks {row.n_ekstrem}</span>
+                  <span style={{ color: "#ef4444" }}>{row.n_ekstrem} ekstrem</span>
                 )}
                 <span className="ml-auto font-bold" style={{ color: "#ef4444" }}>
                   {formatPaguCompact(row.total_pagu_miliar ?? 0)}
