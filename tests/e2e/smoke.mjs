@@ -29,6 +29,18 @@ step('hero + value proposition', await a.getByText('diaudit lebih dulu').count()
 await a.getByRole('radio', { name: /Kritis/ }).click();
 await a.waitForFunction(() => location.search.includes('rpi=70'));
 step('filter reflected in URL', true);
+// pencarian, urutan, dan unduh CSV pada tabel paket
+await a.getByLabel('Cari paket').fill('Binsat');
+await a.waitForFunction(() => location.search.includes('q=Binsat'));
+await a.waitForFunction(() => [...document.querySelectorAll('tbody tr')].length > 0 && [...document.querySelectorAll('tbody tr')].every((r) => /binsat/i.test(r.textContent)), null, { timeout: 20000 });
+step('keyword search filters the package table', true);
+await a.getByLabel('Urutkan').selectOption('pagu:desc');
+await a.waitForFunction(() => location.search.includes('sort=pagu'));
+const csvHref = await a.getByRole('link', { name: /Unduh CSV/ }).getAttribute('href');
+const csv = await a.evaluate(async (u) => { const r = await fetch(u); return { ok: r.ok, ct: r.headers.get('content-type'), txt: (await r.text()).slice(0, 80) }; }, csvHref);
+step('CSV export follows active filter and search', csv.ok && /text\/csv/.test(csv.ct) && /id_sirup,rpi/.test(csv.txt) && /q=Binsat/.test(csvHref), csvHref.slice(-60));
+await a.getByLabel('Cari paket').fill('zzzz-tidak-ada-paket');
+await a.getByText('Tidak ada paket yang cocok').waitFor({ timeout: 20000 }); step('empty state shown for no match', true);
 await a.getByRole('button', { name: /Coba demo sekarang/ }).click();
 await toast(a, /Masuk sebagai Auditor demo/); step('one-click demo login', true);
 
