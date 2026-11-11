@@ -45,6 +45,8 @@ Bukan dengan skor hitam-putih, melainkan **Risk Priority Index (RPI)**: alat **p
 | **Knowledge Graph** | Subgraf lembaga–satker mengikuti filter aktif; kesimpulan otomatis |
 | **Daftar Paket** | Tabel prioritas dengan pagination (50/halaman) — akses penuh ke dataset via API |
 | **Filter Global** | Provinsi · Lembaga · Metode · Ambang RPI minimum |
+| **Passport Paket** | `/paket/:id` — atribut, 7 sinyal beserta kontribusinya ke RPI, provenance data |
+| **Penugasan Audit** | Siklus mengikuti SPKN/Perpres: seleksi → perencanaan (program audit dari sinyal paket, kriteria bersumber pasal) → pelaksanaan (bukti, ketepatan relevan/valid/andal, temuan berunsur) → reviu berjenjang → tanggapan entitas → selesai → pemantauan tindak lanjut. Dasar: [`docs/RISET_PROSES_AUDIT.md`](docs/RISET_PROSES_AUDIT.md) |
 | **Tema & PWA** | Dark / light mode; installable di mobile & desktop; responsif PC–tablet–ponsel |
 
 **Integritas data:** statistik agregat, ranking, peta, dan KG dihitung dari **seluruh baris** yang cocok filter. Satu-satunya sampling eksplisit: scatter chart (max 3.000 titik acak untuk performa render).
@@ -170,6 +172,38 @@ python run_pipeline.py --validate-only # QA gate saja
 | 6 | `06_sensitivity_analysis.py` | robustness bobot RPI |
 
 *(Opsional, startup API lebih cepat)* `python scripts/export_parquet.py`
+
+### Data live dari SIRUP (scraper)
+
+```bash
+python -m scraper.sirup probe                                   # total paket di SIRUP sekarang
+python -m scraper.sirup crawl --out data/live/2026-11-11        # ±1 jam, 1 koneksi, dapat dilanjutkan
+python -m scraper.delta --live data/live/2026-11-11             # baru / hilang / berubah vs snapshot
+```
+Scraper memakai endpoint publik `caripaketctr/search`, jeda ≥1 detik, User-Agent jujur, backoff, dan berhenti bila
+situs menolak (403/429). Data dibagi per rentang pagu sehingga tiap potongan diambil dalam satu halaman, lalu
+direkonsiliasi dengan total situs. Dasbor menampilkan selisih snapshot vs SIRUP (`/api/freshness`) dan tiap
+passport dapat dibandingkan langsung dengan SIRUP (`/api/packages/{id}/live`). Skor RPI **tetap dihitung dari
+snapshot**; data live belum otomatis masuk analisis (lihat `FINAL_COMPETITION_AUDIT.md` §9).
+
+### Uji end-to-end (browser)
+
+```bash
+npm i --no-save playwright-core            # sekali saja; butuh Chromium (npx playwright install chromium)
+AUDITRA_URL=http://localhost:8000 node tests/e2e/smoke.mjs
+pytest tests                                # uji backend & scraper (tanpa jaringan)
+```
+
+### 3a. Demo satu perintah (API + UI dari satu proses)
+
+```bash
+cd web && npm install && VITE_API_URL=/api npm run build && cd ..   # build menjalankan typecheck lebih dulu
+uvicorn api.main:app --port 8000      # buka http://127.0.0.1:8000
+```
+
+Akun demo (kata sandi `auditra2026`): `auditor@auditra.demo`, `reviewer@auditra.demo`.
+**Server publik:** `AUDITRA_SEED_DEMO=0`, `AUDITRA_SECRET=<acak panjang>`, buat reviewer dengan
+`python scripts/create_user.py email "Nama" reviewer`. Data kasus: `output/auditra_app.sqlite`, unggahan: `output/uploads/`.
 
 ### 3. Jalankan dashboard web
 
