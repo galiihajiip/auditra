@@ -67,10 +67,27 @@ export async function fetchDashboardBundle(f: Filters): Promise<DashboardBundle>
   return data;
 }
 
+export interface TableQuery {
+  q: string;
+  sort: "rpi" | "pagu" | "nama";
+  dir: "asc" | "desc";
+}
+export const defaultTableQuery: TableQuery = { q: "", sort: "rpi", dir: "desc" };
+
+/** URL unduhan CSV sesuai filter, kata kunci, dan urutan aktif (maks. 5.000 baris teratas). */
+export function packagesExportUrl(f: Filters, t: TableQuery): string {
+  const sp = new URLSearchParams({
+    provinsi: f.provinsi, lembaga: f.lembaga, metode: f.metode,
+    risk_min: String(Math.max(f.riskMin, 30)), q: t.q, sort: t.sort, direction: t.dir,
+  });
+  return `${api.defaults.baseURL}/packages/export.csv?${sp.toString()}`;
+}
+
 export async function fetchPackages(
   f: Filters,
   page: number,
-  pageSize: number
+  pageSize: number,
+  t: TableQuery = defaultTableQuery
 ): Promise<PaginatedPackages> {
   const { data } = await withWarmupRetry(() =>
     api.get<PaginatedPackages>("/packages", {
@@ -79,6 +96,9 @@ export async function fetchPackages(
         risk_min: Math.max(f.riskMin, 30),
         page,
         page_size: pageSize,
+        q: t.q,
+        sort: t.sort,
+        direction: t.dir,
       },
     })
   );
