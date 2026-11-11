@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import os
 import threading
@@ -26,6 +27,41 @@ from api.config import (
 )
 from api.filters import build_where
 from api.owner_category import MAP_MODES, OWNER_CATEGORY_EXPR
+
+
+SLIM_COLUMNS = [
+    "id", "paket", "jenisPengadaan", "metode", "lembaga", "satker", "lokasi", "pagu", "pemilihanDate",
+    "sumberDana", "isUMKM", "dalamNegeri", "ownerType", "sumberDana_cat", "RPI", "risk_label", "provinsi",
+    "s1_metode", "s2_pagu_anomali", "s3_fragmentasi", "s4_konsentrasi", "s5_umkm", "s6_dana_metode",
+    "s7_reputasi", "kg_pagerank", "kg_betweenness", "kg_degree", "kg_cluster",
+]
+
+
+def _materialize_slim() -> bool:
+    return os.getenv("AUDITRA_MATERIALIZE", "0").lower() in {"1", "true", "yes"}
+
+
+def _json_safe(o):
+    """NaN/Infinity tidak valid di JSON (Starlette melempar 500). Ganti dengan None."""
+    if isinstance(o, float):
+        return None if (o != o or o in (float("inf"), float("-inf"))) else o
+    if isinstance(o, dict):
+        return {k: _json_safe(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_json_safe(v) for v in o]
+    return o
+
+
+def clean_text(v):
+    """Data SIRUP sering ter-escape ganda (mis. '&amp;#40;BK&amp;#41;'). Dekode sampai stabil agar tampil '(BK)'."""
+    if not isinstance(v, str) or "&" not in v:
+        return v
+    for _ in range(3):
+        u = html.unescape(v)
+        if u == v:
+            break
+        v = u
+    return v
 
 
 class DataStoreNotReady(Exception):
@@ -56,6 +92,7 @@ class DataStore:
         self._lock = threading.RLock()
         self._dashboard_cache = TTLCache(maxsize=DASHBOARD_CACHE_SIZE, ttl_seconds=600)
         self._packages_cache = TTLCache(maxsize=128, ttl_seconds=120)
+        self._choro_cache = TTLCache(maxsize=64, ttl_seconds=600)
         self._filter_options_cache: dict | None = None
         self._meta_cache: dict | None = None
         self._geo_coverage_cache: dict | None = None
@@ -75,6 +112,7 @@ class DataStore:
             self.conn = duckdb.connect(str(DUCKDB_CACHE), read_only=False)
             self._configure_session()
             self._ensure_packages_geo(self.conn)
+        self._build_pkg_prov()
         self._warm_static_caches()
         elapsed = time.perf_counter() - t0
         print(f"[Auditra] Database ready in {elapsed:.1f}s ({self._meta_cache['total_rows']:,} rows)")
@@ -127,6 +165,13 @@ class DataStore:
             try:
                 cls._ensure_built()
                 print("[Auditra] Background database init complete.")
+                # panaskan tampilan awal (tanpa filter) agar muat pertama pengunjung terasa instan
+                inst = cls._instance
+                if inst is not None:
+                    t0 = time.perf_counter()
+                    inst.fetch_dashboard_bundle()
+                    inst.fetch_packages_page("ALL", "ALL", "ALL", 0, 1, 50)
+                    print(f"[Auditra] Cache tampilan awal siap dalam {time.perf_counter() - t0:.1f}s")
             except Exception as exc:
                 print(f"[Auditra] Background init failed: {exc}")
 
@@ -250,11 +295,44 @@ class DataStore:
 
     def _setup_parquet_views(self, conn: duckdb.DuckDBPyConnection) -> None:
         source = self._resolve_parquet_source()
-        print(f"[Auditra] Parquet view mode (low RAM) over {source}")
-        conn.execute(
-            f"CREATE VIEW packages AS SELECT * FROM read_parquet('{source}')"
-        )
-        self._create_packages_geo(conn, as_view=True)
+        conn.execute(f"CREATE VIEW packages_full AS SELECT * FROM read_parquet('{source}')")
+        if _materialize_slim():
+            # Tabel ramping di memori (tanpa kolom teks panjang): agregat dasbor jadi 5-10x lebih cepat
+            # daripada membaca ulang Parquet pada setiap filter. Teks panjang tetap dibaca dari Parquet
+            # (view packages_full) hanya untuk satu paket pada halaman Passport.
+            t0 = time.perf_counter()
+            cols = ", ".join(SLIM_COLUMNS)
+            print(f"[Auditra] Memuat tabel ramping ke memori dari {source} ...")
+            conn.execute(f"CREATE TABLE packages AS SELECT {cols} FROM packages_full")
+            self._create_packages_geo(conn, as_view=False)
+            print(f"[Auditra] Tabel ramping siap dalam {time.perf_counter() - t0:.1f}s")
+        else:
+            print(f"[Auditra] Parquet view mode (low RAM) over {source}")
+            conn.execute("CREATE VIEW packages AS SELECT * FROM packages_full")
+            self._create_packages_geo(conn, as_view=True)
+
+    def _build_pkg_prov(self) -> None:
+        """Peta ringan id paket ke provinsi (tabel sementara di memori). Filter provinsi memakai ini,
+        bukan join teks lokasi 3 juta baris pada setiap kueri."""
+        if not GEO_LOOKUP_CSV.exists():
+            return
+        try:
+            t0 = time.perf_counter()
+            self.conn.execute(
+                "CREATE OR REPLACE TEMP TABLE pkg_prov AS "
+                "SELECT id, UPPER(TRIM(prov_name)) AS prov_upper FROM packages_geo"
+            )
+            self._pkg_prov_ok = True
+            print(f"[Auditra] Peta paket-provinsi siap dalam {time.perf_counter() - t0:.1f}s")
+        except Exception as exc:  # tanpa peta, filter provinsi tetap jalan lewat packages_geo
+            print(f"[Auditra] pkg_prov gagal dibuat ({exc}); memakai packages_geo")
+
+    def _has_pkg_prov(self) -> bool:
+        return getattr(self, "_pkg_prov_ok", False)
+
+    def _full_table(self) -> str:
+        """Tabel dengan seluruh kolom (termasuk teks panjang) untuk pencarian satu paket."""
+        return "packages_full" if _use_parquet_views() else "packages"
 
     def _ensure_database(self) -> None:
         if _use_parquet_views():
@@ -439,6 +517,7 @@ class DataStore:
             metode=metode,
             risk_min=risk_min,
             packages_via_geo=GEO_LOOKUP_CSV.exists(),
+            use_pkg_prov=self._has_pkg_prov(),
         )
 
         with self._lock:
@@ -569,36 +648,45 @@ class DataStore:
             "geo_coverage": self.geo_coverage(),
             "kg": self._kg_subset_safe(provinsi, lembaga, metode, risk_min),
         }
+        bundle = _json_safe(bundle)
         self._dashboard_cache.set(key, bundle)
         return bundle
 
     def _fetch_choropleth_modes(self, where: str, params: list) -> dict[str, list]:
-        """Agregat kab/kota per mode pemilik — seluruh Indonesia (tanpa filter provinsi)."""
-        modes: dict[str, list] = {}
+        """Agregat kab/kota per mode pemilik, seluruh Indonesia. Satu kueri (kategori pemilik dihitung sekali)."""
+        ckey = f"{where}|{params}"
+        hit = self._choro_cache.get(ckey)
+        if hit is not None:
+            return hit
+        modes: dict[str, list] = {m: [] for m in MAP_MODES}
         with self._lock:
-            for mode in MAP_MODES:
-                df = self.conn.execute(
-                    f"""
-                    SELECT
-                        printf('%.2f', TRY_CAST(pg.kabkot_id AS DOUBLE)) AS kabkot_id,
-                        pg.kabkot_name,
-                        pg.prov_name,
-                        COUNT(*) AS n_paket,
-                        ROUND(AVG(pg.RPI), 2) AS avg_rpi,
-                        ROUND(SUM(pg.pagu) / 1e9, 2) AS total_pagu_miliar,
-                        ROUND(SUM(CASE WHEN pg.RPI >= 50 THEN pg.pagu ELSE 0 END) / 1e9, 2)
-                            AS pagu_risiko_miliar,
-                        SUM(CASE WHEN pg.risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
-                        SUM(CASE WHEN pg.risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi
-                    FROM packages_geo pg
-                    INNER JOIN packages p ON pg.id = p.id
-                    WHERE {where} AND ({OWNER_CATEGORY_EXPR}) = ?
-                    GROUP BY pg.kabkot_id, pg.kabkot_name, pg.prov_name
-                    ORDER BY pagu_risiko_miliar DESC
-                    """,
-                    params + [mode],
-                ).fetchdf()
-                modes[mode] = df.to_dict(orient="records")
+            df = self.conn.execute(
+                f"""
+                SELECT
+                    ({OWNER_CATEGORY_EXPR}) AS owner_mode,
+                    printf('%.2f', TRY_CAST(pg.kabkot_id AS DOUBLE)) AS kabkot_id,
+                    pg.kabkot_name,
+                    pg.prov_name,
+                    COUNT(*) AS n_paket,
+                    ROUND(AVG(pg.RPI), 2) AS avg_rpi,
+                    ROUND(SUM(pg.pagu) / 1e9, 2) AS total_pagu_miliar,
+                    ROUND(SUM(CASE WHEN pg.RPI >= 50 THEN pg.pagu ELSE 0 END) / 1e9, 2)
+                        AS pagu_risiko_miliar,
+                    SUM(CASE WHEN pg.risk_label = 'KRITIS' THEN 1 ELSE 0 END) AS n_kritis,
+                    SUM(CASE WHEN pg.risk_label = 'TINGGI' THEN 1 ELSE 0 END) AS n_tinggi
+                FROM packages_geo pg
+                INNER JOIN packages p ON pg.id = p.id
+                WHERE {where}
+                GROUP BY owner_mode, pg.kabkot_id, pg.kabkot_name, pg.prov_name
+                ORDER BY pagu_risiko_miliar DESC
+                """,
+                params,
+            ).fetchdf()
+        for rec in df.to_dict(orient="records"):
+            mode = rec.pop("owner_mode")
+            if mode in modes:
+                modes[mode].append(rec)
+        self._choro_cache.set(ckey, modes)  # peta tidak bergantung filter provinsi: ganti provinsi tidak menghitung ulang
         return modes
 
     def _kg_subset_safe(
@@ -631,6 +719,7 @@ class DataStore:
             metode=metode,
             risk_min=risk_min,
             packages_via_geo=GEO_LOOKUP_CSV.exists(),
+            use_pkg_prov=self._has_pkg_prov(),
         )
 
         with self._lock:
@@ -660,9 +749,8 @@ class DataStore:
         if lem_stats.empty and sk_stats.empty:
             return {"nodes": [], "edges": []}
 
-        active_ids: set[str] = set()
-        active_ids.update(f"L::{row['label']}" for _, row in lem_stats.iterrows())
-        active_ids.update(f"SK::{row['label']}" for _, row in sk_stats.iterrows())
+        active_ids: set[str] = {f"L::{x}" for x in lem_stats["label"]}
+        active_ids.update(f"SK::{x}" for x in sk_stats["label"])
 
         nodes_df = self._kg_nodes[
             self._kg_nodes["node_type"].isin(["lembaga", "satker"])
@@ -672,25 +760,17 @@ class DataStore:
         if nodes_df.empty:
             return {"nodes": [], "edges": []}
 
-        lem_map = lem_stats.set_index("label")
-        sk_map = sk_stats.set_index("label")
-
-        def apply_live_stats(row: pd.Series) -> pd.Series:
-            label = row["label"]
-            if row["node_type"] == "lembaga" and label in lem_map.index:
-                stats_row = lem_map.loc[label]
-                row["avg_rpi"] = float(stats_row["avg_rpi"] or 0)
-                row["n_paket"] = int(stats_row["n_paket"] or 0)
-            elif row["node_type"] == "satker" and label in sk_map.index:
-                stats_row = sk_map.loc[label]
-                row["avg_rpi"] = float(stats_row["avg_rpi"] or 0)
-                row["n_paket"] = int(stats_row["n_paket"] or 0)
-            row["risk_influence"] = (
-                float(row.get("avg_rpi") or 0) * int(row.get("n_paket") or 0) / 100.0
-            )
-            return row
-
-        nodes_df = nodes_df.apply(apply_live_stats, axis=1)
+        # statistik hidup mengikuti filter, dihitung vektor (bukan baris demi baris: 34 ribu satker)
+        for node_type, stats_df in (("lembaga", lem_stats), ("satker", sk_stats)):
+            sm = stats_df.drop_duplicates("label").set_index("label")
+            mask = (nodes_df["node_type"] == node_type) & nodes_df["label"].isin(sm.index)
+            nodes_df.loc[mask, "avg_rpi"] = nodes_df.loc[mask, "label"].map(sm["avg_rpi"]).astype(float).fillna(0.0)
+            nodes_df.loc[mask, "n_paket"] = nodes_df.loc[mask, "label"].map(sm["n_paket"]).fillna(0).astype(int)
+        nodes_df["risk_influence"] = (
+            pd.to_numeric(nodes_df["avg_rpi"], errors="coerce").fillna(0.0)
+            * pd.to_numeric(nodes_df["n_paket"], errors="coerce").fillna(0)
+            / 100.0
+        )
 
         if lembaga and lembaga != "ALL":
             focus_id = f"L::{lembaga}"
@@ -721,9 +801,17 @@ class DataStore:
         risk_min: float,
         page: int,
         page_size: int,
+        q: str = "",
+        sort: str = "rpi",
+        direction: str = "desc",
     ) -> dict:
         effective_risk = max(risk_min, 30)
-        key = self._filter_cache_key(provinsi, lembaga, metode, effective_risk, f"p{page}s{page_size}")
+        q = (q or "").strip()[:100]
+        sort_sql = {"rpi": "RPI", "pagu": "pagu", "nama": "paket"}.get(sort, "RPI")
+        dir_sql = "ASC" if str(direction).lower() == "asc" else "DESC"
+        key = self._filter_cache_key(
+            provinsi, lembaga, metode, effective_risk, f"p{page}s{page_size}|q={q}|{sort_sql}{dir_sql}"
+        )
         cached = self._packages_cache.get(key)
         if cached is not None:
             return cached
@@ -734,7 +822,13 @@ class DataStore:
             metode=metode,
             risk_min=effective_risk,
             packages_via_geo=GEO_LOOKUP_CSV.exists(),
+            use_pkg_prov=self._has_pkg_prov(),
         )
+        if q:
+            # pencarian kata kunci pada nama paket, lembaga, atau ID SIRUP persis
+            like = "%" + q.replace("%", "").replace("_", "") + "%"
+            where += " AND (paket ILIKE ? OR lembaga ILIKE ? OR CAST(id AS VARCHAR) = ?)"
+            params = params + [like, like, q]
         offset = (page - 1) * page_size
 
         with self._lock:
@@ -750,7 +844,7 @@ class DataStore:
                        s5_umkm, s6_dana_metode, s7_reputasi
                 FROM packages
                 WHERE {where}
-                ORDER BY RPI DESC, id ASC
+                ORDER BY {sort_sql} {dir_sql} NULLS LAST, id ASC
                 LIMIT ? OFFSET ?
                 """,
                 params + [page_size, offset],
@@ -760,6 +854,8 @@ class DataStore:
         for rec in records:
             if rec.get("pagu") is not None:
                 rec["pagu_miliar"] = round(float(rec["pagu"]) / 1e9, 3)
+            for tk in ("paket", "lembaga"):
+                rec[tk] = clean_text(rec.get(tk))
 
         total_pages = max(1, (total + page_size - 1) // page_size)
         result = {
@@ -777,14 +873,14 @@ class DataStore:
         """Satu paket lengkap (termasuk sinyal & atribut sumber) untuk halaman paket / snapshot kasus."""
         with self._lock:
             df = self.conn.execute(
-                """
+                f"""
                 SELECT id, paket, jenisPengadaan, metode, lembaga, satker, lokasi, pagu,
                        pemilihanDate, sumberDana, isUMKM, dalamNegeri, uraianPekerjaan, ownerType,
                        RPI, risk_label,
                        s1_metode, s2_pagu_anomali, s3_fragmentasi, s4_konsentrasi,
                        s5_umkm, s6_dana_metode, s7_reputasi,
                        kg_pagerank, kg_betweenness, kg_degree, kg_cluster
-                FROM packages WHERE id = ? LIMIT 1
+                FROM {self._full_table()} WHERE id = ? LIMIT 1
                 """,
                 [int(package_id)],
             ).fetchdf()
@@ -800,7 +896,7 @@ class DataStore:
             elif hasattr(v, "isoformat"):
                 out[k] = v.isoformat()
             else:
-                out[k] = v
+                out[k] = clean_text(v)
         return out
 
     def fetch_df(self, sql: str, params: list | None = None) -> pd.DataFrame:
