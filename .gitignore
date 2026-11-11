@@ -19,3 +19,7 @@ output/auditra_app.secret
 output/uploads/
 
 data/live/
+
+# OS and office temporary files
+.DS_Store
+~$*
