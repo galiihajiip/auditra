@@ -6,6 +6,8 @@ import {
   fetchGeoJson,
   fetchMeta,
   fetchPackages,
+  packagesExportUrl,
+  type TableQuery,
 } from "../api/client";
 import { formatApiError } from "../api/errors";
 import ColorLegend from "../components/ColorLegend";
@@ -67,6 +69,12 @@ export default function DashboardPage() {
     [params]
   );
   const page = Math.max(1, Number(params.get("p")) || 1);
+  const tq: TableQuery = useMemo(() => {
+    const sort = (["rpi", "pagu", "nama"] as const).find((x) => x === params.get("sort")) ?? "rpi";
+    const dir = params.get("dir") === "asc" ? "asc" : "desc";
+    return { q: params.get("q") ?? "", sort, dir };
+  }, [params]);
+  const debouncedTq = useDebouncedValue(tq, 350);
   const tab: Tab = (["peta", "analitik", "jaringan"] as const).find((t) => t === params.get("tab")) ?? "peta";
 
   const patchParams = useCallback(
@@ -98,7 +106,7 @@ export default function DashboardPage() {
     },
     [patchParams]
   );
-  const onReset = useCallback(() => patchParams({ provinsi: null, lembaga: null, metode: null, rpi: null, p: null }), [patchParams]);
+  const onReset = useCallback(() => patchParams({ provinsi: null, lembaga: null, metode: null, rpi: null, q: null, sort: null, dir: null, p: null }), [patchParams]);
   const setPage = useCallback((p: number) => patchParams({ p: String(p) }), [patchParams]);
 
   const [options, setOptions] = useState<FilterOptions>({ lembaga: [], metode: [], provinsi: [] });
@@ -203,7 +211,7 @@ export default function DashboardPage() {
     setPackagesLoading(true);
     (async () => {
       try {
-        const pkg = await fetchPackages(debouncedFilters, page, 50);
+        const pkg = await fetchPackages(debouncedFilters, page, 50, debouncedTq);
         if (gen !== packagesGen.current) return;
         setPackages(pkg);
         if (pkg.page === 1) setTopPkgs(pkg.data);
@@ -213,7 +221,7 @@ export default function DashboardPage() {
         if (gen === packagesGen.current) setPackagesLoading(false);
       }
     })();
-  }, [debouncedFilters, page, error]);
+  }, [debouncedFilters, debouncedTq, page, error]);
 
 
   if (error) {
@@ -323,6 +331,30 @@ export default function DashboardPage() {
       <section id="semua-paket" aria-labelledby="semua-h" className="panel">
         <p className="eyebrow">Langkah 3 · Tindak lanjuti</p>
         <h2 id="semua-h" className="mb-3 font-display text-2xl font-extrabold text-primary">Semua paket prioritas</h2>
+        <div className="mb-4 grid gap-3 sm:grid-cols-[1fr_14rem_auto] sm:items-end">
+          <div>
+            <label className="field-label" htmlFor="cari-paket">Cari paket</label>
+            <div className="relative">
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted"><Icon name="search" size={15} /></span>
+              <input id="cari-paket" type="search" className="input-text !pl-9" placeholder="Nama paket, lembaga, atau ID SIRUP"
+                value={tq.q} maxLength={100} onChange={(e) => patchParams({ q: e.target.value, p: null })} />
+            </div>
+          </div>
+          <div>
+            <label className="field-label" htmlFor="urut-paket">Urutkan</label>
+            <select id="urut-paket" className="input-select" value={`${tq.sort}:${tq.dir}`}
+              onChange={(e) => { const [sort, dir] = e.target.value.split(":"); patchParams({ sort: sort === "rpi" ? null : sort, dir: dir === "desc" ? null : dir, p: null }); }}>
+              <option value="rpi:desc">RPI tertinggi</option>
+              <option value="rpi:asc">RPI terendah</option>
+              <option value="pagu:desc">Pagu terbesar</option>
+              <option value="pagu:asc">Pagu terkecil</option>
+              <option value="nama:asc">Nama A sampai Z</option>
+            </select>
+          </div>
+          <a className="btn-secondary" href={packagesExportUrl(filters, tq)} download>
+            <Icon name="download" size={15} /> Unduh CSV
+          </a>
+        </div>
         <PackagesTable result={packages} page={page} loading={packagesLoading} onPage={(p) => { setPage(p); scrollTo("semua-paket"); }} />
       </section>
     </div>
