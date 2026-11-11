@@ -1,28 +1,21 @@
+import { Link } from "react-router-dom";
+
 const SIRUP_URL = "https://sirup.inaproc.id/sirup/caripaketctr/index";
-const UNIVERSITY = "Universitas Pembangunan Nasional Veteran Jawa Timur";
+const GITHUB_URL = "https://github.com/danisharizka/auditra";
 
 export default function SiteFooter() {
   return (
-    <footer className="mt-8 border-t border-[var(--border-subtle)] pt-6 text-center text-[11px] leading-relaxed text-muted">
-      <p className="text-primary">
-        <span className="font-semibold">Auditra</span> © 2026
-      </p>
-      <p className="mt-1">
-        Data:{" "}
-        <a
-          href={SIRUP_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-[var(--accent-teal,#269494)] underline-offset-2 hover:underline"
-        >
-          SIRUP LKPP
-        </a>
-        {" · "}Tim SD2026020000253
-      </p>
-      <p className="mt-1">
-        Developed by Dani Shofi Nur Izza, Danisha Rizka Hapsari, Galih Aji Pangestu
-      </p>
-      <p className="mt-1 font-medium text-primary/90">{UNIVERSITY}</p>
+    <footer className="no-print mt-14 flex flex-col gap-3 border-t border-[var(--border-subtle)] py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="font-display font-bold text-primary">Auditra</p>
+        <p>Prioritas audit pengadaan publik berbasis Knowledge Graph · Tim SD2026020000253</p>
+        <p className="text-xs">Universitas Pembangunan Nasional Veteran Jawa Timur · Dani Shofi Nur Izza, Danisha Rizka Hapsari, Galih Aji Pangestu</p>
+      </div>
+      <div className="flex gap-4">
+        <Link className="underline-offset-4 hover:text-primary hover:underline" to="/metodologi">Dasar metodologi</Link>
+        <a className="underline-offset-4 hover:text-primary hover:underline" href={SIRUP_URL} target="_blank" rel="noopener noreferrer">Data: SIRUP LKPP</a>
+        <a className="underline-offset-4 hover:text-primary hover:underline" href={GITHUB_URL} target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
     </footer>
   );
 }
