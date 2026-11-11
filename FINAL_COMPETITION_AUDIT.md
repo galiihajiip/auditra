@@ -184,3 +184,138 @@ honest copy), `web/vite.config.ts` (chunking, configurable proxy `AUDITRA_API_UR
 2. Redeploy the backend or demo from the single-process local build (§5). Pre-warm it 30 s before judges arrive.
 3. Add per-package provenance (source row id, ingest date, deep link) and a filter reset/URL state.
 4. Replace the Plotly map; add a mobile layout; run axe/Lighthouse; add a Playwright smoke test to CI.
+
+
+---
+
+## 8. Revisi 2 (2026-11-11): dari dashboard menjadi alur kerja end-to-end
+
+Menindaklanjuti P0-1 ("tidak ada alur discovery → evidence"). Yang **sekarang ada dan teruji di browser**
+(skrip Playwright; 20 langkah PASS, termasuk skenario negatif):
+
+| Kemampuan | Implementasi | Bukti |
+|-----------|--------------|-------|
+| Autentikasi | scrypt + token HMAC 12 jam, rate-limit login (429 setelah 8 percobaan) | `tests/test_cases_workflow.py` |
+| Peran & pemisahan tugas | `auditor` membuka kasus/unggah bukti; `reviewer` memverifikasi/menolak. Reviewer tidak boleh menambah bukti; pendaftaran publik selalu auditor | 403 diuji di API dan UI |
+| Alur kasus (state machine di server) | baru → ditelaah → menunggu_verifikasi → terverifikasi/ditolak; reviewer dapat mengembalikan; status terminal tak bisa diubah | transisi ilegal → 409 |
+| Aturan bisnis | Tidak bisa diajukan tanpa bukti; tidak bisa disetujui bila masih ada bukti pending / tak ada yang terverifikasi; penolakan wajib alasan; satu kasus aktif per paket (unique index parsial di DB) | 422/409 diuji |
+| Bukti | Tautan (hanya http/https) atau berkas (pdf/png/jpg/txt/csv ≤ 5 MB, cek *magic bytes* bukan hanya ekstensi, SHA-256, nama acak di disk, unduh butuh login) | berkas "x.pdf" palsu → 415 |
+| Verifikasi nyata | Review per bukti dengan catatan, tercatat siapa/kapan | UI + riwayat |
+| Jejak audit | Tabel `case_events` hanya-INSERT, tampil sebagai riwayat | UI |
+| Passport paket | Halaman `/paket/:id`: atribut, 7 sinyal dengan **kontribusi ke RPI** (jumlah = RPI), provenance (sumber, jumlah baris, tahapan pipeline, tautan SIRUP) | screenshot `e2e-passport` |
+| Rute & UX | React Router, deep link, guard login, cetak laporan kasus (CSS print), empty state | e2e |
+| Skema DB | SQLite terpisah dari DuckDB analitik; FK, CHECK, unique index parsial | `api/appdb.py` |
+
+Status temuan lama: **P0-1 → sebagian ditutup** (alur nyata ada; lihat batasan). **Q2, Q3, Q4, Q5 tidak lagi "absen"**, tetapi
+belum setara produk produksi.
+
+### Batasan yang masih jujur harus disebut
+- **Akun demo berkata sandi publik** (`auditra2026`) di-seed secara default agar juri bisa mencoba. Di server publik **setel
+  `AUDITRA_SEED_DEMO=0` dan `AUDITRA_SECRET`**, lalu buat reviewer dengan `scripts/create_user.py`. Tanpa itu, siapa pun bisa
+  menjadi reviewer — moderasi tetap *berfungsi*, tetapi tidak *aman*.
+- Token disimpan di `localStorage` (rentan jika ada XSS); tidak ada reset kata sandi, verifikasi email, MFA, atau UI admin.
+- Rate-limit in-memory (hilang saat restart, tidak dibagi antar proses).
+- SQLite + berkas lokal: cukup untuk satu server, bukan untuk multi-instance; tidak ada pemindaian virus pada unggahan.
+- Semua pengguna login melihat semua kasus (ruang kerja tim), tanpa izin per-kasus.
+- "Provenance" masih tingkat dataset/pipeline; belum ada tautan dalam (*deep link*) ke satu paket di SIRUP dan belum ada tanggal ingest per baris.
+- Reviewer menolak bukti lewat `window.prompt` (fungsional, tetapi bukan UI yang dipoles).
+- Belum ada tes unit frontend; E2E adalah skrip manual (belum di CI). Skor RPI tetap belum divalidasi terhadap temuan audit nyata.
+- Deploy publik (Railway) masih mati; lihat P0-2.
+
+Skor literal terhadap brief setelah revisi 2 (penilaian saya, bukan jaminan): alur 2→9/15, passport/provenance 3→7/10,
+moderasi 0→6/10 → **total ≈ 62/100** (dari 47); keandalan demo tetap 5/10 sampai deploy dibereskan.
+
+
+---
+
+## 9. Revisi 3 (2026-11-11): data live SIRUP
+
+Temuan awal (bukti: `GET /api/freshness`, probe langsung ke SIRUP): **snapshot analisis = 3.002.992 paket, SIRUP saat ini = 3.646.128**,
+yaitu **643.136 paket (17,6%) belum masuk analisis**. Label "LIVE" di versi awal tidak benar dan sudah dihapus.
+
+Yang dibangun: `scraper/sirup.py` (crawler sopan & dapat dilanjutkan, pembagian per rentang pagu, rekonsiliasi),
+`scraper/detail.py` (parser halaman detail), `scraper/delta.py` (snapshot vs live), `api/freshness.py` + endpoint
+`/api/freshness` & `/api/packages/{id}/live`, panel "Kesegaran data" di dasbor, tombol "Bandingkan dengan SIRUP sekarang" di passport.
+Diuji: 9 tes baru tanpa jaringan (termasuk nilai pagu identik > 1 halaman, *resume*, fail-soft, rate-limit) + uji live
+(rentang 9,7–9,9 jt: 9.007 baris, cocok persis dengan hitungan situs, 0 duplikat) + cek langsung satu paket nyata (sinkron).
+
+Batasan yang harus jujur disebut:
+- **Skor RPI belum memakai data live.** Panel hanya mengukur dan menampilkan selisih. Memasukkan 643 ribu paket baru ke analisis
+  = menjalankan ulang pipeline dan **mengubah semua angka** yang dipakai di esai/dokumen lomba; belum dilakukan.
+- Endpoint daftar SIRUP **tidak memuat uraian/volume/spesifikasi**; sinyal fragmentasi (bobot 15%) memakainya. Paket baru
+  hanya bisa memakai nama paket sebagai pengganti, atau halaman detail per paket (±643 ribu permintaan, tidak dilakukan).
+- Scraper bergantung pada struktur endpoint yang tidak resmi/tidak berdokumen; bisa berubah tanpa pemberitahuan. Ia gagal dengan jelas
+  (bukan diam-diam) dan panel memakai mode *fail-soft*.
+- Izin: situs tidak punya `robots.txt`, data adalah publikasi publik; pemilik tim menyatakan boleh. Syarat penggunaan resmi LKPP belum saya baca/verifikasi.
+- Tanggal ekspor snapshot lama tetap tidak tercatat (isi `data/snapshot.json` bila diketahui).
+
+
+---
+
+## 10. Revisi 4 (2026-11-11): UI/UX dan alur pengguna
+
+Masalah yang dikeluhkan dan diverifikasi di tangkapan layar awal: 37 teks 10–11 px, palet slate generik, emoji sebagai ikon, satu
+halaman dasbor sangat panjang (≈4.500 px desktop / 7.500 px ponsel), tanpa nilai jual di layar pertama, tabel sebagai satu-satunya jalan ke paket,
+`window.prompt` untuk input alasan, pesan status inline.
+
+| Area | Sebelum → sesudah |
+|------|-------------------|
+| Tipografi | Tidak ada teks < 12 px (0 kemunculan `text-[10px]/[11px]`); basis 15 px; judul Plus Jakarta Sans; angka tabular |
+| Identitas visual | Palet navy-tinta + aksen teal khas merek, gradient hero + grid, kartu 16 px, ikon SVG (menggantikan emoji), cincin skor RPI sebagai elemen khas |
+| Layar pertama | Hero berisi nilai jual + CTA "Coba demo" satu klik + strip alur 4 langkah + pratinjau passport dari **paket teratas nyata** |
+| Alur | Dasbor memberi urutan Temukan → Pahami konteks → Tindaklanjuti; kartu "Prioritas audit teratas" langsung membuka passport; passport punya satu CTA kontekstual (Masuk / Buka kasus / Lanjutkan kasus) + bar lengket di ponsel; stepper 4 langkah di passport & kasus |
+| Konteks | Filter, halaman, dan tab tersimpan di URL; tombol "Kembali ke hasil" mengembalikan filter yang sama (diuji E2E) |
+| Panjang halaman | Analitik dipecah jadi 3 tab (Peta, Analitik, Jaringan) yang di-render saat dibuka; tabel menjadi kartu di ponsel |
+| Kasus | Papan Kanban + daftar; kartu "Langkah berikutnya" sesuai peran/status; dropzone unggah; riwayat bergaya timeline; toast + dialog menggantikan `prompt` dan pesan inline |
+| Umpan balik | *Skeleton* (bukan "—"/"Memuat"), bar progres, empty state dengan tindakan, error ramah |
+| Aksesibilitas | Fokus keyboard terlihat, `aria` pada tab/radio/dialog/progress/status, judul langkah berikutnya sebagai heading, `prefers-reduced-motion` dihormati |
+| Responsif | Overflow horizontal ditemukan (679/390 px, akar: peta Plotly memaksa kolom grid melebar) dan diperbaiki; kini 390/390 di `/`, `/masuk`, `/kasus/:id` |
+
+Bukti: `tests/e2e/smoke.mjs` (29 pemeriksaan di browser: demo login, filter di URL, passport, buka kasus, bukti tautan/berkas, berkas palsu ditolak,
+aturan server, peninjauan reviewer, persetujuan, papan, tanpa overflow ponsel, tanpa error halaman) **29/29 lulus**; `pytest` 28 lulus.
+Temuan selama pengujian dan sudah diperbaiki: overflow ponsel; judul panduan bukan heading; *crawler* berhenti pada potongan data padat (lihat §9).
+
+Batasan jujur: **belum ada uji kegunaan dengan pengguna nyata** (penilaian di sini berdasarkan tangkapan layar dan skrip, bukan manusia);
+belum diaudit dengan axe/Lighthouse; kontras mode terang hanya diperiksa visual; peta Plotly (±4,9 MB) tetap berat dan belum diganti;
+ukuran total `dist` ≈ 6,8 MB (sebagian besar chunk Plotly yang dimuat malas); hanya Chromium yang diuji (bukan Safari/Firefox/perangkat sungguhan).
+
+
+---
+
+## 11. Revisi 5 (2026-11-11): alur audit berdasarkan riset proses audit nyata
+
+Permintaan: riset sedalam mungkin cara auditor mengaudit pengadaan, lalu implementasikan **tanpa mengarang alur**. Hasil riset lengkap, dengan nomor
+pasal/paragraf dan status verifikasi tiap sumber, ada di `docs/RISET_PROSES_AUDIT.md` (dan ringkasannya di aplikasi: `/metodologi`).
+
+**Sumber primer yang dibaca langsung:** PBPK 1/2026 (SPKN; 117 ribu karakter), Perban BPKP 3/2019 (batang tubuh), teks konsolidasi Perpres 16/2018 jo. 12/2021 jo. 46/2025
+(JDIH LKPP; 146 ribu karakter), IACRC red flags. **Sekunder:** Perban BPKP 6/2026 (pasal.id), ringkasan Lampiran III 2019, berita KPK/BPK.
+
+**Temuan riset yang mengubah desain** (semua bersumber teks, bukan dugaan):
+1. Alur nyata = perencanaan → pelaksanaan → komunikasi hasil → pemantauan tindak lanjut, dengan **supervisi berjenjang** (SPKN Pelaksanaan par. 43–45).
+2. Bukti dinilai **cukup** (kuantitas) dan **tepat** (relevan, valid, andal) (par. 29); bentuk (par. 31) dan teknik (par. 32) baku; dokumen diragukan wajib didalami (par. 34).
+3. Temuan hanya bila **kondisi ≠ kriteria**; unsur kondisi, kriteria, akibat, sebab; sumber kriteria wajib; indikasi kecurangan diperlakukan khusus (par. 39–42; Pelaporan 18–21).
+4. Tanggapan tertulis entitas wajib didokumentasikan; rekomendasi harus menyebut pihak bertanggung jawab (Pelaporan 22–28).
+5. **Perubahan regulasi** yang berdampak: PBPK 1/2026 baru berlaku 2 tahun setelah diundangkan; Perban BPKP 6/2026 mencabut 3/2019; Perpres 46/2025 menaikkan batas pengadaan langsung **konstruksi menjadi Rp400 jt**.
+6. **Koreksi terhadap metodologi RPI kita** (belum diterapkan ke skor): batas konstruksi Rp400 jt (S3 memakai Rp200 jt untuk semua), paket ≤ Rp15 M diperuntukkan UMK (Pasal 65(3); S5 memakai persentil), HPS bukan dasar kerugian negara (Pasal 26(6); S2 tak boleh dibaca "kemahalan").
+7. Larangan memecah paket ada di **Pasal 20(2)(d)** dan mensyaratkan *maksud menghindari tender*, bukan Pasal 21 seperti yang sempat tertulis di dokumentasi lama.
+
+**Yang diimplementasikan** (tahap: seleksi → perencanaan → pelaksanaan → reviu berjenjang → komunikasi → selesai/dihentikan → pemantauan tindak lanjut):
+- **Program audit dibangkitkan** dari atribut dan sinyal paket (`api/audit_program.py`): tiap prosedur memuat kriteria bersumber pasal, bukti yang diharapkan, teknik, dan peringatan
+  (mis. batas pengadaan langsung per jenis; dasar "keadaan tertentu" penunjukan langsung + Pasal 41A; dasar pengecualian Pasal 61; HPS Pasal 26(6)).
+- **Gerbang kesiapan** per transisi, dihitung dan ditegakkan server (422 + daftar syarat), ditampilkan sebagai checklist; syarat yang benar secara vakum ditandai "belum berlaku".
+- Bukti dengan bentuk/teknik/asal, penilaian relevan-valid-andal, penanda keaslian, SHA-256; temuan berunsur lengkap; tanggapan entitas; tindak lanjut per rekomendasi; riwayat tak dapat diubah.
+- Pemisahan tugas dan peran dijaga di server; migrasi skema aman (berkas lama dicadangkan, tidak dihapus).
+
+**Bukti pengujian:** pytest 39 lulus (siklus penuh, gerbang, peran, migrasi, program audit); E2E browser **40/40** (siklus penuh auditor ↔ reviewer + mobile + halaman metodologi).
+
+**Pengakuan koreksi proses (penting):** pada revisi-revisi sebelumnya saya melaporkan "typecheck bersih", padahal `tsc -p tsconfig.app.json` memeriksa **0 berkas**
+(`tsconfig.app.json` berisi `"files": []`). Pemeriksaan nyata baru berjalan di revisi ini (`npm run typecheck` memakai `tsconfig.json`) dan menemukan 11 error yang semuanya ada di kode yang
+sedang saya ubah (bukan di kode lama). Kini `npm run build` menjalankan typecheck lebih dulu sehingga tidak bisa lolos diam-diam.
+
+**Batasan yang harus jujur disebut:**
+- **Belum divalidasi auditor praktisi.** Alur disusun dari standar tertulis, bukan wawancara. Ini risiko terbesar untuk klaim "sesuai praktik".
+- **Lampiran pedoman audit BPKP (langkah kerja rinci, kertas kerja) tidak dapat diakses**; program audit disusun dari pasal Perpres dan SPKN, bukan salinan pedoman itu.
+- Perban BPKP 6/2026 dibaca dari salinan pasal.id (belum ditinjau); OECD (403) dan materi Inspektorat DIY (404) tidak terbaca; red flags diambil dari IACRC.
+- Tidak dimodelkan: persetujuan program audit oleh pengendali teknis, surat tugas, management representation letter, PDTT Investigatif sebagai jenis terpisah, penilaian SPIP, tenggat tindak lanjut baku (60 hari hanya terverifikasi untuk BPK).
+- Data kita hanya tahap **perencanaan (RUP)**; bukti pelaksanaan kontrak/serah terima tetap harus dikumpulkan dari entitas. Auditra membantu seleksi, dokumentasi, dan disiplin proses; ia **tidak** menggantikan pemeriksaan.
+- Skor RPI tidak berubah; koreksi metodologi no. 6 menunggu keputusan menjalankan ulang pipeline.
