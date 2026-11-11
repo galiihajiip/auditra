@@ -266,11 +266,11 @@ export default function ChoroplethMap({ modes, geojson, isDark: isDarkProp, onRe
         onClick={handleClick}
       />
 
-      <p className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-muted">
+      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-muted">
         {MODE_LEGEND_TITLE[ownerMode]}
       </p>
       <ColorLegend className="mt-1 justify-center sm:justify-start" items={legendItems} />
-      <p className="mt-2 text-[10px] text-muted">
+      <p className="mt-2 text-xs text-muted">
         Peta seluruh Indonesia · Wilayah tanpa warna = tidak ada paket pada mode ini · Klik wilayah
         untuk filter provinsi · Multi-lokasi dihitung penuh per kab/kota.
       </p>
