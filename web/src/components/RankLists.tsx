@@ -13,7 +13,7 @@ function Row({ name, row }: { name: string; row: RankRow }) {
           RPI {row.avg_rpi.toFixed(1)}
         </span>
       </div>
-      <div className="mt-1 text-[11px] text-muted">
+      <div className="mt-1 text-xs text-muted">
         <span className="mr-3" style={{ color: "var(--accent-orange)" }}>
           Kritis: {row.n_kritis}
         </span>
