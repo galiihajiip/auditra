@@ -22,7 +22,7 @@ export default function PackagesTable({ result, page, loading, onPage }: Props) 
   }
 
   if (result.data.length === 0) {
-    return <EmptyState icon="search" title="Tidak ada paket yang cocok">Tidak ada paket dengan RPI ≥ 30 untuk kombinasi filter ini. Coba longgarkan filter di atas.</EmptyState>;
+    return <EmptyState icon="search" title="Tidak ada paket yang cocok">Tidak ada paket dengan RPI ≥ 30 untuk kombinasi filter dan kata kunci ini. Coba longgarkan filter atau ubah kata kunci.</EmptyState>;
   }
 
   const open = (id: unknown) => navigate(`/paket/${String(id)}`);
