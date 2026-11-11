@@ -31,7 +31,32 @@ docker compose up -d --build         # perbarui setelah git pull
 docker compose down                  # berhenti (data tetap di volume)
 ```
 
+## Checklist untuk yang men-deploy (jalankan berurutan)
+1. `git pull` pastikan commit terbaru, lalu `cp .env.docker.example .env` dan isi `AUDITRA_SECRET` (acak panjang).
+2. `docker compose up -d --build` (di server itu sendiri, jangan memindahkan image dari Mac ke Linux amd64).
+3. `docker compose ps` harus `healthy`, dan `curl localhost:8000/api/health` mengembalikan `"database_ready":true`.
+4. Buka `http://IP-SERVER:8000`. Dasbor pertama sekitar 6 detik (memuat Parquet), selanjutnya cepat. Satu port melayani **frontend dan backend sekaligus**.
+5. Uji cepat: klik "Coba demo sekarang", buka satu paket, buka penugasan. Cek juga `/api/freshness` (butuh server dapat keluar ke sirup.inaproc.id).
+6. Pitching: biarkan `AUDITRA_SEED_DEMO=1` agar akun demo satu klik ada. Setelah acara: set ke `0`.
+7. Cadangan offline: jalankan hal yang sama di laptop (`docker compose up -d --build`) dan buka `http://localhost:8000`.
+
+## Mode pengembangan (backend dan frontend langsung terlihat saat diubah)
+```bash
+# terminal 1: backend
+pip install -r requirements-web.txt && AUDITRA_USE_PARQUET_VIEWS=1 uvicorn api.main:app --reload --port 8000
+# terminal 2: frontend (proxy /api ke :8000, hot reload)
+cd web && npm install && npm run dev        # http://localhost:5173
+```
+
+## Yang sudah diuji (11 Nov 2026, Docker 29.6.2, Mac Apple silicon / arm64)
+- Terbaru: `docker compose -p auditra-qa up -d --build`, E2E browser **43/43** (siklus audit penuh, pencarian, urutan, unduh CSV, mobile tanpa overflow), 50 uji pytest lolos, restart menjaga data, memori ±330 MB saat idle.
+- `docker compose up -d --build`: build ±2 menit, image 1,1 GB, container berjalan sebagai **user non-root**, memakai ±550 MB RAM.
+- Dasbor pertama ±6 detik, login demo berhasil, UI + API melayani dari satu port.
+- **Restart container mempertahankan data** (SQLite di volume `auditra_data`): 2 penugasan ada sebelum dan sesudah restart.
+- Seluruh siklus audit dijalankan di browser terhadap container: **40/40 pemeriksaan lolos**.
+
 ## Batasan jujur
-- `Dockerfile` **belum diuji dengan `docker build`** saat dibuat (daemon Docker tidak aktif di mesin pembuat). Langkah-langkahnya diuji terpisah: `npm ci` (dry-run) + `npm run build`, `pip install`, dan `uvicorn` mode parquet. Bila build gagal, kirim log-nya.
-- Memori 1,5 GB dibatasi di `docker-compose.yml`; bila server hanya 1 GB, turunkan beban atau tambah swap.
+- Diuji di arm64. Server Linux biasa umumnya amd64: `docker compose up --build` **di server itu** membangun image amd64 sendiri (jangan memindahkan image dari Mac). Wheel `duckdb`/`pandas` tersedia untuk keduanya, tetapi build amd64 belum saya jalankan.
+- Memori 1,5 GB dibatasi di `docker-compose.yml`; bila server hanya 1 GB, tambah swap.
 - Data live SIRUP (`/api/freshness`) butuh server dapat keluar ke `sirup.inaproc.id`.
+- Belum diuji dari internet/domain/HTTPS (Caddy); langkahnya mengikuti dokumentasi standar Caddy.
