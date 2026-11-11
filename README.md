@@ -10,9 +10,9 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/danisharizka/auditra">GitHub</a> ·
+  <a href="https://github.com/galiihajiip/auditra">GitHub</a> ·
   <a href="https://sirup.lkpp.go.id/">SIRUP LKPP</a> ·
-  Tim <code>SD2026020000253</code> · TA 2026
+  Tim <code>UPNVJT Mau Final ke UPNVJ</code> · Web In Action 2026
 </p>
 
 <p align="center">
@@ -139,7 +139,7 @@ flowchart LR
 ### 1. Clone & siapkan data
 
 ```powershell
-git clone https://github.com/danisharizka/auditra.git
+git clone https://github.com/galiihajiip/auditra.git
 cd auditra
 ```
 
@@ -305,9 +305,9 @@ Lifecycle lengkap: [`docs/DATA_SCIENCE.md`](docs/DATA_SCIENCE.md)
 
 ## Tim & Institusi
 
-**Universitas Pembangunan Nasional Veteran Jawa Timur** · Tim `SD2026020000253`
+**Universitas Pembangunan Nasional Veteran Jawa Timur** · Tim `UPNVJT Mau Final ke UPNVJ` (Multimedia In Action 2026, Web In Action)
 
-Developed by **Dani Shofi Nur Izza**, **Danisha Rizka Hapsari**, **Galih Aji Pangestu**
+Developed by **Galih Aji Pangestu** (galiihajiip), **Nashwa Atika Kusuma Ramadhani** (nashwaakr), **Adristha Arshanti Widyadhari** (adristharshanti)
 
 ---
 
