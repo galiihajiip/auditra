@@ -13,7 +13,15 @@ export function formatApiError(error: unknown): string {
     }
     if (error.response?.data?.detail) {
       const detail = error.response.data.detail;
-      return typeof detail === "string" ? detail : JSON.stringify(detail);
+      if (typeof detail === "string") return detail;
+      if (Array.isArray(detail)) {
+        return detail.map((d: { msg?: string }) => d.msg).filter(Boolean).join("; ") || "Input tidak valid.";
+      }
+      if (typeof detail === "object" && typeof detail.message === "string") {
+        const unmet = Array.isArray(detail.unmet) ? `\n• ${detail.unmet.join("\n• ")}` : "";
+        return detail.message + unmet;
+      }
+      return JSON.stringify(detail);
     }
     if (error.code === "ERR_NETWORK" || !error.response) {
       if (import.meta.env.PROD) {
